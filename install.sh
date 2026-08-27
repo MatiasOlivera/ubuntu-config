@@ -55,6 +55,7 @@ source "$DESKTOP_APPS_DIR/spotify.sh"
 
 source "$DEVELOPMENT_DIR/git/git.sh"
 source "$DEVELOPMENT_DIR/git/git-config.sh"
+source "$DEVELOPMENT_DIR/cursor.sh"
 
 # Essentials
 install_make
@@ -72,4 +73,4 @@ install_spotify
 install_git
 configure_git "$name" "$email"
 
-install_cursor
+install_cursor_cli
