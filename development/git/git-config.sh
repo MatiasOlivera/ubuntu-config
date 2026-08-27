@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+usage() {
+	printf 'Usage: %s "user.name" "user.email"\n' "$0" >&2
+}
+
 configure_git() {
 	local name=$1
 	local email=$2

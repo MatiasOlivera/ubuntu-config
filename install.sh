@@ -53,7 +53,8 @@ source "$DESKTOP_APPS_DIR/chrome.sh"
 source "$DESKTOP_APPS_DIR/obs.sh"
 source "$DESKTOP_APPS_DIR/spotify.sh"
 
-source "$DEVELOPMENT_DIR/git.sh"
+source "$DEVELOPMENT_DIR/git/git.sh"
+source "$DEVELOPMENT_DIR/git/git-config.sh"
 
 # Essentials
 install_make
