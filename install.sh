@@ -71,3 +71,5 @@ install_spotify
 # Development
 install_git
 configure_git "$name" "$email"
+
+install_cursor
