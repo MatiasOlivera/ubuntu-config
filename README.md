@@ -1,6 +1,15 @@
 # ubuntu-config
 Set-up a fresh Ubuntu installation installing apps and some configs
 
+Installation scripts are grouped by purpose:
+
+- `desktop-apps/` contains final user applications (not for development)
+- `development/` contains development tools such as Git and Docker
+- `essentials/` contains common Linux utilities.
+
+Each application script exposes an install function that is sourced and called
+by `install.sh`.
+
 Install Ubuntu packages and configure Git with flags:
 
 ```sh

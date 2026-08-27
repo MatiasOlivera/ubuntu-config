@@ -37,54 +37,36 @@ if [[ -z $name || -z $email ]]; then
 	exit 1
 fi
 
-source "$(dirname "$0")/git-config.sh"
+SCRIPT_DIR=$(dirname "$0")
 
-## Essentials ##
+ESSENTIALS_DIR="$SCRIPT_DIR/essentials"
+DESKTOP_APPS_DIR="$SCRIPT_DIR/desktop-apps"
+DEVELOPMENT_DIR="$SCRIPT_DIR/development"
 
-# Make
-sudo apt install make
+source "$ESSENTIALS_DIR/make.sh"
+source "$ESSENTIALS_DIR/curl.sh"
+source "$ESSENTIALS_DIR/flatpak.sh"
 
-# curl
-sudo apt install curl
+source "$DESKTOP_APPS_DIR/timeshift.sh"
+source "$DESKTOP_APPS_DIR/fsearch.sh"
+source "$DESKTOP_APPS_DIR/chrome.sh"
+source "$DESKTOP_APPS_DIR/obs.sh"
+source "$DESKTOP_APPS_DIR/spotify.sh"
 
-# Flatpak
-# https://flathub.org/en/setup/Ubuntu
-sudo apt install flatpak
-sudo apt install gnome-software-plugin-flatpak
-flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+source "$DEVELOPMENT_DIR/git.sh"
 
-## Apps ##
+# Essentials
+install_make
+install_curl
+install_flatpak
 
-# Timeshift
-sudo apt-get install timeshift
+# Desktop Apps
+install_timeshift
+install_fsearch
+install_chrome
+install_obs
+install_spotify
 
-# FSearch
-sudo add-apt-repository ppa:christian-boxdoerfer/fsearch-daily
-sudo apt update
-sudo apt install fsearch
-
-# Chrome
-wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-sudo dpkg -i google-chrome-stable_current_amd64.deb
-
-# OBS Studio
-# https://flathub.org/en/apps/com.obsproject.Studio
-flatpak install flathub com.obsproject.Studio
-
-# OBS Plugins
-sudo apt-get install obs-advanced-masks
-
-# Spotify
-# https://www.spotify.com/es/download/linux/
-
-curl -sS https://download.spotify.com/debian/pubkey_5384CE82BA52C83A.asc | sudo gpg --dearmor --yes -o /etc/apt/trusted.gpg.d/spotify.gpg
-echo "deb https://repository.spotify.com stable non-free" | sudo tee /etc/apt/sources.list.d/spotify.list
-
-sudo apt-get update && sudo apt-get install spotify-client
-
-## Development ##
-
-# Git
-sudo apt-get install git
-
+# Development
+install_git
 configure_git "$name" "$email"
