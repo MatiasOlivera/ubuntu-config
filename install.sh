@@ -47,21 +47,21 @@ sudo apt install make
 # curl
 sudo apt install curl
 
-# Timeshift
-sudo apt-get install timeshift
-
-# Flatpak (for OBS)
+# Flatpak
 # https://flathub.org/en/setup/Ubuntu
 sudo apt install flatpak
 sudo apt install gnome-software-plugin-flatpak
 flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 
+## Apps ##
+
+# Timeshift
+sudo apt-get install timeshift
+
 # FSearch
 sudo add-apt-repository ppa:christian-boxdoerfer/fsearch-daily
 sudo apt update
 sudo apt install fsearch
-
-## Apps ##
 
 # Chrome
 wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
