@@ -58,6 +58,7 @@ source "$DEVELOPMENT_DIR/git/git-config.sh"
 source "$DEVELOPMENT_DIR/cursor.sh"
 source "$DEVELOPMENT_DIR/docker.sh"
 source "$DEVELOPMENT_DIR/postman.sh"
+source "$DEVELOPMENT_DIR/beekeeper-studio.sh"
 
 # Essentials
 install_make
@@ -77,3 +78,4 @@ configure_git "$name" "$email"
 install_cursor_cli
 install_docker
 install_postman
+install_beekeeper_studio
