@@ -1,0 +1,3 @@
+# Manual installation
+
+- OpenWhispr
