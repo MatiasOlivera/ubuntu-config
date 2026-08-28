@@ -1,3 +1,4 @@
 # Manual installation
 
 - OpenWhispr
+- Discord
