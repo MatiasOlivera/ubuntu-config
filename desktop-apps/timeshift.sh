@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 
 install_timeshift() {
-	sudo apt-get install timeshift
+	sudo apt-get install -y timeshift
 }
