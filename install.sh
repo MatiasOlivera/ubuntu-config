@@ -57,6 +57,7 @@ source "$DEVELOPMENT_DIR/git/git.sh"
 source "$DEVELOPMENT_DIR/git/git-config.sh"
 source "$DEVELOPMENT_DIR/cursor.sh"
 source "$DEVELOPMENT_DIR/docker.sh"
+source "$DEVELOPMENT_DIR/postman.sh"
 
 # Essentials
 install_make
@@ -73,6 +74,6 @@ install_spotify
 # Development
 install_git
 configure_git "$name" "$email"
-
 install_cursor_cli
 install_docker
+install_postman
