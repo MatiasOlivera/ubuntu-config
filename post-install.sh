@@ -9,6 +9,8 @@ sudo apt upgrade
 DEVELOPMENT_DIR="$SCRIPT_DIR/development"
 
 source "$DEVELOPMENT_DIR/oh-my-zsh/oh-myzsh.sh"
+source "$DEVELOPMENT_DIR/oh-my-zsh/plugins.sh"
 
 # Development
 install_oh_my_zsh
+install_oh_my_zsh_plugins
