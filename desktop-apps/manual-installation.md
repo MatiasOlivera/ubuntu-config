@@ -2,3 +2,4 @@
 
 - OpenWhispr
 - Discord
+- Obsidian

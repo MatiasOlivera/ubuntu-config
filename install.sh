@@ -59,11 +59,13 @@ source "$DEVELOPMENT_DIR/cursor.sh"
 source "$DEVELOPMENT_DIR/docker.sh"
 source "$DEVELOPMENT_DIR/postman.sh"
 source "$DEVELOPMENT_DIR/beekeeper-studio.sh"
+source "$ESSENTIALS_DIR/pulseaudio-utils.sh"
 
 # Essentials
 install_make
 install_curl
 install_flatpak
+install_pulseaudio_utils
 
 # Desktop Apps
 install_timeshift
