@@ -46,6 +46,7 @@ DEVELOPMENT_DIR="$SCRIPT_DIR/development"
 source "$ESSENTIALS_DIR/make.sh"
 source "$ESSENTIALS_DIR/curl.sh"
 source "$ESSENTIALS_DIR/flatpak.sh"
+source "$ESSENTIALS_DIR/pulseaudio-utils.sh"
 
 source "$DESKTOP_APPS_DIR/timeshift.sh"
 source "$DESKTOP_APPS_DIR/fsearch.sh"
@@ -59,7 +60,8 @@ source "$DEVELOPMENT_DIR/cursor.sh"
 source "$DEVELOPMENT_DIR/docker.sh"
 source "$DEVELOPMENT_DIR/postman.sh"
 source "$DEVELOPMENT_DIR/beekeeper-studio.sh"
-source "$ESSENTIALS_DIR/pulseaudio-utils.sh"
+source "$DEVELOPMENT_DIR/zsh/zsh.sh"
+source "$DEVELOPMENT_DIR/zsh/zsh-config.sh"
 
 # Essentials
 install_make
@@ -81,3 +83,5 @@ install_cursor_cli
 install_docker
 install_postman
 install_beekeeper_studio
+install_zsh
+configure_zsh
