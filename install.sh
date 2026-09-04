@@ -9,26 +9,26 @@ email=
 
 while [[ $# -gt 0 ]]; do
 	case $1 in
-		--name)
-			if [[ $# -lt 2 ]]; then
-				usage
-				exit 1
-			fi
-			name=$2
-			shift 2
-			;;
-		--email)
-			if [[ $# -lt 2 ]]; then
-				usage
-				exit 1
-			fi
-			email=$2
-			shift 2
-			;;
-		*)
+	--name)
+		if [[ $# -lt 2 ]]; then
 			usage
 			exit 1
-			;;
+		fi
+		name=$2
+		shift 2
+		;;
+	--email)
+		if [[ $# -lt 2 ]]; then
+			usage
+			exit 1
+		fi
+		email=$2
+		shift 2
+		;;
+	*)
+		usage
+		exit 1
+		;;
 	esac
 done
 
@@ -52,7 +52,8 @@ source "$ESSENTIALS_DIR/fuse.sh"
 source "$DESKTOP_APPS_DIR/timeshift.sh"
 source "$DESKTOP_APPS_DIR/fsearch.sh"
 source "$DESKTOP_APPS_DIR/chrome.sh"
-source "$DESKTOP_APPS_DIR/obs.sh"
+source "$DESKTOP_APPS_DIR/obs/obs.sh"
+source "$DESKTOP_APPS_DIR/obs/obs-plugins.sh"
 source "$DESKTOP_APPS_DIR/spotify.sh"
 
 source "$DEVELOPMENT_DIR/git/git.sh"
@@ -77,6 +78,7 @@ install_timeshift
 install_fsearch
 install_chrome
 install_obs
+install_obs_plugins
 install_spotify
 
 # Development
