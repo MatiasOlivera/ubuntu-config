@@ -48,6 +48,7 @@ source "$ESSENTIALS_DIR/curl.sh"
 source "$ESSENTIALS_DIR/flatpak.sh"
 source "$ESSENTIALS_DIR/pulseaudio-utils.sh"
 source "$ESSENTIALS_DIR/fuse.sh"
+source "$ESSENTIALS_DIR/synaptic.sh"
 
 source "$DESKTOP_APPS_DIR/timeshift.sh"
 source "$DESKTOP_APPS_DIR/fsearch.sh"
@@ -71,6 +72,7 @@ install_curl
 install_flatpak
 install_pulseaudio_utils
 install_fuse
+install_synaptic
 
 # Desktop Apps
 install_timeshift
