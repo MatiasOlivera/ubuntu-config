@@ -68,6 +68,7 @@ source "$DEVELOPMENT_DIR/beekeeper-studio.sh"
 source "$DEVELOPMENT_DIR/zsh/zsh.sh"
 source "$DEVELOPMENT_DIR/zsh/zsh-config.sh"
 source "$DEVELOPMENT_DIR/zoxide.sh"
+source "$DEVELOPMENT_DIR/opencode/opencode.sh"
 
 # Essentials
 install_make
@@ -97,3 +98,4 @@ install_beekeeper_studio
 install_zsh
 configure_zsh
 install_zoxide
+install_opencode
