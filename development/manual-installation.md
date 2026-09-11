@@ -10,7 +10,8 @@
 
 ## Fonts
 
-| Name        | Description                                                           | Website                                                                |
-| ----------- | --------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| Fira Code   | Popular programming font with ligatures and a clean monospaced style. | [GitHub FiraCode](https://github.com/tonsky/FiraCode)                  |
-| MesloLGS NF | Nerd Font variant commonly used with Powerlevel10k and Oh My Zsh.     | [GitHub powerlevel10k](https://github.com/romkatv/powerlevel10k#fonts) |
+| Name        | Description                                                                                          | Website                                                                |
+| ----------- | ---------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| Fira Code   | Popular programming font with ligatures and a clean monospaced style.                                | [GitHub FiraCode](https://github.com/tonsky/FiraCode)                  |
+| MesloLGS NF | Nerd Font variant commonly used with Powerlevel10k and Oh My Zsh.                                    | [GitHub powerlevel10k](https://github.com/romkatv/powerlevel10k#fonts) |
+| Iosevka     | A typeface family, designed for writing code, using in terminals, and preparing technical documents. | [typeof.net](https://typeof.net/Iosevka/)                              |
