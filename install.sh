@@ -70,6 +70,7 @@ source "$DEVELOPMENT_DIR/zsh/zsh-config.sh"
 source "$DEVELOPMENT_DIR/zoxide.sh"
 source "$DEVELOPMENT_DIR/opencode/opencode.sh"
 source "$DEVELOPMENT_DIR/ghostty/ghostty.sh"
+source "$DEVELOPMENT_DIR/ghostty/ghostty-config.sh"
 
 # Essentials
 install_make
@@ -101,3 +102,4 @@ configure_zsh
 install_zoxide
 install_opencode
 install_ghostty
+config_ghostty
