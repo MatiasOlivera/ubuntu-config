@@ -58,6 +58,7 @@ source "$DESKTOP_APPS_DIR/chrome.sh"
 source "$DESKTOP_APPS_DIR/obs/obs.sh"
 source "$DESKTOP_APPS_DIR/obs/obs-plugins.sh"
 source "$DESKTOP_APPS_DIR/spotify.sh"
+source "$DESKTOP_APPS_DIR/handy/handy-config.sh"
 
 source "$DEVELOPMENT_DIR/git/git.sh"
 source "$DEVELOPMENT_DIR/git/git-config.sh"
@@ -89,6 +90,7 @@ install_chrome
 install_obs
 install_obs_plugins
 install_spotify
+config_handy
 
 # Development
 install_git
