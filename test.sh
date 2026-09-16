@@ -65,7 +65,7 @@ done
 # 2. every library script is sourced by install.sh or post-install.sh.
 for f in "${ALL_SCRIPTS[@]}"; do
 	case "$f" in
-	"$ROOT/install.sh" | "$ROOT/post-install.sh" | "$ROOT/test.sh") continue ;;
+	"$ROOT/install.sh" | "$ROOT/post-install.sh" | "$ROOT/test.sh" | "$ROOT/verify.sh") continue ;;
 	esac
 	if grep -qF "$(basename "$f")" "$ROOT/install.sh" "$ROOT/post-install.sh"; then
 		pass "sourced $f"
@@ -79,7 +79,7 @@ done
 # post-install.sh are never sourced (post-install.sh runs apt upgrade).
 for f in "${ALL_SCRIPTS[@]}"; do
 	case "$f" in
-	"$ROOT/install.sh" | "$ROOT/post-install.sh" | "$ROOT/test.sh") continue ;;
+	"$ROOT/install.sh" | "$ROOT/post-install.sh" | "$ROOT/test.sh" | "$ROOT/verify.sh") continue ;;
 	esac
 	if funcs="$(bash -c 'source "$1" && declare -F' _ "$f" 2>/dev/null)" &&
 		printf '%s\n' "$funcs" | grep -qE 'declare -f (install_|config_)'; then
