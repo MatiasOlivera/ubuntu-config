@@ -33,3 +33,13 @@ docker run --rm -v "$PWD:/work" -w /work ubuntu-config-test ./test.sh           
 docker run --rm -v "$PWD:/work" -w /work ubuntu-config-test ./test.sh --vm         # same, then Multipass fresh-Ubuntu e2e
 docker run --rm -v "$PWD:/work" -w /work ubuntu-config-test ./test.sh --vm --keep  # same, but leave VM running on failure for inspection
 ```
+
+## Verify
+
+Report-only version table for everything `install.sh` / `post-install.sh` set up
+(manually installed apps excluded, always exits 0):
+
+```sh
+./verify.sh
+multipass exec ubuntu-config-test -- bash ubuntu-config/verify.sh  # same, inside the e2e VM
+```
