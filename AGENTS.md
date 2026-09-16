@@ -1,19 +1,17 @@
 # ubuntu-config
 
-Fresh-Ubuntu setup via bash scripts. No tests, lint, CI, or package manager.
+Fresh-Ubuntu setup via bash scripts. No lint, CI, or package manager.
 
 ## Conventions
 
-- Use conventional commits
-- Each app script under `essentials/`, `desktop-apps/`, `development/` exposes one `install_*` / `config_*` / `configure_*` function; `install.sh` and `post-install.sh` only `source` scripts and call those functions — never inline install logic in the entrypoints.
-- Reusable `configure_*` functions must also work standalone: guard with `if [[ ${BASH_SOURCE[0]} == "$0" ]]; then ... fi` (see `development/git/git-config.sh`).
-- Verify shell edits with `bash -n <file>` (no test suite exists).
+- Use atomic and conventional commits
+- Reusable `config_*` functions must also work standalone: guard with `if [[ ${BASH_SOURCE[0]} == "$0" ]]; then ... fi` (see `development/git/git-config.sh`).
+- Verify shell edits with `./test.sh` (static + source-only) and `./test.sh --vm --keep` for Multipass e2e
 
 ## Structure
 
-- `install.sh` (requires `--name "..." --email "..."`, both mandatory) runs essentials → desktop-apps → development. Add new steps by sourcing the script and appending the call in the matching section.
+- `install.sh` (requires `--name "..." --email "..."`, both mandatory) runs essentials → development → desktop-apps. Add new steps by sourcing the script and appending the call in the matching section.
 - `post-install.sh` runs after it (oh-my-zsh, fnm, antigravity) and assumes `install.sh` already provided zsh/curl.
-- `README.md`'s `./git-config.sh` path is stale; the script lives at `development/git/git-config.sh`.
 
 ## Gotchas
 

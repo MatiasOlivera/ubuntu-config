@@ -19,5 +19,17 @@ Install Ubuntu packages and configure Git with flags:
 Git can also be configured independently:
 
 ```sh
-./git-config.sh "Your Name" "you@example.com"
+./development/git/git-config.sh "Your Name" "you@example.com"
+```
+
+## Testing
+
+Its run on a `ubuntu:26.04` Docker image.
+
+```sh
+docker build -t ubuntu-config-test .
+
+docker run --rm -v "$PWD:/work" -w /work ubuntu-config-test ./test.sh              # static + source-only (fast, zero-dep, default)
+docker run --rm -v "$PWD:/work" -w /work ubuntu-config-test ./test.sh --vm         # same, then Multipass fresh-Ubuntu e2e
+docker run --rm -v "$PWD:/work" -w /work ubuntu-config-test ./test.sh --vm --keep  # same, but leave VM running on failure for inspection
 ```
