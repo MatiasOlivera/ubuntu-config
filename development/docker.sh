@@ -33,6 +33,6 @@ EOF
     sudo groupadd -f docker
     sudo usermod -aG docker "$USER"
 
-    sudo apt install util-linux-extra
+    sudo apt install -y util-linux-extra
     newgrp docker
 }

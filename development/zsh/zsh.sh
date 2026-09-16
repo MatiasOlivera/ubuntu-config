@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 
 install_zsh() {
-    sudo apt install zsh
+    sudo apt install -y zsh
 }
