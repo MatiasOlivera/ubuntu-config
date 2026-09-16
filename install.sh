@@ -9,33 +9,15 @@ email=
 
 while [[ $# -gt 0 ]]; do
 	case $1 in
-	--name)
-		if [[ $# -lt 2 ]]; then
-			usage
-			exit 1
-		fi
-		name=$2
-		shift 2
-		;;
-	--email)
-		if [[ $# -lt 2 ]]; then
-			usage
-			exit 1
-		fi
-		email=$2
-		shift 2
-		;;
-	*)
-		usage
-		exit 1
-		;;
+	--name) name=$2 ;;
+	--email) email=$2 ;;
+	*) usage; exit 1 ;;
 	esac
+	[[ $# -lt 2 ]] && { usage; exit 1; }
+	shift 2
 done
 
-if [[ -z $name || -z $email ]]; then
-	usage
-	exit 1
-fi
+[[ -z $name || -z $email ]] && { usage; exit 1; }
 
 SCRIPT_DIR=$(dirname "$0")
 
@@ -94,13 +76,13 @@ config_handy
 
 # Development
 install_git
-configure_git "$name" "$email"
+config_git "$name" "$email"
 install_cursor_cli
 install_docker
 install_postman
 install_beekeeper_studio
 install_zsh
-configure_zsh
+config_zsh
 install_zoxide
 install_opencode
 install_ghostty

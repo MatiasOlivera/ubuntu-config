@@ -4,7 +4,7 @@ usage() {
 	printf 'Usage: %s "user.name" "user.email"\n' "$0" >&2
 }
 
-configure_git() {
+config_git() {
 	local name=$1
 	local email=$2
 
@@ -16,9 +16,9 @@ configure_git() {
 
 if [[ ${BASH_SOURCE[0]} == "$0" ]]; then
 	if [[ $# -ne 2 ]]; then
-		printf 'Usage: %s "user.name" "user.email"\n' "$0" >&2
+		usage
 		exit 1
 	fi
 
-	configure_git "$1" "$2"
+	config_git "$1" "$2"
 fi

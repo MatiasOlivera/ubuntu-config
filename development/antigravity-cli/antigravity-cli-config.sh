@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 
-configure_antigravity_cli() {
+config_antigravity_cli() {
     # to use the 'agy' CLI globally
-    echo 'export PATH="/home/matias/.local/bin:$PATH"' >>~/.zshrc && source ~/.zshrc
+    echo "export PATH=\"$HOME/.local/bin:\$PATH\"" >>~/.zshrc
 }
+
+if [[ ${BASH_SOURCE[0]} == "$0" ]]; then
+    config_antigravity_cli
+fi
