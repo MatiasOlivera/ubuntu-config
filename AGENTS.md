@@ -6,7 +6,10 @@ Fresh-Ubuntu setup via bash scripts. No lint, CI, or package manager.
 
 - Use atomic and conventional commits
 - Reusable `config_*` functions must also work standalone: guard with `if [[ ${BASH_SOURCE[0]} == "$0" ]]; then ... fi` (see `development/git/git-config.sh`).
-- Verify shell edits with `./test.sh` (static + source-only) and `./test.sh --vm --keep` for Multipass e2e
+- Never run `./test.sh` or `./verify.sh` on the host. Verify isolated-only:
+  - Static: `docker compose run --rm test`
+  - Verify: `docker compose run --rm test ./verify.sh`
+  - Multipass e2e: `./test.sh --vm --keep`
 
 ## Structure
 

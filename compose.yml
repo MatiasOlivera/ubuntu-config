@@ -1,0 +1,7 @@
+services:
+  test:
+    build: .
+    working_dir: /work
+    volumes:
+      - .:/work:ro
+    command: ./test.sh
