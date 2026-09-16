@@ -9,20 +9,12 @@ email=
 
 while [[ $# -gt 0 ]]; do
 	case $1 in
-	--name)
+	--name|--email)
 		if [[ $# -lt 2 ]]; then
 			usage
 			exit 1
 		fi
-		name=$2
-		shift 2
-		;;
-	--email)
-		if [[ $# -lt 2 ]]; then
-			usage
-			exit 1
-		fi
-		email=$2
+		if [[ $1 == --name ]]; then name=$2; else email=$2; fi
 		shift 2
 		;;
 	*)
