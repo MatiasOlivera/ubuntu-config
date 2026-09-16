@@ -87,3 +87,5 @@ install_zoxide
 install_opencode
 install_ghostty
 config_ghostty
+
+bash "$SCRIPT_DIR/verify.sh" || true

@@ -26,3 +26,5 @@ install_antigravity_cli
 config_antigravity_cli
 install_fnm
 config_fnm
+
+bash "$SCRIPT_DIR/verify.sh" || true
