@@ -30,8 +30,8 @@ EOF
     # https://docs.docker.com/engine/install/linux-postinstall/
 
     # Manage Docker as a non-root user
-    getent group docker > /dev/null || sudo groupadd docker
-    id -nG "$USER" | grep -qw docker || sudo usermod -aG docker "$USER"
+    sudo groupadd -f docker
+    sudo usermod -aG docker "$USER"
 
     sudo apt install util-linux-extra
     newgrp docker

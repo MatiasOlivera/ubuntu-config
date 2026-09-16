@@ -19,5 +19,5 @@ Install Ubuntu packages and configure Git with flags:
 Git can also be configured independently:
 
 ```sh
-./git-config.sh "Your Name" "you@example.com"
+./development/git/git-config.sh "Your Name" "you@example.com"
 ```
