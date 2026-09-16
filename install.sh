@@ -54,6 +54,7 @@ source "$DEVELOPMENT_DIR/zoxide.sh"
 source "$DEVELOPMENT_DIR/opencode/opencode.sh"
 source "$DEVELOPMENT_DIR/ghostty/ghostty.sh"
 source "$DEVELOPMENT_DIR/ghostty/ghostty-config.sh"
+source "$DEVELOPMENT_DIR/ollama.sh"
 
 # Essentials
 install_make
@@ -87,5 +88,6 @@ install_zoxide
 install_opencode
 install_ghostty
 config_ghostty
+install_ollama
 
 bash "$SCRIPT_DIR/verify.sh" || true
