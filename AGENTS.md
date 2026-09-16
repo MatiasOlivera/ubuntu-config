@@ -1,12 +1,15 @@
 # ubuntu-config
 
-Fresh-Ubuntu setup via bash scripts. No tests, lint, CI, or package manager.
+Fresh-Ubuntu setup via bash scripts. No lint, CI, or package manager.
 
 ## Conventions
 
 - Use atomic and conventional commits
-- Reusable `configure_*` functions must also work standalone: guard with `if [[ ${BASH_SOURCE[0]} == "$0" ]]; then ... fi` (see `development/git/git-config.sh`).
-- Verify shell edits with `bash -n <file>` (no test suite exists).
+- Reusable `config_*` functions must also work standalone: guard with `if [[ ${BASH_SOURCE[0]} == "$0" ]]; then ... fi` (see `development/git/git-config.sh`).
+- Never run `./test.sh` or `./verify.sh` on the host. Verify isolated-only:
+  - Static: `docker compose run --rm test`
+  - Verify: `docker compose run --rm test ./verify.sh`
+  - Multipass e2e: `./test.sh --vm --keep`
 
 ## Structure
 

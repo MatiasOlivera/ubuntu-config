@@ -76,14 +76,16 @@ config_handy
 
 # Development
 install_git
-configure_git "$name" "$email"
+config_git "$name" "$email"
 install_cursor_cli
 install_docker
 install_postman
 install_beekeeper_studio
 install_zsh
-configure_zsh
+config_zsh
 install_zoxide
 install_opencode
 install_ghostty
 config_ghostty
+
+bash "$SCRIPT_DIR/verify.sh" || true

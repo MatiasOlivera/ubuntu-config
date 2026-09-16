@@ -1,4 +1,5 @@
 # ubuntu-config
+
 Set-up a fresh Ubuntu installation installing apps and some configs
 
 Installation scripts are grouped by purpose:
@@ -20,4 +21,32 @@ Git can also be configured independently:
 
 ```sh
 ./development/git/git-config.sh "Your Name" "you@example.com"
+```
+
+## Testing
+
+Its run on a `ubuntu:26.04` Docker image.
+
+```sh
+docker build -t ubuntu-config-test .
+
+docker run --rm -v "$PWD:/work" -w /work ubuntu-config-test ./test.sh              # static + source-only (fast, zero-dep, default)
+docker run --rm -v "$PWD:/work" -w /work ubuntu-config-test ./test.sh --vm         # same, then Multipass fresh-Ubuntu e2e
+docker run --rm -v "$PWD:/work" -w /work ubuntu-config-test ./test.sh --vm --keep  # same, but leave VM running on failure for inspection
+docker run --rm -v "$PWD:/work" -w /work ubuntu-config-test ./test.sh --vm --reuse  # e2e on host: reuse existing VM (skip launch) for fast iterations
+docker run --rm -v "$PWD:/work" -w /work ubuntu-config-test ./test.sh --vm --reuse --keep  # same, and leave VM running afterwards
+```
+
+The e2e run sets `SKIP_UPGRADE=1` when calling `post-install.sh` inside the
+VM, skipping `apt upgrade` for speed. Run `post-install.sh` without it on a
+real machine for the full update.
+
+## Verify
+
+Report-only version table for everything `install.sh` / `post-install.sh` set up
+(manually installed apps excluded, always exits 0):
+
+```sh
+./verify.sh
+multipass exec ubuntu-config-test -- bash ubuntu-config/verify.sh  # same, inside the e2e VM
 ```
