@@ -1,14 +1,16 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 # check for updates
 sudo apt update
 
 # apply updates
-sudo apt upgrade
+sudo apt upgrade -y
+
+SCRIPT_DIR=$(dirname "$0")
 
 DEVELOPMENT_DIR="$SCRIPT_DIR/development"
 
-source "$DEVELOPMENT_DIR/oh-my-zsh/oh-myzsh.sh"
+source "$DEVELOPMENT_DIR/oh-my-zsh/oh-my-zsh.sh"
 source "$DEVELOPMENT_DIR/oh-my-zsh/plugins.sh"
 source "$DEVELOPMENT_DIR/oh-my-zsh/theme.sh"
 source "$DEVELOPMENT_DIR/antigravity-cli/antigravity-cli.sh"
