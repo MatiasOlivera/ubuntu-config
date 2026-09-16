@@ -9,25 +9,15 @@ email=
 
 while [[ $# -gt 0 ]]; do
 	case $1 in
-	--name|--email)
-		if [[ $# -lt 2 ]]; then
-			usage
-			exit 1
-		fi
-		if [[ $1 == --name ]]; then name=$2; else email=$2; fi
-		shift 2
-		;;
-	*)
-		usage
-		exit 1
-		;;
+	--name) name=$2 ;;
+	--email) email=$2 ;;
+	*) usage; exit 1 ;;
 	esac
+	[[ $# -lt 2 ]] && { usage; exit 1; }
+	shift 2
 done
 
-if [[ -z $name || -z $email ]]; then
-	usage
-	exit 1
-fi
+[[ -z $name || -z $email ]] && { usage; exit 1; }
 
 SCRIPT_DIR=$(dirname "$0")
 
