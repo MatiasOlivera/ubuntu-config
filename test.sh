@@ -143,7 +143,7 @@ if [[ $RUN_VM -eq 1 && $FAILURES -eq 0 ]]; then
 			fail "multipass launch $UBUNTU_IMAGE"
 		fi
 
-		tarball="$(mktemp /tmp/ubuntu-config-test.XXXXXX.tar.gz)"
+		tarball="$(mktemp "$HOME/ubuntu-config-test.XXXXXX.tar.gz")"
 		if tar -czf "$tarball" --exclude=.git -C "$ROOT" . &&
 			multipass transfer "$tarball" "$VM_NAME:/home/ubuntu/ubuntu-config.tar.gz" &&
 			multipass exec "$VM_NAME" -- mkdir -p /home/ubuntu/ubuntu-config &&
