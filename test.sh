@@ -8,15 +8,17 @@ VM_NAME="ubuntu-config-test"
 
 RUN_VM=0
 KEEP=0
+REUSE=0
 
 usage() {
-	printf 'Usage: %s [--vm [--keep]]\n' "$0" >&2
+	printf 'Usage: %s [--vm [--keep] [--reuse]]\n' "$0" >&2
 }
 
 while [[ $# -gt 0 ]]; do
 	case $1 in
 	--vm) RUN_VM=1 ;;
 	--keep) KEEP=1 ;;
+	--reuse) REUSE=1 ;;
 	-h | --help)
 		usage
 		exit 0
@@ -30,6 +32,11 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [[ $KEEP -eq 1 && $RUN_VM -eq 0 ]]; then
+	usage
+	exit 1
+fi
+
+if [[ $REUSE -eq 1 && $RUN_VM -eq 0 ]]; then
 	usage
 	exit 1
 fi
@@ -133,14 +140,19 @@ if [[ $RUN_VM -eq 1 && $FAILURES -eq 0 ]]; then
 	else
 		trap '[[ $KEEP -eq 0 ]] && multipass delete -p "$VM_NAME" >/dev/null 2>&1 || true' EXIT
 
-		if multipass list 2>/dev/null | grep -qw "$VM_NAME"; then
-			multipass delete -p "$VM_NAME" || fail "delete stale VM $VM_NAME"
-		fi
-
-		if multipass launch "$UBUNTU_IMAGE" --name "$VM_NAME" --cpus 2 --memory 4G --disk 20G; then
-			pass "multipass launch $UBUNTU_IMAGE"
+		if [[ $REUSE -eq 1 ]] && multipass list 2>/dev/null | grep -qw "$VM_NAME"; then
+			multipass start "$VM_NAME" >/dev/null 2>&1 || true
+			pass "reuse VM $VM_NAME (skip launch)"
 		else
-			fail "multipass launch $UBUNTU_IMAGE"
+			if multipass list 2>/dev/null | grep -qw "$VM_NAME"; then
+				multipass delete -p "$VM_NAME" || fail "delete stale VM $VM_NAME"
+			fi
+
+			if multipass launch "$UBUNTU_IMAGE" --name "$VM_NAME" --cpus 2 --memory 4G --disk 20G; then
+				pass "multipass launch $UBUNTU_IMAGE"
+			else
+				fail "multipass launch $UBUNTU_IMAGE"
+			fi
 		fi
 
 		tarball="$(mktemp "$HOME/ubuntu-config-test.XXXXXX.tar.gz")"
@@ -160,7 +172,7 @@ if [[ $RUN_VM -eq 1 && $FAILURES -eq 0 ]]; then
 			fail "install.sh in VM"
 		fi
 
-		if multipass exec "$VM_NAME" -- bash /home/ubuntu/ubuntu-config/post-install.sh; then
+		if multipass exec "$VM_NAME" -- env SKIP_UPGRADE=1 bash /home/ubuntu/ubuntu-config/post-install.sh; then
 			pass "post-install.sh in VM"
 		else
 			fail "post-install.sh in VM"

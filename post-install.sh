@@ -1,10 +1,13 @@
 #!/usr/bin/env bash
 
-# check for updates
-sudo apt update
+# SKIP_UPGRADE=1 skips apt upgrade (fast path for test.sh --vm).
+if [[ ${SKIP_UPGRADE:-0} != 1 ]]; then
+  # check for updates
+  sudo apt update
 
-# apply updates
-sudo apt upgrade -y
+  # apply updates
+  sudo apt upgrade -y
+fi
 
 SCRIPT_DIR=$(dirname "$0")
 
