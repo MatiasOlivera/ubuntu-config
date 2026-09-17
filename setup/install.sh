@@ -1,32 +1,15 @@
 #!/usr/bin/env bash
 
-usage() {
-	printf 'Usage: %s --name "Your Name" --email "you@example.com"\n' "$0" >&2
-}
-
-name=
-email=
-
-while [[ $# -gt 0 ]]; do
-	case $1 in
-	--name) name=$2 ;;
-	--email) email=$2 ;;
-	*) usage; exit 1 ;;
-	esac
-	[[ $# -lt 2 ]] && { usage; exit 1; }
-	shift 2
-done
-
-[[ -z $name || -z $email ]] && { usage; exit 1; }
-
 SCRIPT_DIR=$(dirname "$0")
 
 ESSENTIALS_DIR="$SCRIPT_DIR/essentials"
 DESKTOP_APPS_DIR="$SCRIPT_DIR/desktop-apps"
 DEVELOPMENT_DIR="$SCRIPT_DIR/development"
+DOTFILES_DIR="$SCRIPT_DIR/../dotfiles"
 
 source "$ESSENTIALS_DIR/make.sh"
 source "$ESSENTIALS_DIR/curl.sh"
+source "$ESSENTIALS_DIR/chezmoi.sh"
 source "$ESSENTIALS_DIR/flatpak.sh"
 source "$ESSENTIALS_DIR/pulseaudio-utils.sh"
 source "$ESSENTIALS_DIR/fuse.sh"
@@ -43,7 +26,6 @@ source "$DESKTOP_APPS_DIR/spotify.sh"
 source "$DESKTOP_APPS_DIR/handy/handy-config.sh"
 
 source "$DEVELOPMENT_DIR/git/git.sh"
-source "$DEVELOPMENT_DIR/git/git-config.sh"
 source "$DEVELOPMENT_DIR/cursor.sh"
 source "$DEVELOPMENT_DIR/docker.sh"
 source "$DEVELOPMENT_DIR/postman.sh"
@@ -59,6 +41,7 @@ source "$DEVELOPMENT_DIR/ollama.sh"
 # Essentials
 install_make
 install_curl
+install_chezmoi
 install_flatpak
 install_pulseaudio_utils
 install_fuse
@@ -77,7 +60,6 @@ config_handy
 
 # Development
 install_git
-config_git "$name" "$email"
 install_cursor_cli
 install_docker
 install_postman
@@ -90,4 +72,20 @@ install_ghostty
 config_ghostty
 install_ollama
 
-bash "$SCRIPT_DIR/verify.sh" || true
+# Dotfiles identity (git user.name/email). Asked once, stored in
+# ~/.config/chezmoi/chezmoi.toml so re-runs never prompt again.
+# Non-interactive: CHEZMOI_NAME / CHEZMOI_EMAIL.
+CHEZMOI_CONFIG="$HOME/.config/chezmoi/chezmoi.toml"
+if [[ ! -f $CHEZMOI_CONFIG ]]; then
+	name=${CHEZMOI_NAME:-}
+	email=${CHEZMOI_EMAIL:-}
+	[[ -z $name ]] && read -rp "Git name: " name
+	[[ -z $email ]] && read -rp "Git email: " email
+	mkdir -p "$(dirname "$CHEZMOI_CONFIG")"
+	printf '[data]\n\tname = "%s"\n\temail = "%s"\n' \
+		"${name//\"/\\\"}" "${email//\"/\\\"}" >"$CHEZMOI_CONFIG"
+fi
+
+chezmoi apply --source "$DOTFILES_DIR"
+
+bash "$SCRIPT_DIR/../tests/verify.sh" || true
