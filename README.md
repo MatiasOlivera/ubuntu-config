@@ -2,39 +2,46 @@
 
 Set-up a fresh Ubuntu installation installing apps and some configs
 
-Installation scripts are grouped by purpose:
+Installation scripts are grouped by purpose under `setup/`:
 
-- `desktop-apps/` contains final user applications (not for development)
-- `development/` contains development tools such as Git and Docker
-- `essentials/` contains common Linux utilities.
+- `setup/desktop-apps/` contains final user applications (not for development)
+- `setup/development/` contains development tools such as Git and Docker
+- `setup/essentials/` contains common Linux utilities.
 
 Each application script exposes an install function that is sourced and called
-by `install.sh`.
+by `setup/install.sh`.
 
-Install Ubuntu packages and configure Git with flags:
-
-```sh
-./install.sh --name "Your Name" --email "you@example.com"
-```
-
-Git can also be configured independently:
+Install Ubuntu packages and apply dotfiles:
 
 ```sh
-./development/git/git-config.sh "Your Name" "you@example.com"
+./setup/install.sh
 ```
+
+On first run it asks for Git name/email (or set `CHEZMOI_NAME` /
+`CHEZMOI_EMAIL` for non-interactive runs) and stores them in
+`~/.config/chezmoi/chezmoi.toml`, then applies `dotfiles/` via chezmoi.
+
+## Dotfiles
+
+`dotfiles/` is the chezmoi source state (`chezmoi apply --source dotfiles/`).
+Files map to `$HOME`: `dot_zshrc` → `~/.zshrc`, `dot_gitconfig.tmpl` →
+`~/.gitconfig`, `dot_config/*` → `~/.config/*`.
+
+This repo is public: never commit secrets. Root `.gitignore` (commit
+deny-list) and `dotfiles/.chezmoiignore` (deploy deny-list) block SSH/GPG
+keys, cloud credentials, tokens, and history files by default.
 
 ## Testing
 
 Its run on a `ubuntu:26.04` Docker image.
 
 ```sh
-docker build -t ubuntu-config-test .
-
-docker run --rm -v "$PWD:/work" -w /work ubuntu-config-test ./test.sh              # static + source-only (fast, zero-dep, default)
-docker run --rm -v "$PWD:/work" -w /work ubuntu-config-test ./test.sh --vm         # same, then Multipass fresh-Ubuntu e2e
-docker run --rm -v "$PWD:/work" -w /work ubuntu-config-test ./test.sh --vm --keep  # same, but leave VM running on failure for inspection
-docker run --rm -v "$PWD:/work" -w /work ubuntu-config-test ./test.sh --vm --reuse  # e2e on host: reuse existing VM (skip launch) for fast iterations
-docker run --rm -v "$PWD:/work" -w /work ubuntu-config-test ./test.sh --vm --reuse --keep  # same, and leave VM running afterwards
+docker compose -f tests/compose.yml build
+docker compose -f tests/compose.yml run --rm test              # static + source-only (fast, zero-dep, default)
+./tests/test.sh --vm                                           # same, then Multipass fresh-Ubuntu e2e
+./tests/test.sh --vm --keep                                    # same, but leave VM running on failure for inspection
+./tests/test.sh --vm --reuse                                   # e2e on host: reuse existing VM (skip launch) for fast iterations
+./tests/test.sh --vm --reuse --keep                            # same, and leave VM running afterwards
 ```
 
 The e2e run sets `SKIP_UPGRADE=1` when calling `post-install.sh` inside the
@@ -47,6 +54,6 @@ Report-only version table for everything `install.sh` / `post-install.sh` set up
 (manually installed apps excluded, always exits 0):
 
 ```sh
-./verify.sh
-multipass exec ubuntu-config-test -- bash ubuntu-config/verify.sh  # same, inside the e2e VM
+./tests/verify.sh
+multipass exec ubuntu-config-test -- bash ubuntu-config/tests/verify.sh  # same, inside the e2e VM
 ```
