@@ -1,23 +1,149 @@
 # ubuntu-config
-Set-up a fresh Ubuntu installation installing apps and some configs
 
-Installation scripts are grouped by purpose:
+> Opinionated, rerun-safe setup for a fresh Ubuntu workstation: `apt` packages, Flatpak/Snap apps, dev tools, and chezmoi-managed dotfiles in two scripts.
 
-- `desktop-apps/` contains final user applications (not for development)
-- `development/` contains development tools such as Git and Docker
-- `essentials/` contains common Linux utilities.
+## Requirements
 
-Each application script exposes an install function that is sourced and called
-by `install.sh`.
+- Fresh Ubuntu with `apt` + `sudo`
+- `bash`
+- Internet access
 
-Install Ubuntu packages and configure Git with flags:
+No other dependencies. `install.sh` bootstraps `chezmoi`, `curl`, `make`, etc. itself.
 
-```sh
-./install.sh --name "Your Name" --email "you@example.com"
-```
+> [!NOTE]
+> Tested against `ubuntu:26.04`. Other recent Ubuntu releases should work but are not covered by e2e tests.
 
-Git can also be configured independently:
+## Quickstart
 
 ```sh
-./git-config.sh "Your Name" "you@example.com"
+git clone https://github.com/MatiasOlivera/ubuntu-config ubuntu-config
+cd ubuntu-config
+./setup/install.sh
+./setup/post-install.sh
 ```
+
+On first run `install.sh` asks once for your Git name/email (or set `CHEZMOI_NAME` / `CHEZMOI_EMAIL` for non-interactive runs). Values are stored in `~/.config/chezmoi/chezmoi.toml` so re-runs never prompt again.
+
+```sh
+CHEZMOI_NAME="Ada Lovelace" CHEZMOI_EMAIL="ada@example.com" ./setup/install.sh
+```
+
+```sh
+bash setup/post-install.sh  # real machine: full apt upgrade
+```
+
+## What it does
+
+`setup/install.sh` runs essentials → desktop apps → development, then applies dotfiles and prints a verify report. `setup/post-install.sh` finishes interactive shell setup (oh-my-zsh, fnm, AI CLIs).
+
+### Essentials
+
+- `make`, `curl`, `chezmoi`, `flatpak`, `pulseaudio-utils`, `libfuse2t64`, `synaptic`
+- `pip`, `pipx` (Python tooling)
+
+### Desktop apps
+
+- Timeshift (system snapshots), FSearch, Google Chrome, OBS Studio (+ plugins), Spotify
+- Handy speech-to-text (config only - install the AppImage manually, see below)
+
+### Development
+
+- Git, Docker (+ Compose), zsh (set as default shell) + config
+- zoxide, Ghostty (+ config + set as GNOME default terminal), Ollama
+- Cursor CLI, Postman, Beekeeper Studio, opencode
+- oh-my-zsh + `zsh-autosuggestions` + `zsh-syntax-highlighting` + Powerlevel10k theme (`post-install.sh`)
+- `fnm` + Node LTS (`post-install.sh`), Antigravity CLI (`post-install.sh`)
+
+## Dotfiles
+
+`dotfiles/` is a chezmoi source state, applied with:
+
+```sh
+chezmoi apply --source dotfiles/
+```
+
+Mapping:
+
+| Source                  | Destination                                                   |
+| ----------------------- | ------------------------------------------------------------- |
+| `dot_zshrc`             | `~/.zshrc`                                                    |
+| `dot_gitconfig.tmpl`    | `~/.gitconfig` (rendered with name/email from `chezmoi.toml`) |
+| `dot_p10k.zsh`          | `~/.p10k.zsh`                                                 |
+| `dot_config/ghostty/*`  | `~/.config/ghostty/*`                                         |
+| `dot_config/opencode/*` | `~/.config/opencode/*`                                        |
+
+> [!WARNING]
+> This repo is public. Never commit secrets. Root `.gitignore` (commit deny-list) and `dotfiles/.chezmoiignore` (deploy deny-list) already block SSH/GPG keys, cloud credentials, tokens, and shell history - keep them in sync when adding new dotfiles.
+
+Rule of thumb:
+
+- Declarative files → chezmoi in `dotfiles/`
+- Imperative actions (`chsh`, `gsettings`, clones) → bash in `setup/`
+
+## Manual steps
+
+Some apps can't be installed programmatically. See [`setup/manual-installation.md`](setup/manual-installation.md) for the full list.
+
+## Verify
+
+Report-only version table for everything the scripts manage. Installs nothing, always exits `0`:
+
+```sh
+./tests/verify.sh
+multipass exec ubuntu-config-test -- bash ubuntu-config/tests/verify.sh  # same, inside the e2e VM
+```
+
+## Testing
+
+Static checks are host-safe and zero-dependency (shellcheck runs only if installed):
+
+```sh
+./tests/test.sh
+```
+
+Isolated static check in Docker (`ubuntu:26.04`, repo mounted read-only):
+
+```sh
+docker compose -f tests/compose.yml run --rm test
+```
+
+Full e2e on a fresh Multipass VM (requires Multipass on host):
+
+```sh
+./tests/test.sh --vm              # fresh VM, non-interactive CHEZMOI_*, SKIP_UPGRADE=1
+./tests/test.sh --vm --keep       # leave VM running on failure for inspection
+./tests/test.sh --vm --reuse      # reuse existing VM for fast iterations
+```
+
+`tests/test.sh` enforces the script contract: `bash -n` syntax, every library script sourced by `install.sh`/`post-install.sh`, source-only `install_*`/`config_*` functions, standalone `BASH_SOURCE` guard on every `*config*.sh`, plus shellcheck when available.
+
+The e2e run sets `SKIP_UPGRADE=1` when calling `post-install.sh` inside the VM, skipping `apt upgrade` for speed. Run `post-install.sh` without it on a real machine for the full update.
+
+```sh
+SKIP_UPGRADE=1 bash setup/post-install.sh  # test VMs only: skip apt upgrade for speed
+```
+
+## Project structure
+
+```text
+setup/
+  install.sh            # essentials → desktop-apps → development, then chezmoi apply + verify
+  post-install.sh       # oh-my-zsh, fnm/node, antigravity (needs zsh/curl from install.sh)
+  essentials/           # make, curl, chezmoi, flatpak, fuse, pip/pipx, ...
+  desktop-apps/         # chrome, spotify, obs, timeshift, fsearch, handy-config, ...
+  development/          # git, docker, zsh, ghostty, opencode, ollama, fnm, ...
+  manual-installation.md
+dotfiles/               # chezmoi source state (dot_* → $HOME, *.tmpl rendered)
+tests/
+  test.sh               # static + optional Multipass e2e
+  verify.sh             # report-only install report
+  compose.yml / Dockerfile
+```
+
+## Adding a new app
+
+1. Add a single-purpose `setup/<area>/<name>.sh` defining one `install_*` / `config_*` function. Keep it rerun-safe (guard repeats, `groupadd -f`, overwrite apt sources).
+2. `source` it and append its call in `setup/install.sh` or `setup/post-install.sh`.
+3. Config files → `dotfiles/` via chezmoi; commands → bash.
+
+See `setup/development/docker.sh` (rerun-safe apt source) and `setup/development/zsh/zsh-config.sh` (standalone `BASH_SOURCE` guard) as references.

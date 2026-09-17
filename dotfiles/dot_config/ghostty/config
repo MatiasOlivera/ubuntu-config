@@ -1,0 +1,19 @@
+# Appearance
+theme = light:Monokai Pro Light Sun, dark:Monokai Pro
+font-family = Iosevka Term
+font-family = Fira Code
+font-family = JetBrains Mono
+window-padding-x = 10
+window-padding-y = 10
+window-padding-balance = true
+
+# Keybinds
+keybind = ctrl+shift+alt+a=select_all
+keybind = ctrl+shift+t=new_tab
+keybind = ctrl+shift+a=new_split:left
+keybind = ctrl+shift+d=new_split:right
+keybind = ctrl+shift+s=new_split:down
+
+# Misc
+copy-on-select = true
+mouse-hide-while-typing = true

@@ -1,0 +1,34 @@
+# Deploy deny-list: chezmoi will never manage these paths, even if added
+# to the source state by mistake. Mirrors root .gitignore (commit deny-list).
+# Patterns match target (destination) paths, not dot_/private_ source names.
+.ssh/**
+.gnupg/**
+.aws/**
+.azure/**
+.kube/**
+.docker/**
+.config/gh/**
+.config/gcloud/**
+.config/tailscale/**
+.config/rclone/**
+.dockercfg
+.netrc
+_netrc
+.npmrc
+.pypirc
+.git-credentials
+*.pem
+*.key
+*.p12
+*.pfx
+*.kdbx
+*.age
+*.gpg
+*.asc
+.env*
+*token*
+*credentials*
+*secret*
+.zsh_history
+.bash_history
+.cache/**
