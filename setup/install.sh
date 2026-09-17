@@ -81,7 +81,7 @@ if [[ ! -f $CHEZMOI_CONFIG ]]; then
 	email=${CHEZMOI_EMAIL:-}
 	[[ -z $name ]] && read -rp "Git name: " name
 	[[ -z $email ]] && read -rp "Git email: " email
-	mkdir -p "$(dirname "$CHEZMOI_CONFIG")"
+	mkdir -p "$HOME/.config/chezmoi"
 	printf '[data]\n\tname = "%s"\n\temail = "%s"\n' \
 		"${name//\"/\\\"}" "${email//\"/\\\"}" >"$CHEZMOI_CONFIG"
 fi

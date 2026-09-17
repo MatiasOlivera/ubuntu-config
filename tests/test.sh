@@ -31,12 +31,7 @@ while [[ $# -gt 0 ]]; do
 	shift
 done
 
-if [[ $KEEP -eq 1 && $RUN_VM -eq 0 ]]; then
-	usage
-	exit 1
-fi
-
-if [[ $REUSE -eq 1 && $RUN_VM -eq 0 ]]; then
+if [[ $KEEP -eq 1 || $REUSE -eq 1 ]] && [[ $RUN_VM -eq 0 ]]; then
 	usage
 	exit 1
 fi
