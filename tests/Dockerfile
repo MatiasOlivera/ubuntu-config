@@ -3,4 +3,4 @@ RUN apt-get update \
  && apt-get install -y --no-install-recommends bash shellcheck \
  && rm -rf /var/lib/apt/lists/*
 WORKDIR /work
-CMD ["./test.sh"]
+CMD ["./tests/test.sh"]

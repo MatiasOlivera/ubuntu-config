@@ -31,17 +31,13 @@ while [[ $# -gt 0 ]]; do
 	shift
 done
 
-if [[ $KEEP -eq 1 && $RUN_VM -eq 0 ]]; then
+if [[ $KEEP -eq 1 || $REUSE -eq 1 ]] && [[ $RUN_VM -eq 0 ]]; then
 	usage
 	exit 1
 fi
 
-if [[ $REUSE -eq 1 && $RUN_VM -eq 0 ]]; then
-	usage
-	exit 1
-fi
-
-ROOT="$(cd "$(dirname "$0")" && pwd)"
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+SETUP_DIR="$ROOT/setup"
 FAILURES=0
 
 printf 'versions: bash=%s shellcheck=%s multipass=%s\n' \
@@ -58,7 +54,7 @@ pass() {
 	printf 'ok: %s\n' "$1"
 }
 
-mapfile -t ALL_SCRIPTS < <(find "$ROOT" -name '*.sh' -not -path "$ROOT/.git/*" | sort)
+mapfile -t ALL_SCRIPTS < <(find "$SETUP_DIR" -name '*.sh' -not -path "$ROOT/.git/*" | sort)
 
 # 1. syntax: bash -n over every script
 for f in "${ALL_SCRIPTS[@]}"; do
@@ -72,9 +68,9 @@ done
 # 2. every library script is sourced by install.sh or post-install.sh.
 for f in "${ALL_SCRIPTS[@]}"; do
 	case "$f" in
-	"$ROOT/install.sh" | "$ROOT/post-install.sh" | "$ROOT/test.sh" | "$ROOT/verify.sh") continue ;;
+	"$SETUP_DIR/install.sh" | "$SETUP_DIR/post-install.sh") continue ;;
 	esac
-	if grep -qF "$(basename "$f")" "$ROOT/install.sh" "$ROOT/post-install.sh"; then
+	if grep -qF "$(basename "$f")" "$SETUP_DIR/install.sh" "$SETUP_DIR/post-install.sh"; then
 		pass "sourced $f"
 	else
 		fail "not sourced: $f"
@@ -86,7 +82,7 @@ done
 # post-install.sh are never sourced (post-install.sh runs apt upgrade).
 for f in "${ALL_SCRIPTS[@]}"; do
 	case "$f" in
-	"$ROOT/install.sh" | "$ROOT/post-install.sh" | "$ROOT/test.sh" | "$ROOT/verify.sh") continue ;;
+	"$SETUP_DIR/install.sh" | "$SETUP_DIR/post-install.sh") continue ;;
 	esac
 	if funcs="$(bash -c 'source "$1" && declare -F' _ "$f" 2>/dev/null)" &&
 		printf '%s\n' "$funcs" | grep -qE 'declare -f (install_|config_)'; then
@@ -96,31 +92,16 @@ for f in "${ALL_SCRIPTS[@]}"; do
 	fi
 done
 
-# 4. arg validation (safe: install.sh exits before any source/install).
-# Never run install.sh with valid args here.
-check_args_fail() {
-	local label=$1
-	shift
-	if bash "$ROOT/install.sh" "$@" >/dev/null 2>&1; then
-		fail "install.sh ($label) should exit non-zero"
-	else
-		pass "install.sh ($label) fails"
-	fi
-}
-check_args_fail "no args"
-check_args_fail "--name only" --name "Test"
-check_args_fail "unknown flag" --bogus
-
-# 5. every *config*.sh works standalone (BASH_SOURCE guard per AGENTS.md)
+# 4. every *config*.sh works standalone (BASH_SOURCE guard per AGENTS.md)
 while IFS= read -r f; do
 	if grep -q 'BASH_SOURCE' "$f"; then
 		pass "standalone guard $f"
 	else
 		fail "standalone guard missing in $f"
 	fi
-done < <(find "$ROOT" -name '*config*.sh' -not -path "$ROOT/.git/*" | sort)
+done < <(find "$SETUP_DIR" -name '*config*.sh' -not -path "$ROOT/.git/*" | sort)
 
-# 6. shellcheck if installed, else skip (keeps zero-dep default)
+# 5. shellcheck if installed, else skip (keeps zero-dep default)
 if command -v shellcheck >/dev/null 2>&1; then
 	# SC1091 (can't follow $VAR sources) excluded: check 2 verifies targets exist.
 	if shellcheck -e SC1091 "${ALL_SCRIPTS[@]}"; then
@@ -166,13 +147,13 @@ if [[ $RUN_VM -eq 1 && $FAILURES -eq 0 ]]; then
 		fi
 		rm -f "$tarball"
 
-		if multipass exec "$VM_NAME" -- bash /home/ubuntu/ubuntu-config/install.sh --name "Test" --email "test@example.com"; then
+		if multipass exec "$VM_NAME" -- env CHEZMOI_NAME="Test" CHEZMOI_EMAIL="test@example.com" bash /home/ubuntu/ubuntu-config/setup/install.sh; then
 			pass "install.sh in VM"
 		else
 			fail "install.sh in VM"
 		fi
 
-		if multipass exec "$VM_NAME" -- env SKIP_UPGRADE=1 bash /home/ubuntu/ubuntu-config/post-install.sh; then
+		if multipass exec "$VM_NAME" -- env SKIP_UPGRADE=1 bash /home/ubuntu/ubuntu-config/setup/post-install.sh; then
 			pass "post-install.sh in VM"
 		else
 			fail "post-install.sh in VM"
