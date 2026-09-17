@@ -86,4 +86,4 @@ fi
 
 chezmoi apply --source "$DOTFILES_DIR"
 
-bash "$SCRIPT_DIR/../tests/verify.sh" || true
+bash "$SCRIPT_DIR/../tests/verify.sh"
