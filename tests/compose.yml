@@ -1,0 +1,9 @@
+services:
+  test:
+    build:
+      context: ..
+      dockerfile: tests/Dockerfile
+    working_dir: /work
+    volumes:
+      - ..:/work:ro
+    command: ./tests/test.sh

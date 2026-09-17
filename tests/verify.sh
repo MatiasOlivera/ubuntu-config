@@ -39,6 +39,7 @@ chk "obs-plugins" "flatpak list (obs plugins)" bash -c 'flatpak list 2>/dev/null
 chk "spotify" "dpkg -s spotify-client" bash -c 'dpkg -s spotify-client 2>/dev/null | grep "^Version:"'
 chk "git" "git --version" git --version
 chk "git-config" "git user.name/email" bash -c 'git config --global --get user.name >/dev/null && git config --global --get user.email'
+chk "chezmoi" "chezmoi --version" chezmoi --version
 chk "cursor" "cursor --version" bash -c 'cursor --version 2>/dev/null || cursor-agent --version 2>/dev/null'
 chk "docker" "docker --version" docker --version
 chk "docker-compose" "docker compose version" docker compose version
