@@ -161,6 +161,7 @@ setup/
   development/          # git, docker, zsh, ghostty, opencode, ollama, fnm, ...
   manual-installation.md
 dotfiles/               # chezmoi source state (dot_* → $HOME, *.tmpl rendered)
+.opencode/skills/       # agent skills (install-package, run-tests, reports)
 reports/
   versions.sh           # report-only install report
   gaps.sh               # report-only host-vs-repo gaps (apt/snap/flatpak/AppImage)
@@ -173,7 +174,7 @@ tests/
 ## Adding a new app
 
 1. Add a single-purpose `setup/<area>/<name>.sh` defining one `install_*` / `config_*` function. Keep it rerun-safe (guard repeats, `groupadd -f`, overwrite apt sources).
-2. `source` it and append its call in `setup/install.sh` or `setup/post-install.sh`.
+2. `source` it and append its call in `setup/install.sh` or `setup/post-install.sh`, plus a `chk`/`src` row in `reports/versions.sh`.
 3. Config files → `dotfiles/` via chezmoi; commands → bash.
 
-See `setup/development/docker.sh` (rerun-safe apt source) and `setup/development/zsh/zsh-config.sh` (standalone `BASH_SOURCE` guard) as references.
+`tests/test.sh` enforces this contract fail-closed. For the full workflow (phases, apt-repo function, version guards, examples) the repo's `install-package` skill covers it.
