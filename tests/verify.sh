@@ -38,6 +38,8 @@ chk "obs" "flatpak info com.obsproject.Studio" bash -c 'flatpak info com.obsproj
 chk "obs-plugins" "flatpak list (obs plugins)" bash -c 'flatpak list 2>/dev/null | grep -i "com.obsproject.Studio.Plugin" | head -n 1'
 chk "obsidian" "dpkg -s obsidian" bash -c 'dpkg -s obsidian 2>/dev/null | grep "^Version:"'
 chk "spotify" "dpkg -s spotify-client" bash -c 'dpkg -s spotify-client 2>/dev/null | grep "^Version:"'
+chk "discord" "dpkg -s discord" bash -c 'dpkg -s discord 2>/dev/null | grep "^Version:"'
+chk "handy" "dpkg -s handy" bash -c 'dpkg -s handy 2>/dev/null | grep "^Version:"'
 chk "git" "git --version" git --version
 chk "git-config" "git user.name/email" bash -c 'git config --global --get user.name >/dev/null && git config --global --get user.email'
 chk "chezmoi" "chezmoi --version" chezmoi --version

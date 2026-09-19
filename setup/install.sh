@@ -20,9 +20,11 @@ source "$ESSENTIALS_DIR/python3/python3-pipx.sh"
 source "$DESKTOP_APPS_DIR/timeshift.sh"
 source "$DESKTOP_APPS_DIR/fsearch.sh"
 source "$DESKTOP_APPS_DIR/chrome.sh"
+source "$DESKTOP_APPS_DIR/discord.sh"
 source "$DESKTOP_APPS_DIR/obs/obs.sh"
 source "$DESKTOP_APPS_DIR/obsidian.sh"
 source "$DESKTOP_APPS_DIR/spotify.sh"
+source "$DESKTOP_APPS_DIR/handy/handy.sh"
 source "$DESKTOP_APPS_DIR/handy/handy-config.sh"
 
 source "$DEVELOPMENT_DIR/git/git.sh"
@@ -53,9 +55,11 @@ install_pipx
 install_timeshift
 install_fsearch
 install_chrome
+install_discord
 install_obs
 install_obsidian
 install_spotify
+install_handy
 config_handy
 
 # Development
