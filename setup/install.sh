@@ -122,6 +122,6 @@ fi
 
 step chezmoi chezmoi apply --source "$DOTFILES_DIR"
 
-step verify bash "$SCRIPT_DIR/../tests/verify.sh"
+step versions bash "$SCRIPT_DIR/../reports/versions.sh"
 
 printf '[+%ds] install.sh total\n' "$((SECONDS - install_start))"

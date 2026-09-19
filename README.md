@@ -34,7 +34,7 @@ bash setup/post-install.sh  # real machine: full apt upgrade
 
 ## What it does
 
-`setup/install.sh` runs essentials → desktop apps → development, then applies dotfiles and prints a verify report. `setup/post-install.sh` finishes interactive shell setup (oh-my-zsh, fnm, AI CLIs).
+`setup/install.sh` runs essentials → desktop apps → development, then applies dotfiles and prints a versions report. `setup/post-install.sh` finishes interactive shell setup (oh-my-zsh, fnm, AI CLIs).
 
 ### Essentials
 
@@ -84,14 +84,41 @@ Rule of thumb:
 
 Some apps can't be installed programmatically. See [`setup/manual-installation.md`](setup/manual-installation.md) for the full list.
 
-## Verify
+## Reports
+
+### Versions
 
 Report-only version table for everything the scripts manage. Installs nothing, always exits `0`:
 
 ```sh
-./tests/verify.sh
-multipass exec ubuntu-config-test -- bash ubuntu-config/tests/verify.sh  # same, inside the e2e VM
+./reports/versions.sh
+multipass exec ubuntu-config-test -- bash ubuntu-config/reports/versions.sh  # same, inside the e2e VM
 ```
+
+### Gaps
+
+Report-only list of host-installed apps not tracked by this repo (apt, snap, flatpak, AppImage). Installs nothing, always exits `0`. Builds the apt baseline from the vendored official desktop manifest, so it needs no network:
+
+```sh
+./reports/gaps.sh
+```
+
+Baseline: `reports/baselines/ubuntu-26.04.1-desktop-manifest.txt` (names from `https://releases.ubuntu.com/26.04/ubuntu-26.04.1-desktop-amd64.manifest`). See [Updating to a new Ubuntu version](#updating-to-a-new-ubuntu-version) to refresh it after a release bump.
+
+## Updating to a new Ubuntu version
+
+When the repo moves to a newer Ubuntu release:
+
+1. Bump the version pins: `UBUNTU_IMAGE` in `tests/test.sh`, the image in `tests/compose.yml` and `tests/Dockerfile`, and the tested-release note above.
+2. Refresh the gaps baseline from the point-release desktop manifest (use the exact release, e.g. `26.04.1`):
+
+   ```sh
+   curl -sL https://releases.ubuntu.com/<release>/ubuntu-<release>-desktop-amd64.manifest \
+     | awk '{print $1}' | sort -u > reports/baselines/ubuntu-<release>-desktop-manifest.txt
+   ```
+
+3. Update the baseline filename referenced in `reports/gaps.sh`.
+4. Re-run `./tests/test.sh` and `./reports/gaps.sh` (expect near-empty on a fresh VM).
 
 ## Testing
 
@@ -127,16 +154,19 @@ SKIP_UPGRADE=1 bash setup/post-install.sh  # test VMs only: skip apt upgrade for
 
 ```text
 setup/
-  install.sh            # essentials → desktop-apps → development, then chezmoi apply + verify
+  install.sh            # essentials → desktop-apps → development, then chezmoi apply + report
   post-install.sh       # oh-my-zsh, fnm/node, antigravity (needs zsh/curl from install.sh)
   essentials/           # make, curl, chezmoi, flatpak, fuse, pip/pipx, ...
   desktop-apps/         # chrome, spotify, obs, timeshift, fsearch, handy-config, ...
   development/          # git, docker, zsh, ghostty, opencode, ollama, fnm, ...
   manual-installation.md
 dotfiles/               # chezmoi source state (dot_* → $HOME, *.tmpl rendered)
+reports/
+  versions.sh           # report-only install report
+  gaps.sh               # report-only host-vs-repo gaps (apt/snap/flatpak/AppImage)
+  baselines/            # vendored Ubuntu desktop manifest baseline
 tests/
   test.sh               # static + optional Multipass e2e
-  verify.sh             # report-only install report
   compose.yml / Dockerfile
 ```
 
