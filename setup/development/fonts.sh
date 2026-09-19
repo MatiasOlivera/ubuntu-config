@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 
 install_fonts() {
+	local installed_ver
+	if installed_ver="$(fonts_version 2>/dev/null)"; then
+		printf 'skip: fonts already installed (%s)\n' "$installed_ver"
+		return 0
+	fi
 	sudo apt install -y unzip fontconfig fonts-firacode
 
 	local dir="$HOME/.local/share/fonts"
@@ -18,4 +23,11 @@ install_fonts() {
 	done
 
 	fc-cache -f
+}
+
+fonts_version() {
+	fc-list 2>/dev/null | grep -qi "firacode" &&
+		fc-list 2>/dev/null | grep -qi "iosevka" &&
+		fc-list 2>/dev/null | grep -qi "meslo" &&
+		echo present
 }

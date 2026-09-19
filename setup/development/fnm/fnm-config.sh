@@ -7,6 +7,10 @@ config_fnm() {
     fnm default 24
 }
 
+node_version() {
+    node --version 2>/dev/null | head -n 1 | grep .
+}
+
 if [[ ${BASH_SOURCE[0]} == "$0" ]]; then
     config_fnm
 fi

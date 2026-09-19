@@ -3,67 +3,116 @@
 # verify.sh — report-only version table for everything install.sh /
 # post-install.sh set up.
 # Never installs anything, never exits non-zero.
-# shellcheck disable=SC2016,SC2088
-# (single-quoted bash -c strings and "~" label are intentional)
+# shellcheck disable=SC2016,SC2088,SC1090,SC1091
+# (single-quoted bash -c strings and "~" label are intentional;
+#  SC1090/SC1091: dynamic sources below are all repo-local setup scripts)
 
 chk() {
-	local label=$1 desc=$2
-	shift 2
+	local label=$1
+	shift
 	local out status
 	out="$("$@" 2>&1)"
 	status=$?
 	out="$(printf '%s\n' "$out" | head -n 1)"
 	if [ "$status" -eq 0 ] && [ -n "$out" ]; then
-		printf '| %s | `%s` | %s |\n' "$label" "$desc" "$out"
+		printf '| %s | %s |\n' "$label" "$out"
 	else
-		printf '| %s | `%s` | MISSING |\n' "$label" "$desc"
+		printf '| %s | MISSING |\n' "$label"
 	fi
 }
 
-printf '| Component | Check | Result |\n'
-printf '|---|---|---|\n'
+printf '| Package | Version |\n'
+printf '|---|---|\n'
 
-chk "curl" "curl --version" curl --version
-chk "make" "make --version" make --version
-chk "flatpak" "flatpak --version" flatpak --version
-chk "pulseaudio-utils" "pactl --version" pactl --version
-chk "fuse" "dpkg -s libfuse2t64" bash -c 'dpkg -s libfuse2t64 2>/dev/null | grep "^Version:"'
-chk "synaptic" "dpkg -s synaptic" bash -c 'dpkg -s synaptic 2>/dev/null | grep "^Version:"'
-chk "pip" "pip3 --version" pip3 --version
-chk "pipx" "pipx --version" pipx --version
-chk "timeshift" "timeshift --version" timeshift --version
-chk "fsearch" "dpkg -s fsearch" bash -c 'dpkg -s fsearch 2>/dev/null | grep "^Version:"'
-chk "chrome" "google-chrome --version" bash -c 'google-chrome --version 2>/dev/null || google-chrome-stable --version 2>/dev/null'
-chk "obs" "flatpak info com.obsproject.Studio" bash -c 'flatpak info com.obsproject.Studio 2>/dev/null | grep -i "Version:" | head -n 1'
-chk "obs-plugins" "flatpak list (obs plugins)" bash -c 'flatpak list 2>/dev/null | grep -i "com.obsproject.Studio.Plugin" | head -n 1'
-chk "obsidian" "dpkg -s obsidian" bash -c 'dpkg -s obsidian 2>/dev/null | grep "^Version:"'
-chk "spotify" "dpkg -s spotify-client" bash -c 'dpkg -s spotify-client 2>/dev/null | grep "^Version:"'
-chk "discord" "dpkg -s discord" bash -c 'dpkg -s discord 2>/dev/null | grep "^Version:"'
-chk "handy" "dpkg -s handy" bash -c 'dpkg -s handy 2>/dev/null | grep "^Version:"'
-chk "git" "git --version" git --version
-chk "git-config" "git user.name/email" bash -c 'git config --global --get user.name >/dev/null && git config --global --get user.email'
-chk "chezmoi" "chezmoi --version" chezmoi --version
-chk "cursor" "cursor --version" bash -c 'cursor --version 2>/dev/null || cursor-agent --version 2>/dev/null'
-chk "cursor-ide" "dpkg -s cursor" bash -c 'dpkg -s cursor 2>/dev/null | grep "^Version:"'
-chk "gitkraken" "dpkg -s gitkraken" bash -c 'dpkg -s gitkraken 2>/dev/null | grep "^Version:"'
-chk "vscode" "code --version" bash -c 'code --version 2>/dev/null | head -n 1'
-chk "fonts" "fc-list FiraCode/Iosevka/Meslo" bash -c 'fc-list 2>/dev/null | grep -qi "firacode" && fc-list 2>/dev/null | grep -qi "iosevka" && fc-list 2>/dev/null | grep -qi "meslo" && echo present'
-chk "docker" "docker --version" docker --version
-chk "docker-compose" "docker compose version" docker compose version
-chk "postman" "snap list postman" bash -c 'snap list postman 2>/dev/null | tail -n 1'
-chk "beekeeper" "dpkg -s beekeeper-studio" bash -c 'dpkg -s beekeeper-studio 2>/dev/null | grep "^Version:"'
-chk "zsh" "zsh --version" zsh --version
-chk "zsh-default" "SHELL is zsh" bash -c '[[ "$SHELL" == *zsh* ]] && echo "$SHELL"'
-chk "zoxide" "zoxide --version" zoxide --version
-chk "opencode" "opencode --version" opencode --version
-chk "ghostty" "ghostty --version" ghostty --version
-chk "ghostty-default" "gsettings terminal exec" gsettings get org.gnome.desktop.default-applications.terminal exec
-chk "oh-my-zsh" "~/.oh-my-zsh present" bash -c '[ -d "$HOME/.oh-my-zsh" ] && echo present'
-chk "zsh-plugins" "autosuggestions/syntax-highlighting" bash -c '[ -d "$HOME/.oh-my-zsh/custom/plugins/zsh-autosuggestions" ] && [ -d "$HOME/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting" ] && echo present'
-chk "p10k-theme" "powerlevel10k present" bash -c '[ -d "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k" ] && echo present'
-chk "antigravity" "agy --version" agy --version
-chk "antigravity-path" ".local/bin in .zshrc" bash -c 'grep -qF ".local/bin" "$HOME/.zshrc" && echo present'
-chk "fnm" "fnm --version" fnm --version
-chk "node" "node --version" node --version
+# Version checks live in the package scripts (single source of truth, also
+# used by the install guards). Sourcing is side-effect-free: library scripts
+# only define functions. `|| true` keeps this report-only on a bad file
+# (missing fns degrade to MISSING rows via chk).
+VERIFY_DIR="$(cd "$(dirname "$0")" && pwd)"
+SETUP_DIR="$VERIFY_DIR/../setup"
+src() { source "$SETUP_DIR/$1" || true; }
+src essentials/curl.sh
+src essentials/make.sh
+src essentials/flatpak.sh
+src essentials/pulseaudio-utils.sh
+src essentials/fuse.sh
+src essentials/synaptic.sh
+src essentials/python3/python3-pip.sh
+src essentials/python3/python3-pipx.sh
+src essentials/chezmoi.sh
+src desktop-apps/timeshift.sh
+src desktop-apps/fsearch.sh
+src desktop-apps/chrome.sh
+src desktop-apps/obs/obs.sh
+src desktop-apps/obsidian.sh
+src desktop-apps/spotify.sh
+src desktop-apps/discord.sh
+src desktop-apps/handy/handy.sh
+src development/git/git.sh
+src development/cursor.sh
+src development/gitkraken.sh
+src development/vscode.sh
+src development/fonts.sh
+src development/docker.sh
+src development/postman.sh
+src development/beekeeper-studio.sh
+src development/zsh/zsh.sh
+src development/zoxide.sh
+src development/opencode/opencode.sh
+src development/ghostty/ghostty.sh
+src development/oh-my-zsh/oh-my-zsh.sh
+src development/oh-my-zsh/plugins.sh
+src development/oh-my-zsh/theme.sh
+src development/antigravity-cli/antigravity-cli.sh
+src development/fnm/install-fnm.sh
+src development/fnm/fnm-config.sh
+src development/ollama.sh
+
+chk "curl" curl_version
+chk "make" make_version
+chk "flatpak" flatpak_version
+chk "pulseaudio-utils" pulseaudio_utils_version
+chk "fuse" fuse_version
+chk "synaptic" synaptic_version
+chk "pip" pip_version
+chk "pipx" pipx_version
+chk "timeshift" timeshift_version
+chk "fsearch" fsearch_version
+chk "chrome" chrome_version
+chk "obs" obs_version
+chk "obs-plugins" obs_plugins_version
+chk "obsidian" obsidian_version
+chk "spotify" spotify_version
+chk "discord" discord_version
+chk "handy" handy_version
+chk "git" git_version
+chk "chezmoi" chezmoi_version
+chk "cursor" cursor_cli_version
+chk "cursor-ide" cursor_version
+chk "gitkraken" gitkraken_version
+chk "vscode" vscode_version
+chk "fonts" fonts_version
+chk "docker" docker_version
+chk "docker-compose" docker_compose_version
+chk "postman" postman_version
+chk "beekeeper" beekeeper_studio_version
+chk "zsh" zsh_version
+chk "zoxide" zoxide_version
+chk "opencode" opencode_version
+chk "ghostty" ghostty_version
+chk "oh-my-zsh" oh_my_zsh_version
+chk "zsh-plugins" oh_my_zsh_plugins_version
+chk "p10k-theme" oh_my_zsh_theme_version
+chk "antigravity" antigravity_cli_version
+chk "fnm" fnm_version
+chk "node" node_version
+chk "ollama" ollama_version
+
+printf '\n| Config | Status |\n'
+printf '|---|---|\n'
+chk "git-config" bash -c 'git config --global --get user.name >/dev/null && git config --global --get user.email'
+chk "zsh-default" bash -c '[[ "$SHELL" == *zsh* ]] && echo "$SHELL"'
+chk "ghostty-default" gsettings get org.gnome.desktop.default-applications.terminal exec
+chk "antigravity-path" bash -c 'grep -qF ".local/bin" "$HOME/.zshrc" && echo present'
 
 exit 0
