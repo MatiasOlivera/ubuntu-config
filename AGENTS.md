@@ -4,6 +4,8 @@ Fresh-Ubuntu setup: bash scripts (`setup/`) + chezmoi dotfiles (`dotfiles/`). No
 
 ## Skills (load the one matching your task)
 
+Skills live in `.agents/skills/` (cross-agent: opencode, Cursor, VS Code, Codex, ...).
+
 - Adding or extending a setup script (`install_*`/`config_*`, apt repos, version guards, wiring) → `install-package`.
 - Running or iterating on tests (`./tests/test.sh`, docker-isolated, Multipass e2e, `--reuse` loop) → `run-tests`.
 - Working with reports (`versions.sh`, `gaps.sh`, `chk`/`src` rows, baseline refresh) → `reports`.

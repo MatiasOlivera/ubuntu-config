@@ -161,7 +161,7 @@ setup/
   development/          # git, docker, zsh, ghostty, opencode, ollama, fnm, ...
   manual-installation.md
 dotfiles/               # chezmoi source state (dot_* → $HOME, *.tmpl rendered)
-.opencode/skills/       # agent skills (install-package, run-tests, reports)
+.agents/skills/         # cross-agent skills (opencode, Cursor, VS Code, Codex, …)
 reports/
   versions.sh           # report-only install report
   gaps.sh               # report-only host-vs-repo gaps (apt/snap/flatpak/AppImage)
