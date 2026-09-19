@@ -19,6 +19,8 @@ Fresh-Ubuntu setup: bash scripts (`setup/`) + chezmoi dotfiles (`dotfiles/`). No
 - Full e2e (needs Multipass on host): `./tests/test.sh --vm` (fresh VM, non-interactive `CHEZMOI_*`, `SKIP_UPGRADE=1`); `--keep`/`--reuse` only valid with `--vm`.
 - Developing: use the `--reuse` loop, not fresh runs. Seed once with `./tests/test.sh --vm --reuse --keep` (full install, VM kept), then iterate with `./tests/test.sh --vm --reuse` — idempotency guards skip installed packages (~seconds). `--reuse` needs `--keep` on the seeding run: without it the VM is deleted on exit and the next run rebuilds fresh.
 - `reports/versions.sh` is report-only, always exits 0, installs nothing; excludes manually installed apps (see `setup/manual-installation.md`).
+- `reports/gaps.sh` is report-only, always exits 0, installs nothing; flags host apps (apt/snap/flatpak/AppImage) not tracked by the repo.
+- New top-level report scripts belong in `reports/` (`versions.sh`, `gaps.sh`); `tests/` holds `test.sh` and e2e assets only.
 
 ## Secrets
 
