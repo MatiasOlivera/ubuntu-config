@@ -5,6 +5,7 @@
 
 UBUNTU_IMAGE="26.04"
 VM_NAME="ubuntu-config-test"
+SNAPSHOT="base"
 
 RUN_VM=0
 KEEP=0
@@ -52,6 +53,31 @@ fail() {
 
 pass() {
 	printf 'ok: %s\n' "$1"
+}
+
+# ponytail: SECONDS wall-clock only, no per-command profiling; use
+# `systemd-analyze` in-VM if finer data is ever needed.
+phase_start=0
+phase_begin() {
+	phase_start=$SECONDS
+}
+phase_end() {
+	printf '[+%ds] %s\n' "$((SECONDS - phase_start))" "$1"
+}
+
+snap_supported() {
+	multipass snapshot --help >/dev/null 2>&1
+}
+
+ensure_snapshot() {
+	# Best-effort clean-base snapshot right after launch so a dirty
+	# --reuse VM can reset without paying launch cost:
+	# multipass restore "$VM_NAME.$SNAPSHOT"
+	snap_supported || return 0
+	if multipass info "$VM_NAME" 2>/dev/null | grep -qw "$SNAPSHOT"; then
+		return 0
+	fi
+	multipass snapshot "$VM_NAME" --name "$SNAPSHOT" >/dev/null 2>&1 || true
 }
 
 mapfile -t ALL_SCRIPTS < <(find "$SETUP_DIR" -name '*.sh' -not -path "$ROOT/.git/*" | sort)
@@ -120,22 +146,32 @@ if [[ $RUN_VM -eq 1 && $FAILURES -eq 0 ]]; then
 		fail "multipass not installed"
 	else
 		trap '[[ $KEEP -eq 0 ]] && multipass delete -p "$VM_NAME" >/dev/null 2>&1 || true' EXIT
+		vm_start=$SECONDS
 
 		if [[ $REUSE -eq 1 ]] && multipass list 2>/dev/null | grep -qw "$VM_NAME"; then
+			phase_begin
 			multipass start "$VM_NAME" >/dev/null 2>&1 || true
+			phase_end "reuse VM $VM_NAME (skip launch, keep apt caches for fast re-run)"
 			pass "reuse VM $VM_NAME (skip launch)"
 		else
 			if multipass list 2>/dev/null | grep -qw "$VM_NAME"; then
 				multipass delete -p "$VM_NAME" || fail "delete stale VM $VM_NAME"
 			fi
 
+			phase_begin
 			if multipass launch "$UBUNTU_IMAGE" --name "$VM_NAME" --cpus 2 --memory 4G --disk 20G; then
 				pass "multipass launch $UBUNTU_IMAGE"
 			else
 				fail "multipass launch $UBUNTU_IMAGE"
 			fi
+			multipass exec "$VM_NAME" -- cloud-init status --wait >/dev/null 2>&1 || true
+			phase_end "launch + cloud-init"
+			phase_begin
+			ensure_snapshot
+			phase_end "base snapshot"
 		fi
 
+		phase_begin
 		tarball="$(mktemp "$HOME/ubuntu-config-test.XXXXXX.tar.gz")"
 		if tar -czf "$tarball" --exclude=.git -C "$ROOT" . &&
 			multipass transfer "$tarball" "$VM_NAME:/home/ubuntu/ubuntu-config.tar.gz" &&
@@ -146,24 +182,33 @@ if [[ $RUN_VM -eq 1 && $FAILURES -eq 0 ]]; then
 			fail "transfer repo to VM"
 		fi
 		rm -f "$tarball"
+		phase_end "transfer repo to VM"
 
+		phase_begin
 		if multipass exec "$VM_NAME" -- env CHEZMOI_NAME="Test" CHEZMOI_EMAIL="test@example.com" bash /home/ubuntu/ubuntu-config/setup/install.sh; then
 			pass "install.sh in VM"
 		else
 			fail "install.sh in VM"
 		fi
+		phase_end "install.sh in VM"
 
+		phase_begin
 		if multipass exec "$VM_NAME" -- env SKIP_UPGRADE=1 bash /home/ubuntu/ubuntu-config/setup/post-install.sh; then
 			pass "post-install.sh in VM"
 		else
 			fail "post-install.sh in VM"
 		fi
+		phase_end "post-install.sh in VM"
 
+		phase_begin
 		if multipass exec "$VM_NAME" -- which git docker zsh curl; then
 			pass "smoke: git docker zsh curl in VM"
 		else
 			fail "smoke: git docker zsh curl in VM"
 		fi
+		phase_end "smoke"
+
+		printf '[+%ds] Multipass e2e total (tip: --reuse skips launch, restore %s.%s resets dirty VM to clean base)\n' "$((SECONDS - vm_start))" "$VM_NAME" "$SNAPSHOT"
 
 		if [[ $KEEP -eq 1 ]]; then
 			printf 'keeping VM %s running for inspection\n' "$VM_NAME"
