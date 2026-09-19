@@ -1,5 +1,14 @@
 #!/usr/bin/env bash
 
+install_fsearch() {
+	local installed_ver
+	if installed_ver="$(fsearch_version 2>/dev/null)"; then
+		printf 'skip: fsearch already installed (%s)\n' "$installed_ver"
+		return 0
+	fi
+	sudo apt install -y fsearch
+}
+
 install_fsearch_repository() {
 	# Manual entry: add-apt-repository calls api.launchpad.net, which
 	# stalls ~2 min per run here. Key fingerprint per
@@ -14,6 +23,6 @@ Signed-By: /usr/share/keyrings/fsearch.gpg
 EOF
 }
 
-install_fsearch() {
-	sudo apt install -y fsearch
+fsearch_version() {
+	dpkg -s fsearch 2>/dev/null | grep "^Version:"
 }
