@@ -1,5 +1,25 @@
 #!/usr/bin/env bash
 
+install_docker() {
+    local installed_ver
+    if installed_ver="$(docker_version 2>/dev/null)" && docker_compose_version >/dev/null 2>&1; then
+        printf 'skip: docker already installed (%s)\n' "$installed_ver"
+    else
+        # Install the Docker packages.
+        sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+        sudo apt install -y util-linux-extra
+    fi
+
+    # Post installation
+    # https://docs.docker.com/engine/install/linux-postinstall/
+
+    # Manage Docker as a non-root user
+    sudo groupadd -f docker
+    sudo usermod -aG docker "$USER"
+
+    newgrp docker
+}
+
 install_docker_repository() {
     # https://docs.docker.com/engine/install/ubuntu/
     # Set up Docker's apt repository (sources only, no apt update here).
@@ -21,17 +41,10 @@ Signed-By: /etc/apt/keyrings/docker.asc
 EOF
 }
 
-install_docker() {
-    # Install the Docker packages.
-    sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+docker_version() {
+    docker --version 2>/dev/null | head -n 1 | grep .
+}
 
-    # Post installation
-    # https://docs.docker.com/engine/install/linux-postinstall/
-
-    # Manage Docker as a non-root user
-    sudo groupadd -f docker
-    sudo usermod -aG docker "$USER"
-
-    sudo apt install -y util-linux-extra
-    newgrp docker
+docker_compose_version() {
+    docker compose version 2>/dev/null | head -n 1 | grep .
 }
