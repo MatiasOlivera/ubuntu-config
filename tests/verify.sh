@@ -47,6 +47,7 @@ chk "cursor" "cursor --version" bash -c 'cursor --version 2>/dev/null || cursor-
 chk "cursor-ide" "dpkg -s cursor" bash -c 'dpkg -s cursor 2>/dev/null | grep "^Version:"'
 chk "gitkraken" "dpkg -s gitkraken" bash -c 'dpkg -s gitkraken 2>/dev/null | grep "^Version:"'
 chk "vscode" "code --version" bash -c 'code --version 2>/dev/null | head -n 1'
+chk "fonts" "fc-list FiraCode/Iosevka/Meslo" bash -c 'fc-list 2>/dev/null | grep -qi "firacode" && fc-list 2>/dev/null | grep -qi "iosevka" && fc-list 2>/dev/null | grep -qi "meslo" && echo present'
 chk "docker" "docker --version" docker --version
 chk "docker-compose" "docker compose version" docker compose version
 chk "postman" "snap list postman" bash -c 'snap list postman 2>/dev/null | tail -n 1'

@@ -31,6 +31,7 @@ source "$DEVELOPMENT_DIR/git/git.sh"
 source "$DEVELOPMENT_DIR/cursor.sh"
 source "$DEVELOPMENT_DIR/gitkraken.sh"
 source "$DEVELOPMENT_DIR/vscode.sh"
+source "$DEVELOPMENT_DIR/fonts.sh"
 source "$DEVELOPMENT_DIR/docker.sh"
 source "$DEVELOPMENT_DIR/postman.sh"
 source "$DEVELOPMENT_DIR/beekeeper-studio.sh"
@@ -70,6 +71,7 @@ install_cursor_cli
 install_cursor
 install_gitkraken
 install_vscode
+install_fonts
 install_docker
 install_postman
 install_beekeeper_studio
