@@ -21,6 +21,7 @@ source "$DESKTOP_APPS_DIR/timeshift.sh"
 source "$DESKTOP_APPS_DIR/fsearch.sh"
 source "$DESKTOP_APPS_DIR/chrome.sh"
 source "$DESKTOP_APPS_DIR/obs/obs.sh"
+source "$DESKTOP_APPS_DIR/obsidian.sh"
 source "$DESKTOP_APPS_DIR/spotify.sh"
 source "$DESKTOP_APPS_DIR/handy/handy-config.sh"
 
@@ -53,6 +54,7 @@ install_timeshift
 install_fsearch
 install_chrome
 install_obs
+install_obsidian
 install_spotify
 config_handy
 

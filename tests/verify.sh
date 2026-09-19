@@ -36,6 +36,7 @@ chk "fsearch" "dpkg -s fsearch" bash -c 'dpkg -s fsearch 2>/dev/null | grep "^Ve
 chk "chrome" "google-chrome --version" bash -c 'google-chrome --version 2>/dev/null || google-chrome-stable --version 2>/dev/null'
 chk "obs" "flatpak info com.obsproject.Studio" bash -c 'flatpak info com.obsproject.Studio 2>/dev/null | grep -i "Version:" | head -n 1'
 chk "obs-plugins" "flatpak list (obs plugins)" bash -c 'flatpak list 2>/dev/null | grep -i "com.obsproject.Studio.Plugin" | head -n 1'
+chk "obsidian" "dpkg -s obsidian" bash -c 'dpkg -s obsidian 2>/dev/null | grep "^Version:"'
 chk "spotify" "dpkg -s spotify-client" bash -c 'dpkg -s spotify-client 2>/dev/null | grep "^Version:"'
 chk "git" "git --version" git --version
 chk "git-config" "git user.name/email" bash -c 'git config --global --get user.name >/dev/null && git config --global --get user.email'

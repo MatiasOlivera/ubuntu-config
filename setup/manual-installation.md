@@ -17,4 +17,3 @@ These apps can't be installed programatically.
 | **Desktop apps**      |                                                                                 |                                                                        |
 | Discord               | Communication platform for communities, voice, and messaging.                   | [discord.com](https://discord.com)                                     |
 | Handy                 | A free, open source, extensible and offline speech-to-text application.         | [handy.computer](https://handy.computer/)                              |
-| Obsidian              | Knowledge base and note-taking app with local-first markdown storage.           | [obsidian.md](https://obsidian.md)                                     |
