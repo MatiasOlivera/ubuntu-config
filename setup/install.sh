@@ -54,6 +54,17 @@ install_synaptic
 install_pip
 install_pipx
 
+# Repositories (apt sources only, no installs, no apt update)
+install_fsearch_repository
+install_spotify_repository
+install_cursor_repository
+install_vscode_repository
+install_docker_repository
+install_beekeeper_studio_repository
+
+# Single update covering all repositories above.
+sudo apt update
+
 # Desktop Apps
 install_timeshift
 install_fsearch

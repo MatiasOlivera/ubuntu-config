@@ -4,8 +4,8 @@ Fresh-Ubuntu setup: bash scripts (`setup/`) + chezmoi dotfiles (`dotfiles/`). No
 
 ## New setup script contract (enforced by `tests/test.sh`)
 
-- Single-purpose script defining one `install_*`/`config_*` function. Plain `install_*` scripts need no guard; `*config*.sh` must run standalone via `if [[ ${BASH_SOURCE[0]} == "$0" ]]; then ... fi` (see `setup/development/zsh/zsh-config.sh`).
-- Wire it up: `source` it and append its call in `setup/install.sh` (essentials → desktop-apps → development, then chezmoi apply) or `setup/post-install.sh` (oh-my-zsh, fnm, antigravity; assumes `install.sh` already provided zsh/curl). `test.sh` fails any library script not referenced by basename in one of them.
+- Single-purpose script defining one `install_*`/`config_*` function. Scripts adding an apt source additionally define `install_<pkg>_repository()` (sources/keys only: no `apt update`, no installs); plain `install_*` scripts need no guard; `*config*.sh` must run standalone via `if [[ ${BASH_SOURCE[0]} == "$0" ]]; then ... fi` (see `setup/development/zsh/zsh-config.sh`).
+- Wire it up: `source` it and append its call in `setup/install.sh` (essentials → repositories → single `apt update` → desktop-apps → development, then chezmoi apply) or `setup/post-install.sh` (oh-my-zsh, fnm, antigravity; assumes `install.sh` already provided zsh/curl). New `install_*_repository` calls belong in the repositories phase. `test.sh` fails any library script not referenced by basename in one of them.
 - Keep it rerun-safe (guard repeated runs, `groupadd -f`, overwrite apt sources — see `setup/development/docker.sh`).
 - Declarative files → chezmoi in `dotfiles/` (`dot_*` → `$HOME`, `*.tmpl` rendered with `~/.config/chezmoi/chezmoi.toml` data); imperative commands (`chsh`, `gsettings`, clones) → stay in bash.
 - Match the surrounding file's indentation (tabs vs spaces varies by file).
