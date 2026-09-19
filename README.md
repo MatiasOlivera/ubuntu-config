@@ -34,7 +34,7 @@ bash setup/post-install.sh  # real machine: full apt upgrade
 
 ## What it does
 
-`setup/install.sh` runs essentials → desktop apps → development, then applies dotfiles and prints a verify report. `setup/post-install.sh` finishes interactive shell setup (oh-my-zsh, fnm, AI CLIs).
+`setup/install.sh` runs essentials → desktop apps → development, then applies dotfiles and prints a versions report. `setup/post-install.sh` finishes interactive shell setup (oh-my-zsh, fnm, AI CLIs).
 
 ### Essentials
 
@@ -84,13 +84,15 @@ Rule of thumb:
 
 Some apps can't be installed programmatically. See [`setup/manual-installation.md`](setup/manual-installation.md) for the full list.
 
-## Verify
+## Reports
+
+### Versions
 
 Report-only version table for everything the scripts manage. Installs nothing, always exits `0`:
 
 ```sh
-./tests/verify.sh
-multipass exec ubuntu-config-test -- bash ubuntu-config/tests/verify.sh  # same, inside the e2e VM
+./reports/versions.sh
+multipass exec ubuntu-config-test -- bash ubuntu-config/reports/versions.sh  # same, inside the e2e VM
 ```
 
 ## Testing
@@ -127,16 +129,17 @@ SKIP_UPGRADE=1 bash setup/post-install.sh  # test VMs only: skip apt upgrade for
 
 ```text
 setup/
-  install.sh            # essentials → desktop-apps → development, then chezmoi apply + verify
+  install.sh            # essentials → desktop-apps → development, then chezmoi apply + report
   post-install.sh       # oh-my-zsh, fnm/node, antigravity (needs zsh/curl from install.sh)
   essentials/           # make, curl, chezmoi, flatpak, fuse, pip/pipx, ...
   desktop-apps/         # chrome, spotify, obs, timeshift, fsearch, handy-config, ...
   development/          # git, docker, zsh, ghostty, opencode, ollama, fnm, ...
   manual-installation.md
 dotfiles/               # chezmoi source state (dot_* → $HOME, *.tmpl rendered)
+reports/
+  versions.sh           # report-only install report
 tests/
   test.sh               # static + optional Multipass e2e
-  verify.sh             # report-only install report
   compose.yml / Dockerfile
 ```
 

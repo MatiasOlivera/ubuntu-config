@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# verify.sh — report-only version table for everything install.sh /
+# versions.sh — report-only version table for everything install.sh /
 # post-install.sh set up.
 # Never installs anything, never exits non-zero.
 # shellcheck disable=SC2016,SC2088,SC1090,SC1091

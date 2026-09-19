@@ -42,6 +42,6 @@ step install_antigravity_cli
 step install_fnm
 step config_fnm
 
-step verify bash "$SCRIPT_DIR/../tests/verify.sh"
+step versions bash "$SCRIPT_DIR/../reports/versions.sh"
 
 printf '[+%ds] post-install.sh total\n' "$((SECONDS - post_start))"
