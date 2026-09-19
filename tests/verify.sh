@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 #
 # verify.sh — report-only version table for everything install.sh /
-# post-install.sh set up. Manually installed apps (e.g. Handy) are
-# intentionally excluded. Never installs anything, never exits non-zero.
+# post-install.sh set up.
+# Never installs anything, never exits non-zero.
 # shellcheck disable=SC2016,SC2088
 # (single-quoted bash -c strings and "~" label are intentional)
 
