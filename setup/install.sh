@@ -7,6 +7,18 @@ DESKTOP_APPS_DIR="$SCRIPT_DIR/desktop-apps"
 DEVELOPMENT_DIR="$SCRIPT_DIR/development"
 DOTFILES_DIR="$SCRIPT_DIR/../dotfiles"
 
+# ponytail: SECONDS wall-clock per step, no external profiler.
+install_start=$SECONDS
+step() {
+	local label=$1
+	local t0=$SECONDS
+	if [[ $# -gt 1 ]]; then shift; fi
+	"$@"
+	local st=$?
+	printf '[+%ds] %s\n' "$((SECONDS - t0))" "$label"
+	return $st
+}
+
 source "$ESSENTIALS_DIR/make.sh"
 source "$ESSENTIALS_DIR/curl.sh"
 source "$ESSENTIALS_DIR/chezmoi.sh"
@@ -44,55 +56,55 @@ source "$DEVELOPMENT_DIR/ghostty/ghostty-config.sh"
 source "$DEVELOPMENT_DIR/ollama.sh"
 
 # Essentials
-install_make
-install_curl
-install_chezmoi
-install_flatpak
-install_pulseaudio_utils
-install_fuse
-install_synaptic
-install_pip
-install_pipx
+step install_make
+step install_curl
+step install_chezmoi
+step install_flatpak
+step install_pulseaudio_utils
+step install_fuse
+step install_synaptic
+step install_pip
+step install_pipx
 
 # Repositories (apt sources only, no installs, no apt update)
-install_fsearch_repository
-install_spotify_repository
-install_cursor_repository
-install_vscode_repository
-install_docker_repository
-install_beekeeper_studio_repository
+step install_fsearch_repository
+step install_spotify_repository
+step install_cursor_repository
+step install_vscode_repository
+step install_docker_repository
+step install_beekeeper_studio_repository
 
 # Single update covering all repositories above.
-sudo apt update
+step apt_update sudo apt update
 
 # Desktop Apps
-install_timeshift
-install_fsearch
-install_chrome
-install_discord
-install_obs
-install_obsidian
-install_spotify
-install_handy
-config_handy
+step install_timeshift
+step install_fsearch
+step install_chrome
+step install_discord
+step install_obs
+step install_obsidian
+step install_spotify
+step install_handy
+step config_handy
 
 # Development
-install_git
-install_cursor_cli
-install_cursor
-install_gitkraken
-install_vscode
-install_fonts
-install_docker
-install_postman
-install_beekeeper_studio
-install_zsh
-config_zsh
-install_zoxide
-install_opencode
-install_ghostty
-config_ghostty
-install_ollama
+step install_git
+step install_cursor_cli
+step install_cursor
+step install_gitkraken
+step install_vscode
+step install_fonts
+step install_docker
+step install_postman
+step install_beekeeper_studio
+step install_zsh
+step config_zsh
+step install_zoxide
+step install_opencode
+step install_ghostty
+step config_ghostty
+step install_ollama
 
 # Dotfiles identity (git user.name/email). Asked once, stored in
 # ~/.config/chezmoi/chezmoi.toml so re-runs never prompt again.
@@ -108,6 +120,8 @@ if [[ ! -f $CHEZMOI_CONFIG ]]; then
 		"${name//\"/\\\"}" "${email//\"/\\\"}" >"$CHEZMOI_CONFIG"
 fi
 
-chezmoi apply --source "$DOTFILES_DIR"
+step chezmoi chezmoi apply --source "$DOTFILES_DIR"
 
-bash "$SCRIPT_DIR/../tests/verify.sh"
+step verify bash "$SCRIPT_DIR/../tests/verify.sh"
+
+printf '[+%ds] install.sh total\n' "$((SECONDS - install_start))"
