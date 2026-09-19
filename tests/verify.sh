@@ -44,6 +44,9 @@ chk "git" "git --version" git --version
 chk "git-config" "git user.name/email" bash -c 'git config --global --get user.name >/dev/null && git config --global --get user.email'
 chk "chezmoi" "chezmoi --version" chezmoi --version
 chk "cursor" "cursor --version" bash -c 'cursor --version 2>/dev/null || cursor-agent --version 2>/dev/null'
+chk "cursor-ide" "dpkg -s cursor" bash -c 'dpkg -s cursor 2>/dev/null | grep "^Version:"'
+chk "gitkraken" "dpkg -s gitkraken" bash -c 'dpkg -s gitkraken 2>/dev/null | grep "^Version:"'
+chk "vscode" "code --version" bash -c 'code --version 2>/dev/null | head -n 1'
 chk "docker" "docker --version" docker --version
 chk "docker-compose" "docker compose version" docker compose version
 chk "postman" "snap list postman" bash -c 'snap list postman 2>/dev/null | tail -n 1'

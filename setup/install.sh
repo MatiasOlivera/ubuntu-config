@@ -29,6 +29,8 @@ source "$DESKTOP_APPS_DIR/handy/handy-config.sh"
 
 source "$DEVELOPMENT_DIR/git/git.sh"
 source "$DEVELOPMENT_DIR/cursor.sh"
+source "$DEVELOPMENT_DIR/gitkraken.sh"
+source "$DEVELOPMENT_DIR/vscode.sh"
 source "$DEVELOPMENT_DIR/docker.sh"
 source "$DEVELOPMENT_DIR/postman.sh"
 source "$DEVELOPMENT_DIR/beekeeper-studio.sh"
@@ -65,6 +67,9 @@ config_handy
 # Development
 install_git
 install_cursor_cli
+install_cursor
+install_gitkraken
+install_vscode
 install_docker
 install_postman
 install_beekeeper_studio
