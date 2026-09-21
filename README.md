@@ -173,7 +173,7 @@ tests/
 
 ## Adding a new app
 
-1. Add a single-purpose `setup/<area>/<name>.sh` defining one `install_*` / `config_*` function. Keep it rerun-safe (guard repeats, `groupadd -f`, overwrite apt sources).
+1. Add a single-purpose `setup/<area>/<name>.sh` defining one `install_*` / `config_*` function. Keep it rerun-safe (guard repeats, `groupadd -f`, overwrite apt sources). If the app needs extra apt packages, add a `<pkg>_dependencies()` function in the same file and call it from `install_<pkg>()` (see `setup/development/homebrew.sh`).
 2. `source` it and append its call in `setup/install.sh` or `setup/post-install.sh`, plus a `chk`/`src` row in `reports/versions.sh`.
 3. Config files → `dotfiles/` via chezmoi; commands → bash.
 

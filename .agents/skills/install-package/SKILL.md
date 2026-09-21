@@ -35,6 +35,7 @@ Existing examples: `desktop-apps/fsearch.sh`, `development/git/git.sh`, `develop
   }
   ```
   Never gate cheap state (`groupadd`/`usermod`/`gsettings`/`chsh`/`remote-add`/`ensurepath`, `chezmoi apply`, `versions.sh`, `apt update`, repo functions, node pin) — those run every time.
+- **System dependencies**: if the package needs apt packages beyond what other scripts already manage, define an imperative `<pkg>_dependencies()` in the same file and call it inside `install_<pkg>()` after the skip-guard (see `development/homebrew.sh`). Keeps the script self-contained — no separate essentials scripts for another package's private deps. `apt install` is idempotent, so this stays rerun-safe.
 - **Rerun-safe**: guard repeated runs, `groupadd -f`, overwrite apt sources.
 - **`config_*` scripts** must also run standalone:
   ```bash
