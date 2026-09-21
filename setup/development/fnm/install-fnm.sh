@@ -1,13 +1,16 @@
 #!/usr/bin/env bash
 
+fnm_dependencies() {
+    sudo apt install -y unzip
+}
+
 install_fnm() {
     local installed_ver
     if installed_ver="$(fnm_version 2>/dev/null)"; then
         printf 'skip: fnm already installed (%s)\n' "$installed_ver"
         return 0
     fi
-    # upstream installer requires unzip (aborts without it)
-    sudo apt install -y unzip
+    fnm_dependencies
     curl -o- https://fnm.vercel.app/install | bash
 }
 
