@@ -67,6 +67,7 @@ src development/antigravity-cli/antigravity-cli.sh
 src development/fnm/install-fnm.sh
 src development/fnm/fnm-config.sh
 src development/ollama.sh
+src development/homebrew.sh
 
 chk "curl" curl_version
 chk "make" make_version
@@ -107,6 +108,7 @@ chk "antigravity" antigravity_cli_version
 chk "fnm" fnm_version
 chk "node" node_version
 chk "ollama" ollama_version
+chk "homebrew" brew_version
 
 printf '\n| Config | Status |\n'
 printf '|---|---|\n'
