@@ -142,6 +142,11 @@ if [ -d "$FNM_PATH" ]; then
   eval "$(fnm env --use-on-cd --shell zsh)"
 fi
 
+# Homebrew
+if [ -d /home/linuxbrew/.linuxbrew ]; then
+  eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv zsh)"
+fi
+
 # opencode
 export PATH=$HOME/.opencode/bin:$PATH
 alias opencode-config="code ~/.config/opencode/opencode.json"
