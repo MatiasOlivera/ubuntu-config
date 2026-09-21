@@ -54,6 +54,7 @@ source "$DEVELOPMENT_DIR/opencode/opencode.sh"
 source "$DEVELOPMENT_DIR/ghostty/ghostty.sh"
 source "$DEVELOPMENT_DIR/ghostty/ghostty-config.sh"
 source "$DEVELOPMENT_DIR/ollama.sh"
+source "$DEVELOPMENT_DIR/homebrew.sh"
 
 # Essentials
 step install_make
@@ -105,6 +106,7 @@ step install_opencode
 step install_ghostty
 step config_ghostty
 step install_ollama
+step install_homebrew
 
 # Dotfiles identity (git user.name/email). Asked once, stored in
 # ~/.config/chezmoi/chezmoi.toml so re-runs never prompt again.

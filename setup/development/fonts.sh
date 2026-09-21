@@ -1,12 +1,17 @@
 #!/usr/bin/env bash
 
+fonts_dependencies() {
+	sudo apt install -y unzip fontconfig
+}
+
 install_fonts() {
 	local installed_ver
 	if installed_ver="$(fonts_version 2>/dev/null)"; then
 		printf 'skip: fonts already installed (%s)\n' "$installed_ver"
 		return 0
 	fi
-	sudo apt install -y unzip fontconfig fonts-firacode
+	fonts_dependencies
+	sudo apt install -y fonts-firacode
 
 	local dir="$HOME/.local/share/fonts"
 	mkdir -p "$dir/Iosevka" "$dir/MesloLGS_NF"

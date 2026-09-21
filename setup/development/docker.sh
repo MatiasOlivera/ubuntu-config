@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+docker_dependencies() {
+    sudo apt install -y ca-certificates util-linux-extra
+}
+
 install_docker() {
     local installed_ver
     if installed_ver="$(docker_version 2>/dev/null)" && docker_compose_version >/dev/null 2>&1; then
@@ -7,7 +11,7 @@ install_docker() {
     else
         # Install the Docker packages.
         sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-        sudo apt install -y util-linux-extra
+        docker_dependencies
     fi
 
     # Post installation
@@ -25,7 +29,8 @@ install_docker_repository() {
     # Set up Docker's apt repository (sources only, no apt update here).
 
     # Add Docker's official GPG key:
-    sudo apt install -y ca-certificates curl
+    docker_dependencies
+    sudo apt install -y curl
     sudo install -m 0755 -d /etc/apt/keyrings
     sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
     sudo chmod a+r /etc/apt/keyrings/docker.asc
