@@ -38,6 +38,7 @@ source "$DESKTOP_APPS_DIR/obsidian.sh"
 source "$DESKTOP_APPS_DIR/spotify.sh"
 source "$DESKTOP_APPS_DIR/handy/handy.sh"
 source "$DESKTOP_APPS_DIR/handy/handy-config.sh"
+source "$DESKTOP_APPS_DIR/orca.sh"
 
 source "$DEVELOPMENT_DIR/git/git.sh"
 source "$DEVELOPMENT_DIR/cursor.sh"
@@ -88,6 +89,7 @@ step install_obsidian
 step install_spotify
 step install_handy
 step config_handy
+step install_orca
 
 # Development
 step install_git
