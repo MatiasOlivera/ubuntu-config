@@ -48,6 +48,7 @@ src desktop-apps/obsidian.sh
 src desktop-apps/spotify.sh
 src desktop-apps/discord.sh
 src desktop-apps/handy/handy.sh
+src desktop-apps/orca.sh
 src development/git/git.sh
 src development/cursor.sh
 src development/gitkraken.sh
@@ -86,6 +87,7 @@ chk "obsidian" obsidian_version
 chk "spotify" spotify_version
 chk "discord" discord_version
 chk "handy" handy_version
+chk "orca" orca_version
 chk "git" git_version
 chk "chezmoi" chezmoi_version
 chk "cursor" cursor_cli_version
