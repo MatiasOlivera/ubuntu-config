@@ -1,5 +1,17 @@
 #!/usr/bin/env bash
 
+# Ask for sudo once up front and keep the timestamp alive for the whole run.
+if ! sudo -n true 2>/dev/null; then
+	if [[ ! -t 0 ]]; then
+		printf 'error: sudo authentication required, run in an interactive terminal\n' >&2
+		exit 1
+	fi
+	sudo -v || exit 1
+fi
+while true; do sudo -n true 2>/dev/null; sleep 50; kill -0 "$$" || exit; done 2>/dev/null &
+SUDO_KEEPALIVE=$!
+trap 'kill "$SUDO_KEEPALIVE" 2>/dev/null' EXIT
+
 SCRIPT_DIR=$(dirname "$0")
 
 ESSENTIALS_DIR="$SCRIPT_DIR/essentials"
