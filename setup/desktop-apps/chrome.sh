@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+source "$(dirname "${BASH_SOURCE[0]}")/../helpers/dispatcher.sh"
+
 install_chrome() {
 	local installed_ver
 	if installed_ver="$(chrome_version 2>/dev/null)"; then
@@ -20,3 +22,7 @@ chrome_version() {
 		return 1
 	fi
 }
+
+if [[ ${BASH_SOURCE[0]} == "$0" ]]; then
+	dispatch_command "$@"
+fi

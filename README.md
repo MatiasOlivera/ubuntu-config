@@ -20,6 +20,12 @@ git clone https://github.com/MatiasOlivera/ubuntu-config ubuntu-config
 cd ubuntu-config
 ./setup/install.sh
 ./setup/post-install.sh
+
+# installing one app
+bash setup/development/github-cli.sh repository
+sudo apt update
+bash setup/development/github-cli.sh install
+bash setup/development/github-cli.sh version
 ```
 
 On first run `install.sh` asks once for your Git name/email (or set `CHEZMOI_NAME` / `CHEZMOI_EMAIL` for non-interactive runs). Values are stored in `~/.config/chezmoi/chezmoi.toml` so re-runs never prompt again.
@@ -48,7 +54,7 @@ bash setup/post-install.sh  # real machine: full apt upgrade
 
 ### Development
 
-- Git, Docker (+ Compose), zsh (set as default shell) + config
+- Git, GitHub CLI, Docker (+ Compose), zsh (set as default shell) + config
 - zoxide, Ghostty (+ config + set as GNOME default terminal), Ollama, Homebrew
 - Cursor CLI, Postman, Beekeeper Studio, opencode
 - oh-my-zsh + `zsh-autosuggestions` + `zsh-syntax-highlighting` + Powerlevel10k theme (`post-install.sh`)
@@ -158,7 +164,8 @@ setup/
   post-install.sh       # oh-my-zsh, fnm/node, antigravity (needs zsh/curl from install.sh)
   essentials/           # make, curl, chezmoi, flatpak, fuse, pip/pipx, ...
   desktop-apps/         # chrome, spotify, obs, timeshift, fsearch, handy-config, ...
-  development/          # git, docker, zsh, ghostty, opencode, ollama, fnm, ...
+  development/          # git, GitHub CLI, docker, zsh, ghostty, opencode, ollama, fnm, ...
+  helpers/              # shared shell helpers for setup scripts
   manual-installation.md
 dotfiles/               # chezmoi source state (dot_* → $HOME, *.tmpl rendered)
 .agents/skills/         # cross-agent skills (opencode, Cursor, VS Code, Codex, …)
@@ -178,3 +185,28 @@ tests/
 3. Config files → `dotfiles/` via chezmoi; commands → bash.
 
 `tests/test.sh` enforces this contract fail-closed. For the full workflow (phases, apt-repo function, version guards, examples) the repo's `install-package` skill covers it.
+
+## Installing one app
+
+Package scripts expose a small command interface when run directly. The main
+package uses one argument:
+
+```sh
+bash setup/development/github-cli.sh install
+bash setup/development/github-cli.sh version
+bash setup/development/docker.sh install
+bash setup/development/docker.sh version
+```
+
+Scripts with additional components use `<component> <command>`:
+
+```sh
+bash setup/development/cursor.sh cli install
+bash setup/development/cursor.sh cli version
+bash setup/development/docker.sh compose version
+```
+
+The supported commands are `install`, `repository`, `config`, and `version`.
+Scripts remain safe to `source`; dispatching only happens when a script is
+executed directly. Scripts with multiple related functions expose components
+using names such as `cli`, `compose`, or `plugins`.

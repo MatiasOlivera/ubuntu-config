@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+source "$(dirname "${BASH_SOURCE[0]}")/../../helpers/dispatcher.sh"
+
 fnm_dependencies() {
     sudo apt install -y unzip
 }
@@ -18,3 +20,7 @@ fnm_version() {
     export PATH="$HOME/.local/share/fnm:$PATH"
     fnm --version 2>/dev/null | head -n 1 | grep .
 }
+
+if [[ ${BASH_SOURCE[0]} == "$0" ]]; then
+	dispatch_command "$@"
+fi

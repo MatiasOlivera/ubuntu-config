@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+source "$(dirname "${BASH_SOURCE[0]}")/../helpers/dispatcher.sh"
+
 install_orca() {
 	local installed_ver
 	if installed_ver="$(orca_version 2>/dev/null)"; then
@@ -15,3 +17,6 @@ install_orca() {
 orca_version() {
 	dpkg -s orca-ide 2>/dev/null | grep "^Version:"
 }
+if [[ ${BASH_SOURCE[0]} == "$0" ]]; then
+	dispatch_command "$@"
+fi

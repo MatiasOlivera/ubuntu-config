@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+source "$(dirname "${BASH_SOURCE[0]}")/../../helpers/dispatcher.sh"
+
 install_oh_my_zsh_plugins() {
     local base="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins"
     local installed_ver
@@ -17,3 +19,7 @@ install_oh_my_zsh_plugins() {
 oh_my_zsh_plugins_version() {
     [ -d "$HOME/.oh-my-zsh/custom/plugins/zsh-autosuggestions" ] && [ -d "$HOME/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting" ] && echo present
 }
+
+if [[ ${BASH_SOURCE[0]} == "$0" ]]; then
+	dispatch_command "$@"
+fi

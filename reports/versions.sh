@@ -37,19 +37,20 @@ src essentials/flatpak.sh
 src essentials/pulseaudio-utils.sh
 src essentials/fuse.sh
 src essentials/synaptic.sh
-src essentials/python3/python3-pip.sh
-src essentials/python3/python3-pipx.sh
+src essentials/pip.sh
+src essentials/pipx.sh
 src essentials/chezmoi.sh
 src desktop-apps/timeshift.sh
 src desktop-apps/fsearch.sh
 src desktop-apps/chrome.sh
-src desktop-apps/obs/obs.sh
+src desktop-apps/obs.sh
 src desktop-apps/obsidian.sh
 src desktop-apps/spotify.sh
 src desktop-apps/discord.sh
 src desktop-apps/handy/handy.sh
 src desktop-apps/orca.sh
-src development/git/git.sh
+src development/git.sh
+src development/github-cli.sh
 src development/cursor.sh
 src development/gitkraken.sh
 src development/vscode.sh
@@ -59,12 +60,12 @@ src development/postman.sh
 src development/beekeeper-studio.sh
 src development/zsh/zsh.sh
 src development/zoxide.sh
-src development/opencode/opencode.sh
+src development/opencode.sh
 src development/ghostty/ghostty.sh
 src development/oh-my-zsh/oh-my-zsh.sh
 src development/oh-my-zsh/plugins.sh
 src development/oh-my-zsh/theme.sh
-src development/antigravity-cli/antigravity-cli.sh
+src development/antigravity-cli.sh
 src development/fnm/install-fnm.sh
 src development/fnm/fnm-config.sh
 src development/ollama.sh
@@ -89,6 +90,7 @@ chk "discord" discord_version
 chk "handy" handy_version
 chk "orca" orca_version
 chk "git" git_version
+chk "github-cli" github_cli_version
 chk "chezmoi" chezmoi_version
 chk "cursor" cursor_cli_version
 chk "cursor-ide" cursor_version

@@ -95,6 +95,7 @@ done
 for f in "${ALL_SCRIPTS[@]}"; do
 	case "$f" in
 	"$SETUP_DIR/install.sh" | "$SETUP_DIR/post-install.sh") continue ;;
+	"$SETUP_DIR/helpers/"*) continue ;;
 	esac
 	if grep -qF "$(basename "$f")" "$SETUP_DIR/install.sh" "$SETUP_DIR/post-install.sh"; then
 		pass "sourced $f"
@@ -109,6 +110,7 @@ done
 for f in "${ALL_SCRIPTS[@]}"; do
 	case "$f" in
 	"$SETUP_DIR/install.sh" | "$SETUP_DIR/post-install.sh") continue ;;
+	"$SETUP_DIR/helpers/"*) continue ;;
 	esac
 	if funcs="$(bash -c 'source "$1" && declare -F' _ "$f" 2>/dev/null)" &&
 		printf '%s\n' "$funcs" | grep -qE 'declare -f (install_|config_)'; then

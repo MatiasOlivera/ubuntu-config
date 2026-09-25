@@ -38,21 +38,22 @@ source "$ESSENTIALS_DIR/flatpak.sh"
 source "$ESSENTIALS_DIR/pulseaudio-utils.sh"
 source "$ESSENTIALS_DIR/fuse.sh"
 source "$ESSENTIALS_DIR/synaptic.sh"
-source "$ESSENTIALS_DIR/python3/python3-pip.sh"
-source "$ESSENTIALS_DIR/python3/python3-pipx.sh"
+source "$ESSENTIALS_DIR/pip.sh"
+source "$ESSENTIALS_DIR/pipx.sh"
 
 source "$DESKTOP_APPS_DIR/timeshift.sh"
 source "$DESKTOP_APPS_DIR/fsearch.sh"
 source "$DESKTOP_APPS_DIR/chrome.sh"
 source "$DESKTOP_APPS_DIR/discord.sh"
-source "$DESKTOP_APPS_DIR/obs/obs.sh"
+source "$DESKTOP_APPS_DIR/obs.sh"
 source "$DESKTOP_APPS_DIR/obsidian.sh"
 source "$DESKTOP_APPS_DIR/spotify.sh"
 source "$DESKTOP_APPS_DIR/handy/handy.sh"
 source "$DESKTOP_APPS_DIR/handy/handy-config.sh"
 source "$DESKTOP_APPS_DIR/orca.sh"
 
-source "$DEVELOPMENT_DIR/git/git.sh"
+source "$DEVELOPMENT_DIR/git.sh"
+source "$DEVELOPMENT_DIR/github-cli.sh"
 source "$DEVELOPMENT_DIR/cursor.sh"
 source "$DEVELOPMENT_DIR/gitkraken.sh"
 source "$DEVELOPMENT_DIR/vscode.sh"
@@ -63,7 +64,7 @@ source "$DEVELOPMENT_DIR/beekeeper-studio.sh"
 source "$DEVELOPMENT_DIR/zsh/zsh.sh"
 source "$DEVELOPMENT_DIR/zsh/zsh-config.sh"
 source "$DEVELOPMENT_DIR/zoxide.sh"
-source "$DEVELOPMENT_DIR/opencode/opencode.sh"
+source "$DEVELOPMENT_DIR/opencode.sh"
 source "$DEVELOPMENT_DIR/ghostty/ghostty.sh"
 source "$DEVELOPMENT_DIR/ghostty/ghostty-config.sh"
 source "$DEVELOPMENT_DIR/ollama.sh"
@@ -87,6 +88,7 @@ step install_cursor_repository
 step install_vscode_repository
 step install_docker_repository
 step install_beekeeper_studio_repository
+step install_github_cli_repository
 
 # Single update covering all repositories above.
 step apt_update sudo apt update
@@ -105,6 +107,7 @@ step install_orca
 
 # Development
 step install_git
+step install_github_cli
 step install_cursor_cli
 step install_cursor
 step install_gitkraken

@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+source "$(dirname "${BASH_SOURCE[0]}")/../helpers/dispatcher.sh"
+
 install_antigravity_cli() {
     local installed_ver
     if installed_ver="$(antigravity_cli_version 2>/dev/null)"; then
@@ -14,3 +16,7 @@ install_antigravity_cli() {
 antigravity_cli_version() {
     agy --version 2>/dev/null | head -n 1 | grep .
 }
+
+if [[ ${BASH_SOURCE[0]} == "$0" ]]; then
+	dispatch_command "$@"
+fi
