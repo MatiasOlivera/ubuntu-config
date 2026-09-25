@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+source "$(dirname "${BASH_SOURCE[0]}")/../helpers/dispatcher.sh"
+
 install_beekeeper_studio() {
     local installed_ver
     if installed_ver="$(beekeeper_studio_version 2>/dev/null)"; then
@@ -20,3 +22,7 @@ install_beekeeper_studio_repository() {
 beekeeper_studio_version() {
     dpkg -s beekeeper-studio 2>/dev/null | grep "^Version:"
 }
+
+if [[ ${BASH_SOURCE[0]} == "$0" ]]; then
+	dispatch_command "$@"
+fi

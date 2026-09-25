@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+source "$(dirname "${BASH_SOURCE[0]}")/../../helpers/dispatcher.sh"
+
 config_fnm() {
     # fnm binary dir is rc-file-only by default; needed for non-interactive shells
     export PATH="$HOME/.local/share/fnm:$PATH"
@@ -12,5 +14,5 @@ node_version() {
 }
 
 if [[ ${BASH_SOURCE[0]} == "$0" ]]; then
-    config_fnm
+    dispatch_command "$@"
 fi

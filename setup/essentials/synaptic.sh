@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+source "$(dirname "${BASH_SOURCE[0]}")/../helpers/dispatcher.sh"
+
 install_synaptic() {
     local installed_ver
     if installed_ver="$(synaptic_version 2>/dev/null)"; then
@@ -12,3 +14,7 @@ install_synaptic() {
 synaptic_version() {
     dpkg -s synaptic 2>/dev/null | grep "^Version:"
 }
+
+if [[ ${BASH_SOURCE[0]} == "$0" ]]; then
+	dispatch_command "$@"
+fi

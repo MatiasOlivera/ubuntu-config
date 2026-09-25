@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+source "$(dirname "${BASH_SOURCE[0]}")/../../helpers/dispatcher.sh"
+
 install_pipx() {
     local installed_ver
     if installed_ver="$(pipx_version 2>/dev/null)"; then
@@ -13,3 +15,7 @@ install_pipx() {
 pipx_version() {
     pipx --version 2>/dev/null | head -n 1 | grep .
 }
+
+if [[ ${BASH_SOURCE[0]} == "$0" ]]; then
+	dispatch_command "$@"
+fi

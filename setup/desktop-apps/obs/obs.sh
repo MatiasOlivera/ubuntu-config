@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+source "$(dirname "${BASH_SOURCE[0]}")/../../helpers/dispatcher.sh"
+
 install_obs() {
 	local installed_ver
 	if installed_ver="$(obs_version 2>/dev/null)" && obs_plugins_version >/dev/null 2>&1; then
@@ -23,3 +25,7 @@ obs_version() {
 obs_plugins_version() {
 	flatpak list 2>/dev/null | grep -i "com.obsproject.Studio.Plugin" | head -n 1 | grep .
 }
+
+if [[ ${BASH_SOURCE[0]} == "$0" ]]; then
+	dispatch_command "$@"
+fi

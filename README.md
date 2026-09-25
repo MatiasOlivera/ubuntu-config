@@ -22,10 +22,10 @@ cd ubuntu-config
 ./setup/post-install.sh
 
 # installing one app
-./setup/development/github-cli.sh repository
+bash setup/development/github-cli.sh repository
 sudo apt update
-./setup/development/github-cli.sh install
-./setup/development/github-cli.sh version
+bash setup/development/github-cli.sh install
+bash setup/development/github-cli.sh version
 ```
 
 On first run `install.sh` asks once for your Git name/email (or set `CHEZMOI_NAME` / `CHEZMOI_EMAIL` for non-interactive runs). Values are stored in `~/.config/chezmoi/chezmoi.toml` so re-runs never prompt again.
@@ -185,3 +185,10 @@ tests/
 3. Config files → `dotfiles/` via chezmoi; commands → bash.
 
 `tests/test.sh` enforces this contract fail-closed. For the full workflow (phases, apt-repo function, version guards, examples) the repo's `install-package` skill covers it.
+
+Package scripts also expose standard dispatcher commands when unambiguous:
+
+```sh
+bash setup/development/github-cli.sh version
+bash setup/development/cursor.sh install_cursor_cli
+```

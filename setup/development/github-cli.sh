@@ -32,9 +32,5 @@ github_cli_version() {
 }
 
 if [[ ${BASH_SOURCE[0]} == "$0" ]]; then
-	dispatch_command "${1:-help}" \
-		'github-cli.sh {repository|install|version}' \
-		repository=install_github_cli_repository \
-		install=install_github_cli \
-		version=github_cli_version
+	dispatch_command "$@"
 fi

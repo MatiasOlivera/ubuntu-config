@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+source "$(dirname "${BASH_SOURCE[0]}")/../../helpers/dispatcher.sh"
+
 install_pip() {
     local installed_ver
     if installed_ver="$(pip_version 2>/dev/null)"; then
@@ -12,3 +14,7 @@ install_pip() {
 pip_version() {
     pip3 --version 2>/dev/null | head -n 1 | grep .
 }
+
+if [[ ${BASH_SOURCE[0]} == "$0" ]]; then
+	dispatch_command "$@"
+fi

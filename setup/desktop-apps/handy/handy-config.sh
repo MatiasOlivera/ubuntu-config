@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+source "$(dirname "${BASH_SOURCE[0]}")/../../helpers/dispatcher.sh"
+
 config_handy() {
     local installed_ver
     if installed_ver="$(handy_config_version 2>/dev/null)"; then
@@ -16,5 +18,5 @@ handy_config_version() {
 }
 
 if [[ ${BASH_SOURCE[0]} == "$0" ]]; then
-    config_handy
+	dispatch_command "$@"
 fi
