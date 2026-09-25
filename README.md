@@ -186,9 +186,27 @@ tests/
 
 `tests/test.sh` enforces this contract fail-closed. For the full workflow (phases, apt-repo function, version guards, examples) the repo's `install-package` skill covers it.
 
-Package scripts also expose standard dispatcher commands when unambiguous:
+## Installing one app
+
+Package scripts expose a small command interface when run directly. The main
+package uses one argument:
 
 ```sh
+bash setup/development/github-cli.sh install
 bash setup/development/github-cli.sh version
-bash setup/development/cursor.sh install_cursor_cli
+bash setup/development/docker.sh install
+bash setup/development/docker.sh version
 ```
+
+Scripts with additional components use `<component> <command>`:
+
+```sh
+bash setup/development/cursor.sh cli install
+bash setup/development/cursor.sh cli version
+bash setup/development/docker.sh compose version
+```
+
+The supported commands are `install`, `repository`, `config`, and `version`.
+Scripts remain safe to `source`; dispatching only happens when a script is
+executed directly. Scripts with multiple related functions expose components
+using names such as `cli`, `compose`, or `plugins`.
