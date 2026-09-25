@@ -20,6 +20,12 @@ git clone https://github.com/MatiasOlivera/ubuntu-config ubuntu-config
 cd ubuntu-config
 ./setup/install.sh
 ./setup/post-install.sh
+
+# installing one app
+./setup/development/github-cli.sh repository
+sudo apt update
+./setup/development/github-cli.sh install
+./setup/development/github-cli.sh version
 ```
 
 On first run `install.sh` asks once for your Git name/email (or set `CHEZMOI_NAME` / `CHEZMOI_EMAIL` for non-interactive runs). Values are stored in `~/.config/chezmoi/chezmoi.toml` so re-runs never prompt again.
@@ -48,7 +54,7 @@ bash setup/post-install.sh  # real machine: full apt upgrade
 
 ### Development
 
-- Git, Docker (+ Compose), zsh (set as default shell) + config
+- Git, GitHub CLI, Docker (+ Compose), zsh (set as default shell) + config
 - zoxide, Ghostty (+ config + set as GNOME default terminal), Ollama, Homebrew
 - Cursor CLI, Postman, Beekeeper Studio, opencode
 - oh-my-zsh + `zsh-autosuggestions` + `zsh-syntax-highlighting` + Powerlevel10k theme (`post-install.sh`)
@@ -158,7 +164,8 @@ setup/
   post-install.sh       # oh-my-zsh, fnm/node, antigravity (needs zsh/curl from install.sh)
   essentials/           # make, curl, chezmoi, flatpak, fuse, pip/pipx, ...
   desktop-apps/         # chrome, spotify, obs, timeshift, fsearch, handy-config, ...
-  development/          # git, docker, zsh, ghostty, opencode, ollama, fnm, ...
+  development/          # git, GitHub CLI, docker, zsh, ghostty, opencode, ollama, fnm, ...
+  helpers/              # shared shell helpers for setup scripts
   manual-installation.md
 dotfiles/               # chezmoi source state (dot_* → $HOME, *.tmpl rendered)
 .agents/skills/         # cross-agent skills (opencode, Cursor, VS Code, Codex, …)
