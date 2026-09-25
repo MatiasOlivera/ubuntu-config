@@ -53,6 +53,7 @@ source "$DESKTOP_APPS_DIR/handy/handy-config.sh"
 source "$DESKTOP_APPS_DIR/orca.sh"
 
 source "$DEVELOPMENT_DIR/git/git.sh"
+source "$DEVELOPMENT_DIR/github-cli.sh"
 source "$DEVELOPMENT_DIR/cursor.sh"
 source "$DEVELOPMENT_DIR/gitkraken.sh"
 source "$DEVELOPMENT_DIR/vscode.sh"
@@ -87,6 +88,7 @@ step install_cursor_repository
 step install_vscode_repository
 step install_docker_repository
 step install_beekeeper_studio_repository
+step install_github_cli_repository
 
 # Single update covering all repositories above.
 step apt_update sudo apt update
@@ -105,6 +107,7 @@ step install_orca
 
 # Development
 step install_git
+step install_github_cli
 step install_cursor_cli
 step install_cursor
 step install_gitkraken

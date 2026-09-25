@@ -50,6 +50,7 @@ src desktop-apps/discord.sh
 src desktop-apps/handy/handy.sh
 src desktop-apps/orca.sh
 src development/git/git.sh
+src development/github-cli.sh
 src development/cursor.sh
 src development/gitkraken.sh
 src development/vscode.sh
@@ -89,6 +90,7 @@ chk "discord" discord_version
 chk "handy" handy_version
 chk "orca" orca_version
 chk "git" git_version
+chk "github-cli" github_cli_version
 chk "chezmoi" chezmoi_version
 chk "cursor" cursor_cli_version
 chk "cursor-ide" cursor_version
