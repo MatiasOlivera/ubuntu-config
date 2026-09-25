@@ -17,7 +17,10 @@ End-to-end workflow for adding a package/tool to this repo so `tests/test.sh` st
 | development | dev tools, editors, shells | `setup/development/` |
 | post-install | oh-my-zsh, fnm, antigravity (need zsh/curl from `install.sh`) | `setup/development/` |
 
-Existing examples: `desktop-apps/fsearch.sh`, `development/git/git.sh`, `development/zsh/zsh-config.sh`.
+Keep package scripts flat when a directory would contain only one script.
+
+Use a directory only when it groups multiple related scripts for one package,
+such as installation or package components.
 
 ## 2. Follow the script contract
 
