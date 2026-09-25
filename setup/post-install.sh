@@ -42,7 +42,7 @@ DEVELOPMENT_DIR="$SCRIPT_DIR/development"
 source "$DEVELOPMENT_DIR/oh-my-zsh/oh-my-zsh.sh"
 source "$DEVELOPMENT_DIR/oh-my-zsh/plugins.sh"
 source "$DEVELOPMENT_DIR/oh-my-zsh/theme.sh"
-source "$DEVELOPMENT_DIR/antigravity-cli/antigravity-cli.sh"
+source "$DEVELOPMENT_DIR/antigravity-cli.sh"
 source "$DEVELOPMENT_DIR/fnm/install-fnm.sh"
 source "$DEVELOPMENT_DIR/fnm/fnm-config.sh"
 
