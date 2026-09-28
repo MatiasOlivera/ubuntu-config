@@ -1,0 +1,25 @@
+{
+  "mcpServers": {
+    "chrome-devtools": {
+      "args": [
+        "-y",
+        "chrome-devtools-mcp@latest"
+      ],
+      "command": "npx"
+    },
+    "context7": {
+      "args": [
+        "-y",
+        "@upstash/context7-mcp@latest"
+      ],
+      "command": "npx"
+    },
+    "github": {
+      "disabled": false,
+      "headers": {
+        "Authorization": "Bearer ${GITHUB_PAT_FOR_CODING_AGENTS}"
+      },
+      "serverUrl": "https://api.githubcopilot.com/mcp/readonly"
+    }
+  }
+}
