@@ -40,6 +40,7 @@ source "$ESSENTIALS_DIR/fuse.sh"
 source "$ESSENTIALS_DIR/synaptic.sh"
 source "$ESSENTIALS_DIR/pip.sh"
 source "$ESSENTIALS_DIR/pipx.sh"
+source "$ESSENTIALS_DIR/keyring.sh"
 
 source "$DESKTOP_APPS_DIR/timeshift.sh"
 source "$DESKTOP_APPS_DIR/fsearch.sh"
@@ -70,6 +71,8 @@ source "$DEVELOPMENT_DIR/ghostty/ghostty.sh"
 source "$DEVELOPMENT_DIR/ghostty/ghostty-config.sh"
 source "$DEVELOPMENT_DIR/ollama.sh"
 source "$DEVELOPMENT_DIR/homebrew.sh"
+source "$DEVELOPMENT_DIR/bitwarden-cli.sh"
+source "$DEVELOPMENT_DIR/copilot.sh"
 
 # Essentials
 step install_make
@@ -81,6 +84,7 @@ step install_fuse
 step install_synaptic
 step install_pip
 step install_pipx
+step install_keyring
 
 # Repositories (apt sources only, no installs, no apt update)
 step install_fsearch_repository
@@ -126,6 +130,8 @@ step install_ghostty
 step config_ghostty
 step install_ollama
 step install_homebrew
+step install_bitwarden_cli
+step install_copilot
 
 # Dotfiles identity (git user.name/email). Asked once, stored in
 # ~/.config/chezmoi/chezmoi.toml so re-runs never prompt again.

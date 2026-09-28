@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+source "$(dirname "${BASH_SOURCE[0]}")/../helpers/dispatcher.sh"
+
+install_copilot() {
+    local installed_ver
+    if installed_ver="$(copilot_version 2>/dev/null)"; then
+        printf 'skip: copilot already installed (%s)\n' "$installed_ver"
+        return 0
+    fi
+    curl -fsSL https://gh.io/copilot-install | bash
+}
+
+copilot_version() {
+    copilot --version 2>/dev/null | head -n 1 | grep .
+}
+
+if [[ ${BASH_SOURCE[0]} == "$0" ]]; then
+	dispatch_command "$@"
+fi
