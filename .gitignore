@@ -1,4 +1,5 @@
 .vscode
+docs/plans
 
 # --- secrets safety net (deny by default, public repo) ---
 # Home-path forms (catch raw copies) + chezmoi source forms
