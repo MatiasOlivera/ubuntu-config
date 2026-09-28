@@ -73,6 +73,7 @@ source "$DEVELOPMENT_DIR/ollama.sh"
 source "$DEVELOPMENT_DIR/homebrew.sh"
 source "$DEVELOPMENT_DIR/bitwarden-cli.sh"
 source "$DEVELOPMENT_DIR/copilot.sh"
+source "$SCRIPT_DIR/security/credential-sync.sh"
 
 # Essentials
 step install_make
@@ -148,6 +149,10 @@ if [[ ! -f $CHEZMOI_CONFIG ]]; then
 fi
 
 step chezmoi chezmoi apply --source "$DOTFILES_DIR"
+
+# Interactive when secrets are missing, silent skip otherwise; never fails
+# a non-interactive run (reports pending and exits 0).
+step config_sync_credentials
 
 step versions bash "$SCRIPT_DIR/../reports/versions.sh"
 
