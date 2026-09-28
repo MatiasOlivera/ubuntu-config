@@ -56,6 +56,7 @@ src development/gitkraken.sh
 src development/vscode.sh
 src development/fonts.sh
 src development/docker.sh
+src development/sbx.sh
 src development/postman.sh
 src development/beekeeper-studio.sh
 src development/zsh/zsh.sh
@@ -99,6 +100,7 @@ chk "vscode" vscode_version
 chk "fonts" fonts_version
 chk "docker" docker_version
 chk "docker-compose" docker_compose_version
+chk "sbx" sbx_version
 chk "postman" postman_version
 chk "beekeeper" beekeeper_studio_version
 chk "zsh" zsh_version

@@ -59,6 +59,7 @@ source "$DEVELOPMENT_DIR/gitkraken.sh"
 source "$DEVELOPMENT_DIR/vscode.sh"
 source "$DEVELOPMENT_DIR/fonts.sh"
 source "$DEVELOPMENT_DIR/docker.sh"
+source "$DEVELOPMENT_DIR/sbx.sh"
 source "$DEVELOPMENT_DIR/postman.sh"
 source "$DEVELOPMENT_DIR/beekeeper-studio.sh"
 source "$DEVELOPMENT_DIR/zsh/zsh.sh"
@@ -114,6 +115,7 @@ step install_gitkraken
 step install_vscode
 step install_fonts
 step install_docker
+step install_sbx
 step install_postman
 step install_beekeeper_studio
 step install_zsh
