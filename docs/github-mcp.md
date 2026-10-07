@@ -47,7 +47,9 @@ This is the durable copy: sync, backup, and the source for rotation and future m
 
 The agents read env var `GITHUB_PAT_FOR_CODING_AGENTS`, which your shell fills from the
 Keyring at startup. Copy it there once — easiest via the sync script (re-runnable,
-skips what's already stored):
+skips what's already stored). The script pulls the latest vault first, so
+edits made in the browser extension are picked up (the CLI cache alone
+would serve a stale copy):
 
 ```sh
 bash setup/security/credential-sync.sh
