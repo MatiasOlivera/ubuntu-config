@@ -141,6 +141,16 @@ else
 	printf 'skip: shellcheck (not installed)\n'
 fi
 
+# 6. functional tests: every *-test.sh under tests/ must exit 0.
+# Stubs included: tests must mock secrets/network (never touch the real thing).
+while IFS= read -r f; do
+	if bash "$f"; then
+		pass "functional $f"
+	else
+		fail "functional $f"
+	fi
+done < <(find "$ROOT/tests" -name '*-test.sh' -not -path "$ROOT/.git/*" | sort)
+
 # Phase 2 — Multipass e2e on a fresh Ubuntu VM (only with --vm).
 # Skipped when Phase 1 failed: never boot a VM on a broken tree.
 if [[ $RUN_VM -eq 1 && $FAILURES -eq 0 ]]; then
