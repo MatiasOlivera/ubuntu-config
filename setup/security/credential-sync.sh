@@ -76,6 +76,12 @@ config_sync_credentials() {
 	}
 	export BW_SESSION
 	BW_SESSION="$(bw unlock --raw)" || return 1
+	# Pull extension/web edits into the CLI cache; otherwise get serves
+	# a stale vault. Fail-closed: never store on a failed sync.
+	if ! bw sync --session "$BW_SESSION" >/dev/null 2>&1; then
+		printf 'error: could not sync vault; keyring left untouched\n' >&2
+		return 1
+	fi
 	local failed=0
 	for entry in "${missing[@]}"; do
 		read -r item service account <<< "$entry"
