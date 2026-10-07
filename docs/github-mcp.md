@@ -109,13 +109,18 @@ revoke it on github.com and redo 1.
 ## Rotation (every ~90 days or on any leak suspicion)
 
 1. Create the new PAT (1), update the Bitwarden item (2).
-2. Re-run the one-line bridge in 3 (overwrites the Keyring entry), plus the agy
-   host-only add in 4 (agy's literal token does not follow rotation).
+2. Re-sync the Keyring with `bash setup/security/credential-sync.sh --force
+   github-mcp-pat` — a plain re-run skips entries already stored, so without
+   the flag the revoked token stays. Plus the agy host-only add in 4 (agy's
+   literal token does not follow rotation).
 3. Open a new shell, re-run 4. Revoke the old PAT on github.com.
 
 ## Troubleshooting
 
-- `401 Unauthorized`: PAT expired or revoked — rotate. Check `secret-tool lookup ...` returns a value first.
+- `401 Unauthorized`: PAT expired or revoked — rotate. A stored value can still
+  be stale (deleted on GitHub, never re-synced): re-bridge with
+  `credential-sync.sh --force`, then check the new token against
+  `https://api.github.com/user` (want `200`) before blaming client configs.
 - `agy` shows `initialize: Bad Request`: the header holds a placeholder instead of a
   literal token — re-run the host-only `agy mcp add` in 4, then restart the agent.
 - `copilot` stored a literal token instead of the env reference: edit
