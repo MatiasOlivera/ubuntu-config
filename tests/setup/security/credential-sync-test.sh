@@ -45,10 +45,11 @@ elif [[ $op == store ]]; then
 fi
 exit 2
 EOF
-# Stub bw: unlock succeeds only with a tty (like the real CLI); get serves
-# vault files; lock is a no-op.
+# Stub bw: logs every call; unlock succeeds only with a tty (like the real
+# CLI); sync fails when $STUB_DIR/fail-sync exists; get serves vault files.
 cat > "$T/bin/bw" <<'EOF'
 #!/usr/bin/env bash
+printf '%s\n' "$1" >> "$STUB_DIR/bw-calls"
 if [[ $1 == unlock ]]; then
 	if [[ -t 0 ]]; then
 		echo stub-session
@@ -57,6 +58,8 @@ if [[ $1 == unlock ]]; then
 		echo "vault locked" >&2
 		exit 1
 	fi
+elif [[ $1 == sync ]]; then
+	[[ -f $STUB_DIR/fail-sync ]] && exit 1 || exit 0
 elif [[ $1 == get ]]; then
 	f="$STUB_DIR/vault-$3"
 	[[ -f $f ]] && cat "$f" && exit 0 || exit 1
@@ -194,6 +197,36 @@ if [[ $rc -eq 0 && $out == *pending:* && $(keyring github-mcp personal-access-to
 	pass "--force without tty stays pending"
 else
 	fail "--force without tty stays pending (rc=$rc out=$out)"
+fi
+
+# 9. vault sync runs after unlock and before the first get.
+if [[ $HAS_TTY -eq 1 ]]; then
+	: > "$STUB_DIR/bw-calls"
+	printf '%s' OLD > "$STUB_DIR/keyring-github-mcp-personal-access-token"
+	out=$(call_tty --force github-mcp-pat 2>&1); rc=$?
+	mapfile -t calls < "$STUB_DIR/bw-calls"
+	if [[ $rc -eq 0 && ${calls[0]} == unlock && ${calls[1]} == sync && ${calls[2]} == get ]]; then
+		pass "vault syncs after unlock, before get"
+	else
+		fail "vault syncs after unlock, before get (rc=$rc calls=${calls[*]})"
+	fi
+else
+	printf 'skip: vault syncs after unlock, before get\n'
+fi
+
+# 10. failed sync aborts without touching the keyring.
+if [[ $HAS_TTY -eq 1 ]]; then
+	touch "$STUB_DIR/fail-sync"
+	printf '%s' OLD > "$STUB_DIR/keyring-github-mcp-personal-access-token"
+	out=$(call_tty --force github-mcp-pat 2>&1); rc=$?
+	rm -f "$STUB_DIR/fail-sync"
+	if [[ $rc -eq 1 && $out == *could\ not\ sync* && $(keyring github-mcp personal-access-token) == OLD ]]; then
+		pass "failed sync aborts, keyring untouched"
+	else
+		fail "failed sync aborts, keyring untouched (rc=$rc out=$out)"
+	fi
+else
+	printf 'skip: failed sync aborts, keyring untouched\n'
 fi
 
 if [[ $FAILURES -gt 0 ]]; then
