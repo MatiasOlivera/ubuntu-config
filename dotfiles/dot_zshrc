@@ -158,7 +158,7 @@ alias opencode-config="code ~/.config/opencode/opencode.json"
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
 
-# Github MCP: PAT comes from GNOME Keyring (see docs/github-mcp.md), never stored here
+# Github MCP: PAT comes from GNOME Keyring (see docs/runbooks/agent-credentials-runbook.md), never stored here
 if command -v secret-tool >/dev/null; then
   export GITHUB_PAT_FOR_CODING_AGENTS="$(secret-tool lookup service github-mcp account personal-access-token 2>/dev/null)"
 fi
