@@ -26,15 +26,23 @@ Per-consumer config wiring stays in chezmoi-managed files, never here.
    ```
 
    Same thing by hand (secret travels via stdin — never as an argument,
-   so it stays out of history):
+   so it stays out of history). Capture the unlock session first: without
+   it, `bw sync` and `bw get` run against a locked vault and fail:
 
    ```sh
-   bw login && bw unlock
+   bw login
+   export BW_SESSION="$(bw unlock --raw)"
    bw sync
    ITEM=<bitwarden-item> SERVICE=<keyring-service> ACCOUNT=<keyring-account>
-   bw get password "$ITEM" | secret-tool store --label "$ITEM" service "$SERVICE" account "$ACCOUNT"
+   SECRET="$(bw get password "$ITEM")" && [ -n "$SECRET" ] \
+     && printf '%s' "$SECRET" | secret-tool store --label "$ITEM" service "$SERVICE" account "$ACCOUNT" \
+     || echo "bridge failed for $ITEM" >&2
    bw lock && bw logout
+   unset BW_SESSION SECRET
    ```
+
+   The read-then-store order matters: a failed read must never reach the
+   keyring, since empty stdin stores an empty value and reports success.
 
    Step 3 is load-bearing: extension/web edits live server-side and the
    CLI cache is stale until sync — without it, `bw get` answers
@@ -115,7 +123,7 @@ command-line argument, where it would be visible in process arguments:
 
 ```sh
 python3 - <<'EOF'
-import json, subprocess
+import json, os, subprocess
 from pathlib import Path
 cfg_path = Path.home() / ".gemini/config/mcp_config.json"
 token = subprocess.run(
@@ -129,9 +137,13 @@ cfg.setdefault("mcpServers", {})["github"] = {
     "disabled": False,
 }
 cfg_path.parent.mkdir(parents=True, exist_ok=True)
-cfg_path.write_text(json.dumps(cfg, indent=2) + "\n")
+# 0600 at creation: write_text + chmod afterwards leaves a window where the
+# PAT is readable under a permissive umask (or forever if chmod never runs).
+fd = os.open(cfg_path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+with os.fdopen(fd, "w") as f:
+    f.write(json.dumps(cfg, indent=2) + "\n")
+os.chmod(cfg_path, 0o600)  # also tightens a pre-existing lax file
 EOF
-chmod 600 ~/.gemini/config/mcp_config.json
 agy mcp list  # expect: github enabled
 ```
 
