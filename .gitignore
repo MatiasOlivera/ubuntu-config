@@ -1,4 +1,5 @@
 .vscode
+docs/plans
 
 # --- secrets safety net (deny by default, public repo) ---
 # Home-path forms (catch raw copies) + chezmoi source forms
@@ -50,3 +51,6 @@ id_dsa*
 .zsh_history
 .bash_history
 .cache/
+# agy has no env-var expansion: its github MCP header holds a literal PAT,
+# so the file is host-managed via `agy mcp add` and must never be committed
+dotfiles/dot_gemini/config/mcp_config.json

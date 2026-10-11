@@ -39,6 +39,7 @@ src essentials/fuse.sh
 src essentials/synaptic.sh
 src essentials/pip.sh
 src essentials/pipx.sh
+src essentials/keyring.sh
 src essentials/chezmoi.sh
 src desktop-apps/timeshift.sh
 src desktop-apps/fsearch.sh
@@ -71,6 +72,8 @@ src development/fnm/install-fnm.sh
 src development/fnm/fnm-config.sh
 src development/ollama.sh
 src development/homebrew.sh
+src development/bitwarden-cli.sh
+src development/copilot.sh
 
 chk "curl" curl_version
 chk "make" make_version
@@ -80,6 +83,7 @@ chk "fuse" fuse_version
 chk "synaptic" synaptic_version
 chk "pip" pip_version
 chk "pipx" pipx_version
+chk "libsecret-tools" keyring_version
 chk "timeshift" timeshift_version
 chk "fsearch" fsearch_version
 chk "chrome" chrome_version
@@ -115,6 +119,8 @@ chk "fnm" fnm_version
 chk "node" node_version
 chk "ollama" ollama_version
 chk "homebrew" brew_version
+chk "bitwarden-cli" bitwarden_cli_version
+chk "copilot" copilot_version
 
 printf '\n| Config | Status |\n'
 printf '|---|---|\n'
