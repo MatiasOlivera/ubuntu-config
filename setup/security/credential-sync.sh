@@ -74,18 +74,38 @@ config_sync_credentials() {
 		printf 'error: bw not installed\n' >&2
 		return 1
 	}
+	# Fresh machines have bw installed but never logged in; unlock alone
+	# cannot fix that, so check first and log in interactively (a tty is
+	# guaranteed here — non-interactive shells returned early above).
+	local bw_state
+	bw_state="$(bw status 2>/dev/null | grep -o '"status":"[a-z]*"' | cut -d'"' -f4)"
+	if [[ $bw_state == unauthenticated ]]; then
+		printf 'vault: not logged in; starting interactive login\n' >&2
+		bw login || return 1
+	elif [[ $bw_state != unlocked && $bw_state != locked ]]; then
+		printf 'error: cannot read vault status; run bw login first\n' >&2
+		return 1
+	fi
 	export BW_SESSION
 	BW_SESSION="$(bw unlock --raw)" || return 1
 	# Pull extension/web edits into the CLI cache; otherwise get serves
-	# a stale vault. Fail-closed: never store on a failed sync.
-	if ! bw sync --session "$BW_SESSION" >/dev/null 2>&1; then
+	# a stale vault. Fail-closed: never store on a failed sync. The
+	# exported session is picked up automatically; passing it per command
+	# would expose the session key in process arguments.
+	if ! bw sync >/dev/null 2>&1; then
 		printf 'error: could not sync vault; keyring left untouched\n' >&2
+		bw lock >/dev/null 2>&1
+		unset BW_SESSION
 		return 1
 	fi
-	local failed=0
+	local failed=0 secret
 	for entry in "${missing[@]}"; do
 		read -r item service account <<< "$entry"
-		if bw get password "$item" --session "$BW_SESSION" 2>/dev/null |
+		# Read first, store second: a failed read must never reach the
+		# keyring (empty stdin stores an empty value and reports success).
+		secret="$(bw get password "$item" 2>/dev/null)"
+		if [[ -n $secret ]] &&
+			printf '%s' "$secret" |
 			secret-tool store --label "$item" service "$service" account "$account"; then
 			printf 'synced: %s\n' "$item"
 		else
@@ -94,6 +114,7 @@ config_sync_credentials() {
 		fi
 	done
 	bw lock >/dev/null 2>&1
+	unset BW_SESSION
 	return $failed
 }
 

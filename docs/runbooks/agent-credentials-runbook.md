@@ -31,7 +31,8 @@ Per-consumer config wiring stays in chezmoi-managed files, never here.
    ```sh
    bw login && bw unlock
    bw sync
-   bw get password <item> | secret-tool store --label "<label>" service <service> account <account>
+   ITEM=<bitwarden-item> SERVICE=<keyring-service> ACCOUNT=<keyring-account>
+   bw get password "$ITEM" | secret-tool store --label "$ITEM" service "$SERVICE" account "$ACCOUNT"
    bw lock && bw logout
    ```
 
@@ -106,16 +107,36 @@ copilot mcp get github       # check URL ends /readonly, no literal token in fil
 ### agy needs a literal token (host-only)
 
 Upstream agy has no env-var expansion — `${...}` is sent literally and the server
-answers `initialize: Bad Request` (verified). So agy's entry is set with a literal
-PAT via the CLI and stays out of the repo (both deny-lists exclude
-`mcp_config.json` — see comments there):
+answers `initialize: Bad Request` (verified). So agy's entry carries a literal
+PAT and stays out of the repo (both deny-lists exclude
+`mcp_config.json` — see comments there). Write it with a script that reads
+the token from the Keyring — never pass it via `--header` or any other
+command-line argument, where it would be visible in process arguments:
 
 ```sh
-agy mcp add --header "Authorization: Bearer $(secret-tool lookup service github-mcp account personal-access-token)" github https://api.githubcopilot.com/mcp/readonly
+python3 - <<'EOF'
+import json, subprocess
+from pathlib import Path
+cfg_path = Path.home() / ".gemini/config/mcp_config.json"
+token = subprocess.run(
+    ["secret-tool", "lookup", "service", "github-mcp",
+     "account", "personal-access-token"],
+    capture_output=True, text=True, check=True).stdout.strip()
+cfg = json.loads(cfg_path.read_text()) if cfg_path.exists() else {}
+cfg.setdefault("mcpServers", {})["github"] = {
+    "serverUrl": "https://api.githubcopilot.com/mcp/readonly",
+    "headers": {"Authorization": "Bearer " + token},
+    "disabled": False,
+}
+cfg_path.parent.mkdir(parents=True, exist_ok=True)
+cfg_path.write_text(json.dumps(cfg, indent=2) + "\n")
+EOF
 chmod 600 ~/.gemini/config/mcp_config.json
+agy mcp list  # expect: github enabled
 ```
 
-The `$(...)` keeps the token out of shell history. Re-run this after every PAT
+The heredoc keeps the token out of shell history and process arguments
+alike, and the merge preserves sibling servers. Re-run this after every PAT
 rotation — unlike the other two agents, agy does not follow the Keyring automatically.
 
 Safety check — ask any agent: *"Create a test issue in <repo> titled 'mcp write test'"*.

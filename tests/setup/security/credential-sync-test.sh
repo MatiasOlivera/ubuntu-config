@@ -46,11 +46,22 @@ fi
 exit 2
 EOF
 # Stub bw: logs every call; unlock succeeds only with a tty (like the real
-# CLI); sync fails when $STUB_DIR/fail-sync exists; get serves vault files.
+# CLI); status reports unauthenticated when $STUB_DIR/bw-logged-out exists;
+# sync fails when $STUB_DIR/fail-sync exists; get serves vault files.
 cat > "$T/bin/bw" <<'EOF'
 #!/usr/bin/env bash
 printf '%s\n' "$1" >> "$STUB_DIR/bw-calls"
-if [[ $1 == unlock ]]; then
+if [[ $1 == status ]]; then
+	if [[ -f $STUB_DIR/bw-logged-out ]]; then
+		printf '%s\n' '{"status":"unauthenticated"}'
+	else
+		printf '%s\n' '{"status":"unlocked"}'
+	fi
+	exit 0
+elif [[ $1 == login ]]; then
+	rm -f "$STUB_DIR/bw-logged-out"
+	exit 0
+elif [[ $1 == unlock ]]; then
 	if [[ -t 0 ]]; then
 		echo stub-session
 		exit 0
@@ -205,7 +216,7 @@ if [[ $HAS_TTY -eq 1 ]]; then
 	printf '%s' OLD > "$STUB_DIR/keyring-github-mcp-personal-access-token"
 	out=$(call_tty --force github-mcp-pat 2>&1); rc=$?
 	mapfile -t calls < "$STUB_DIR/bw-calls"
-	if [[ $rc -eq 0 && ${calls[0]} == unlock && ${calls[1]} == sync && ${calls[2]} == get ]]; then
+	if [[ $rc -eq 0 && ${calls[0]} == status && ${calls[1]} == unlock && ${calls[2]} == sync && ${calls[3]} == get ]]; then
 		pass "vault syncs after unlock, before get"
 	else
 		fail "vault syncs after unlock, before get (rc=$rc calls=${calls[*]})"
@@ -214,19 +225,53 @@ else
 	printf 'skip: vault syncs after unlock, before get\n'
 fi
 
-# 10. failed sync aborts without touching the keyring.
+# 10. failed sync aborts without touching the keyring, and locks the vault.
 if [[ $HAS_TTY -eq 1 ]]; then
+	: > "$STUB_DIR/bw-calls"
 	touch "$STUB_DIR/fail-sync"
 	printf '%s' OLD > "$STUB_DIR/keyring-github-mcp-personal-access-token"
 	out=$(call_tty --force github-mcp-pat 2>&1); rc=$?
 	rm -f "$STUB_DIR/fail-sync"
-	if [[ $rc -eq 1 && $out == *could\ not\ sync* && $(keyring github-mcp personal-access-token) == OLD ]]; then
-		pass "failed sync aborts, keyring untouched"
+	mapfile -t calls < "$STUB_DIR/bw-calls"
+	if [[ $rc -eq 1 && $out == *could\ not\ sync* && $(keyring github-mcp personal-access-token) == OLD ]] && printf '%s\n' "${calls[@]}" | grep -qx lock; then
+		pass "failed sync aborts, keyring untouched, vault locked"
 	else
-		fail "failed sync aborts, keyring untouched (rc=$rc out=$out)"
+		fail "failed sync aborts, keyring untouched, vault locked (rc=$rc out=$out calls=${calls[*]})"
 	fi
 else
-	printf 'skip: failed sync aborts, keyring untouched\n'
+	printf 'skip: failed sync aborts, keyring untouched, vault locked\n'
+fi
+
+# 11. logged-out CLI logs in, then the sync proceeds.
+if [[ $HAS_TTY -eq 1 ]]; then
+	: > "$STUB_DIR/bw-calls"
+	touch "$STUB_DIR/bw-logged-out"
+	printf '%s' OLD > "$STUB_DIR/keyring-github-mcp-personal-access-token"
+	printf '%s' NEWVAL > "$STUB_DIR/vault-github-mcp-pat"
+	out=$(call_tty --force github-mcp-pat 2>&1); rc=$?
+	rm -f "$STUB_DIR/bw-logged-out"
+	mapfile -t calls < "$STUB_DIR/bw-calls"
+	if [[ $rc -eq 0 && $out == *synced:* && $(keyring github-mcp personal-access-token) == NEWVAL ]] && [[ ${calls[0]} == status && ${calls[1]} == login && ${calls[2]} == unlock ]]; then
+		pass "logged-out CLI logs in, then syncs"
+	else
+		fail "logged-out CLI logs in, then syncs (rc=$rc out=$out calls=${calls[*]})"
+	fi
+else
+	printf 'skip: logged-out CLI logs in, then syncs\n'
+fi
+
+# 12. missing vault item reports an error and leaves the keyring untouched.
+if [[ $HAS_TTY -eq 1 ]]; then
+	printf '%s' OLD > "$STUB_DIR/keyring-github-mcp-personal-access-token"
+	rm -f "$STUB_DIR/vault-github-mcp-pat"
+	out=$(call_tty --force github-mcp-pat 2>&1); rc=$?
+	if [[ $rc -eq 1 && $out == *could\ not\ sync* && $out != *synced:* && $(keyring github-mcp personal-access-token) == OLD ]]; then
+		pass "missing item errors, keyring untouched"
+	else
+		fail "missing item errors, keyring untouched (rc=$rc out=$out)"
+	fi
+else
+	printf 'skip: missing item errors, keyring untouched\n'
 fi
 
 if [[ $FAILURES -gt 0 ]]; then
