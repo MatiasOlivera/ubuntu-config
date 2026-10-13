@@ -13,7 +13,7 @@ Skills live in `.agents/skills/` (cross-agent: opencode, Cursor, VS Code, Codex,
 
 ## Commands (verify in this order, stop at first failure)
 
-1. `./tests/test.sh` — static checks on host: `bash -n`, script contract, shellcheck if installed.
+1. `./tests/test.sh` — static checks on a trusted checkout: `bash -n`, script contract, shellcheck if installed (the source-only check sources library scripts, so use Docker or Multipass for untrusted changes).
 2. `docker compose -f tests/compose.yml run --rm test` — isolated static checks in `ubuntu:26.04`.
 3. `./tests/test.sh --vm --reuse` — Multipass e2e when the change touches the install path (`--vm` alone for a fresh VM, `--keep` to inspect failures).
 
@@ -23,11 +23,11 @@ Anything beyond verify (adding apps, reports, baselines): `README.md` ("Testing"
 
 - Declarative files → chezmoi in `dotfiles/` (`dot_*` → `$HOME`, `*.tmpl` rendered with `~/.config/chezmoi/chezmoi.toml` data); imperative commands (`chsh`, `gsettings`, clones) → stay in bash.
 - Public repo: never commit secrets. Root `.gitignore` (commit deny-list) and `dotfiles/.chezmoiignore` (deploy deny-list) must stay in sync when adding dotfiles.
-- Setup scripts stay rerun-safe and source-only; `tests/test.sh` enforces this fail-closed.
+- Setup scripts stay rerun-safe and source-only. The host `tests/test.sh` check sources library scripts, so run it only on trusted checkouts.
 
 ## Execution environment
 
-MUST NOT run system-mutating `setup/` scripts (`install.sh`, `post-install.sh`, app install/config scripts) on the host machine: run them in Docker or Multipass instead. `tests/test.sh` static checks, `reports/versions.sh`, and `reports/gaps.sh` are report-only and host-safe.
+MUST NOT run system-mutating `setup/` scripts (`install.sh`, `post-install.sh`, app install/config scripts) on the host machine: run them in Docker or Multipass instead. `tests/test.sh` and `reports/versions.sh` source library scripts, so run them only on trusted checkouts — for untrusted changes use `docker compose -f tests/compose.yml run --rm test` or the Multipass loop. `bash -n`, shellcheck, the grep-based contract checks, and `reports/gaps.sh` do not execute repo code and are host-safe on any checkout.
 
 ## For changes
 
