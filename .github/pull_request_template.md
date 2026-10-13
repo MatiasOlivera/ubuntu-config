@@ -10,4 +10,4 @@
 
 - [ ] Static analysis passes (`./tests/test.sh`)
 - [ ] Docker test passes (`docker compose -f tests/compose.yml run --rm test`)
-- [ ] e2e passes (`./tests/test.sh --vm`)
+- [ ] e2e passes (`./tests/test.sh --vm`) — required when install/setup behavior changes; mark N/A otherwise
