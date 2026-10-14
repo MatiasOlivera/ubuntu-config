@@ -50,7 +50,7 @@ bash setup/post-install.sh  # real machine: full apt upgrade
 ### Desktop apps
 
 - Timeshift (system snapshots), FSearch, Google Chrome, OBS Studio (+ plugins), Spotify
-- GNOME browser connector + Deja Window extension (window geometry memory)
+- GNOME browser connector + Deja Vu extension (window geometry memory)
 - Handy speech-to-text (config only - install the AppImage manually, see below)
 
 ### Development
@@ -164,7 +164,7 @@ setup/
   install.sh            # essentials → desktop-apps → development, then chezmoi apply + report
   post-install.sh       # oh-my-zsh, fnm/node, antigravity (needs zsh/curl from install.sh)
   essentials/           # make, curl, chezmoi, flatpak, fuse, pip/pipx, ...
-  desktop-apps/         # chrome, spotify, obs, timeshift, fsearch, handy-config, deja-window, ...
+  desktop-apps/         # chrome, spotify, obs, timeshift, fsearch, handy-config, deja-vu, ...
   development/          # git, GitHub CLI, docker, zsh, ghostty, opencode, ollama, fnm, ...
   helpers/              # shared shell helpers for setup scripts
   manual-installation.md
