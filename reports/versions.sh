@@ -50,7 +50,8 @@ src desktop-apps/spotify.sh
 src desktop-apps/discord.sh
 src desktop-apps/handy/handy.sh
 src desktop-apps/orca.sh
-src desktop-apps/deja-vu.sh
+src desktop-apps/gnome-extensions/gnome-browser-connector.sh
+src desktop-apps/gnome-extensions/deja-vu.sh
 src development/git.sh
 src development/github-cli.sh
 src development/cursor.sh
