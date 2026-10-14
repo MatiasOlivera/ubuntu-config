@@ -1,6 +1,12 @@
 .vscode
 docs/plans
 
+# Kilo local scratch (never commit; shared agents/skills/setup stay committable)
+.kilo/plans/
+.kilo/tui.json
+.kilo/tui.jsonc
+.kilo/jetbrains.json
+
 # --- secrets safety net (deny by default, public repo) ---
 # Home-path forms (catch raw copies) + chezmoi source forms
 # (chezmoi add ~/.aws/credentials -> dotfiles/dot_aws/credentials).
