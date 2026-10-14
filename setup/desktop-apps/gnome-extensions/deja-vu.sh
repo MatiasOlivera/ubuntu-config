@@ -17,14 +17,15 @@ deja_vu_extract() {
 }
 
 deja_vu_publish() {
+	# -T keeps this a rename (never move-into-directory); --backup parks
+	# the previous version at $2~ until the swap succeeds.
 	mkdir -p "$(dirname "$2")" || return 1
-	rm -rf "$2" && mv "$1" "$2"
+	mv -T --backup=simple "$1" "$2" && rm -rf "$2~"
 }
 
 deja_vu_compile_schemas() {
-	if command -v glib-compile-schemas >/dev/null 2>&1; then
-		glib-compile-schemas "$1/schemas" 2>/dev/null || true
-	fi
+	command -v glib-compile-schemas >/dev/null 2>&1 || return 1
+	glib-compile-schemas "$1/schemas"
 }
 
 install_deja_vu() {
@@ -33,7 +34,7 @@ install_deja_vu() {
 		printf 'skip: deja-vu already installed (%s)\n' "$installed_ver"
 		return 0
 	fi
-	sudo apt-get install -y unzip || return 1
+	sudo apt-get install -y unzip libglib2.0-bin || return 1
 	local work zip stage dir
 	work="$(mktemp -d)" || return 1
 	trap 'rm -rf "$work"' RETURN
@@ -42,9 +43,9 @@ install_deja_vu() {
 	mkdir -p "$stage" || return 1
 	deja_vu_download "$zip" || return 1
 	deja_vu_extract "$zip" "$stage" || return 1
+	deja_vu_compile_schemas "$stage" || return 1
 	dir="$HOME/.local/share/gnome-shell/extensions/$DEJA_VU_UUID"
-	deja_vu_publish "$stage" "$dir" || return 1
-	deja_vu_compile_schemas "$dir"
+	deja_vu_publish "$stage" "$dir"
 }
 
 config_deja_vu() {
