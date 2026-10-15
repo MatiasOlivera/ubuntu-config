@@ -8,11 +8,24 @@ install_openusage() {
         printf 'skip: openusage already installed (%s)\n' "$installed_ver"
         return 0
     fi
-    curl -fsSL https://github.com/janekbaraniewski/openusage/releases/latest/download/install.sh | bash
+    local tmp
+    tmp=$(mktemp)
+    if ! curl -fsSL https://github.com/janekbaraniewski/openusage/releases/latest/download/install.sh -o "$tmp"; then
+        rm -f "$tmp"
+        return 1
+    fi
+    bash "$tmp"
+    local rc=$?
+    rm -f "$tmp"
+    return $rc
 }
 
 openusage_version() {
-    openusage --version 2>/dev/null | head -n 1 | grep .
+    local v
+    if ! v=$(openusage --version 2>/dev/null); then
+        return 1
+    fi
+    printf '%s\n' "$v" | head -n 1 | grep .
 }
 
 if [[ ${BASH_SOURCE[0]} == "$0" ]]; then
