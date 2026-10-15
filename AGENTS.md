@@ -15,7 +15,7 @@ Skills live in `.agents/skills/` (cross-agent: opencode, Cursor, VS Code, Codex,
 
 1. `./tests/test.sh` — static checks on a trusted checkout: `bash -n`, script contract, shellcheck if installed (the source-only check sources library scripts, so use Docker or Multipass for untrusted changes).
 2. `docker compose -f tests/compose.yml run --rm test` — isolated static checks in `ubuntu:26.04`.
-3. `./tests/test.sh --vm --reuse` — Multipass e2e when the change touches the install path (`--vm` alone for a fresh VM, `--keep` to inspect failures).
+3. `./tests/test.sh --vm --reuse` — Multipass e2e on a **trusted checkout** when the change touches the install path (`--vm` alone for a fresh VM, `--keep` to inspect failures). For **untrusted checkouts** use step 2 (Docker) only — `--vm` runs host-side test phases before entering Multipass.
 
 Anything beyond verify (adding apps, reports, baselines): `README.md` ("Testing", "Reports").
 
@@ -27,7 +27,7 @@ Anything beyond verify (adding apps, reports, baselines): `README.md` ("Testing"
 
 ## Execution environment
 
-MUST NOT run system-mutating `setup/` scripts (`install.sh`, `post-install.sh`, app install/config scripts) on the host machine: run them in Docker or Multipass instead. `tests/test.sh` and `reports/versions.sh` source library scripts, so run them only on trusted checkouts — for untrusted changes use `docker compose -f tests/compose.yml run --rm test` or the Multipass loop. `bash -n`, shellcheck, the grep-based contract checks, and `reports/gaps.sh` do not execute repo code and are host-safe on any checkout.
+MUST NOT run system-mutating `setup/` scripts (`install.sh`, `post-install.sh`, app install/config scripts) on the host machine: run them in Docker or Multipass instead. `tests/test.sh` and `reports/versions.sh` source library scripts, so run them only on trusted checkouts — for untrusted changes use `docker compose -f tests/compose.yml run --rm test` (the Multipass loop runs host-side checks before entering the VM, so it is trusted-checkout-only as well). `bash -n`, shellcheck, the grep-based contract checks, and `reports/gaps.sh` do not execute repo code and are host-safe on any checkout.
 
 ## For changes
 
