@@ -68,6 +68,7 @@ source "$DEVELOPMENT_DIR/beekeeper-studio.sh"
 source "$DEVELOPMENT_DIR/zsh/zsh.sh"
 source "$DEVELOPMENT_DIR/zsh/zsh-config.sh"
 source "$DEVELOPMENT_DIR/zoxide.sh"
+source "$DEVELOPMENT_DIR/uv.sh"
 source "$DEVELOPMENT_DIR/opencode.sh"
 source "$DEVELOPMENT_DIR/openusage.sh"
 source "$DEVELOPMENT_DIR/ghostty/ghostty.sh"
@@ -132,6 +133,7 @@ step install_beekeeper_studio
 step install_zsh
 step config_zsh
 step install_zoxide
+step install_uv
 step install_opencode
 step install_openusage
 step install_ghostty
