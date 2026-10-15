@@ -52,6 +52,8 @@ source "$DESKTOP_APPS_DIR/spotify.sh"
 source "$DESKTOP_APPS_DIR/handy/handy.sh"
 source "$DESKTOP_APPS_DIR/handy/handy-config.sh"
 source "$DESKTOP_APPS_DIR/orca.sh"
+source "$DESKTOP_APPS_DIR/gnome-extensions/gnome-browser-connector.sh"
+source "$DESKTOP_APPS_DIR/gnome-extensions/deja-vu.sh"
 
 source "$DEVELOPMENT_DIR/git.sh"
 source "$DEVELOPMENT_DIR/github-cli.sh"
@@ -110,6 +112,9 @@ step install_spotify
 step install_handy
 step config_handy
 step install_orca
+step install_gnome_browser_connector
+step install_deja_vu
+step config_deja_vu
 
 # Development
 step install_git

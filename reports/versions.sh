@@ -50,6 +50,8 @@ src desktop-apps/spotify.sh
 src desktop-apps/discord.sh
 src desktop-apps/handy/handy.sh
 src desktop-apps/orca.sh
+src desktop-apps/gnome-extensions/gnome-browser-connector.sh
+src desktop-apps/gnome-extensions/deja-vu.sh
 src development/git.sh
 src development/github-cli.sh
 src development/cursor.sh
@@ -94,6 +96,8 @@ chk "spotify" spotify_version
 chk "discord" discord_version
 chk "handy" handy_version
 chk "orca" orca_version
+chk "gnome-browser-connector" gnome_browser_connector_version
+chk "deja-vu" deja_vu_version
 chk "git" git_version
 chk "github-cli" github_cli_version
 chk "chezmoi" chezmoi_version
