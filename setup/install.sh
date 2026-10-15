@@ -69,6 +69,7 @@ source "$DEVELOPMENT_DIR/zsh/zsh.sh"
 source "$DEVELOPMENT_DIR/zsh/zsh-config.sh"
 source "$DEVELOPMENT_DIR/zoxide.sh"
 source "$DEVELOPMENT_DIR/opencode.sh"
+source "$DEVELOPMENT_DIR/openusage.sh"
 source "$DEVELOPMENT_DIR/ghostty/ghostty.sh"
 source "$DEVELOPMENT_DIR/ghostty/ghostty-config.sh"
 source "$DEVELOPMENT_DIR/ollama.sh"
@@ -132,6 +133,7 @@ step install_zsh
 step config_zsh
 step install_zoxide
 step install_opencode
+step install_openusage
 step install_ghostty
 step config_ghostty
 step install_ollama
