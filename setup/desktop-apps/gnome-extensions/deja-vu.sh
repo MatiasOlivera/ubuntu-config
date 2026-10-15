@@ -17,10 +17,17 @@ deja_vu_extract() {
 }
 
 deja_vu_publish() {
-	# -T keeps this a rename (never move-into-directory); --backup parks
-	# the previous version at $2~ until the swap succeeds.
+	# -T keeps this a rename (never move-into-directory); numbered backups
+	# never collide with a stale backup, and are swept after success.
 	mkdir -p "$(dirname "$2")" || return 1
-	mv -T --backup=simple "$1" "$2" && rm -rf "$2~"
+	mv -T --backup=numbered "$1" "$2" || return 1
+	# Sweep old numbered backups, best-effort: leftovers are benign since
+	# the next publish takes the next free number.
+	local b
+	for b in "$2".~*~; do
+		[ -e "$b" ] && rm -rf "$b"
+	done
+	return 0
 }
 
 deja_vu_compile_schemas() {
@@ -35,8 +42,10 @@ install_deja_vu() {
 		return 0
 	fi
 	sudo apt-get install -y unzip libglib2.0-bin || return 1
-	local work zip stage dir
-	work="$(mktemp -d)" || return 1
+	local extension_root work zip stage dir
+	extension_root="$HOME/.local/share/gnome-shell/extensions"
+	mkdir -p "$extension_root" || return 1
+	work="$(mktemp -d "$extension_root/.deja-vu.XXXXXX")" || return 1
 	trap 'rm -rf "$work"' RETURN
 	zip="$work/deja-vu.zip"
 	stage="$work/stage"
@@ -44,7 +53,7 @@ install_deja_vu() {
 	deja_vu_download "$zip" || return 1
 	deja_vu_extract "$zip" "$stage" || return 1
 	deja_vu_compile_schemas "$stage" || return 1
-	dir="$HOME/.local/share/gnome-shell/extensions/$DEJA_VU_UUID"
+	dir="$extension_root/$DEJA_VU_UUID"
 	deja_vu_publish "$stage" "$dir"
 }
 
