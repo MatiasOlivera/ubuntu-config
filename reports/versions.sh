@@ -64,6 +64,7 @@ src development/postman.sh
 src development/beekeeper-studio.sh
 src development/zsh/zsh.sh
 src development/zoxide.sh
+src development/uv.sh
 src development/opencode.sh
 src development/openusage.sh
 src development/ghostty/ghostty.sh
@@ -114,6 +115,7 @@ chk "postman" postman_version
 chk "beekeeper" beekeeper_studio_version
 chk "zsh" zsh_version
 chk "zoxide" zoxide_version
+chk "uv" uv_version
 chk "opencode" opencode_version
 chk "openusage" openusage_version
 chk "ghostty" ghostty_version
