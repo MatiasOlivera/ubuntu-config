@@ -65,6 +65,7 @@ src development/beekeeper-studio.sh
 src development/zsh/zsh.sh
 src development/zoxide.sh
 src development/opencode.sh
+src development/openusage.sh
 src development/ghostty/ghostty.sh
 src development/oh-my-zsh/oh-my-zsh.sh
 src development/oh-my-zsh/plugins.sh
@@ -114,6 +115,7 @@ chk "beekeeper" beekeeper_studio_version
 chk "zsh" zsh_version
 chk "zoxide" zoxide_version
 chk "opencode" opencode_version
+chk "openusage" openusage_version
 chk "ghostty" ghostty_version
 chk "oh-my-zsh" oh_my_zsh_version
 chk "zsh-plugins" oh_my_zsh_plugins_version
