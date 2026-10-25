@@ -14,6 +14,7 @@
 # Item names are not secrets and are safe to commit.
 SECRETS_MAP=(
 	"github-mcp-pat github-mcp personal-access-token"
+	"KILO_API_KEY kilo api-key"
 )
 
 config_sync_credentials() {
