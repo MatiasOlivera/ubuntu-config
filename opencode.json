@@ -15,7 +15,18 @@
       "apt *": "deny",
       "apt-get *": "deny",
       "snap *": "deny",
-      "chsh*": "deny"
+      "chsh*": "deny",
+      "bash -n *setup/*.sh*": "allow",
+      "shellcheck *setup/*.sh*": "allow",
+      "cat *setup/*.sh*": "allow",
+      "grep *setup/*.sh*": "allow",
+      "sed *setup/*.sh*": "allow",
+      "awk *setup/*.sh*": "allow",
+      "head *setup/*.sh*": "allow",
+      "tail *setup/*.sh*": "allow",
+      "wc *setup/*.sh*": "allow",
+      "docker *setup/*.sh*": "allow",
+      "multipass *setup/*.sh*": "allow"
     }
   }
 }
