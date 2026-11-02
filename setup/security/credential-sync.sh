@@ -15,6 +15,7 @@
 SECRETS_MAP=(
 	"github-mcp-pat github-mcp personal-access-token"
 	"KILO_API_KEY kilo api-key"
+	"OPENCODE_API_KEY opencode api-key"
 )
 
 config_sync_credentials() {

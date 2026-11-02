@@ -122,8 +122,9 @@ fi
 # 1. default re-run skips present entries (the stale-token rotation bug).
 seed github-mcp-pat OLD NEW github-mcp personal-access-token
 seed KILO_API_KEY OLD-K NEW-K kilo api-key
+seed OPENCODE_API_KEY OLD-O NEW-O opencode api-key
 out=$(call 2>&1); rc=$?
-if [[ $rc -eq 0 && $out == *present:* && $(keyring github-mcp personal-access-token) == OLD && $(keyring kilo api-key) == OLD-K ]]; then
+if [[ $rc -eq 0 && $out == *present:* && $(keyring github-mcp personal-access-token) == OLD && $(keyring kilo api-key) == OLD-K && $(keyring opencode api-key) == OLD-O ]]; then
 	pass "default skips present entry"
 else
 	fail "default skips present entry (rc=$rc out=$out)"
@@ -158,8 +159,9 @@ fi
 if [[ $HAS_TTY -eq 1 ]]; then
 	printf '%s' OLD > "$STUB_DIR/keyring-github-mcp-personal-access-token"
 	printf '%s' OLD-K > "$STUB_DIR/keyring-kilo-api-key"
+	printf '%s' OLD-O > "$STUB_DIR/keyring-opencode-api-key"
 	out=$(call_tty --force); rc=$?
-	if [[ $rc -eq 0 && $out == *synced:* && $(keyring github-mcp personal-access-token) == NEW && $(keyring kilo api-key) == NEW-K ]]; then
+	if [[ $rc -eq 0 && $out == *synced:* && $(keyring github-mcp personal-access-token) == NEW && $(keyring kilo api-key) == NEW-K && $(keyring opencode api-key) == NEW-O ]]; then
 		pass "bare --force re-syncs all"
 	else
 		fail "bare --force re-syncs all (rc=$rc out=$out)"
