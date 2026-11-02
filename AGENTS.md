@@ -29,7 +29,7 @@ Anything beyond verify (adding apps, reports, baselines): `README.md` ("Testing"
 
 MUST NOT run system-mutating `setup/` scripts (`install.sh`, `post-install.sh`, app install/config scripts) on the host machine: run them in Docker or Multipass instead. `tests/test.sh` and `reports/versions.sh` source library scripts, so run them only on trusted checkouts — for untrusted changes use `docker compose -f tests/compose.yml run --rm test` (the Multipass loop runs host-side checks before entering the VM, so it is trusted-checkout-only as well). `bash -n`, shellcheck, the grep-based contract checks, and `reports/gaps.sh` do not execute repo code and are host-safe on any checkout.
 
-The root `opencode.json` enforces this for coding agents: the setup scripts and the commands they run (`sudo`, `apt`, `apt-get`, `snap`, `chsh`) are denied, so an agent reaches Docker or Multipass instead of the host.
+The root `opencode.json` adds command denials for setup scripts and selected host-mutating commands (`sudo`, `apt`, `apt-get`, `snap`, `chsh`). It is a command filter, not an OS sandbox; use Docker or Multipass for system-mutating work.
 
 ## For changes
 

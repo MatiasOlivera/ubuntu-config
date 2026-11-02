@@ -10,6 +10,7 @@
       "sh ./setup/*": "deny",
       "source setup/*": "deny",
       "source ./setup/*": "deny",
+      "*setup/*.sh*": "deny",
       "sudo *": "deny",
       "apt *": "deny",
       "apt-get *": "deny",
