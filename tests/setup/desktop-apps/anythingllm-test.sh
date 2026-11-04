@@ -3,7 +3,8 @@
 # anythingllm-test.sh — use-case tests for the AnythingLLM Desktop installer.
 # Black-box: only exit codes, stdout markers and filesystem state are asserted,
 # never helper names or code layout. Hermetic: stubbed curl/sudo/apparmor_parser/
-# uname, sandboxed HOME, release JSON fixture generated with the real sha256 of a
+# uname, sandboxed HOME with the installer's own env knobs pinned inside it,
+# release JSON fixture generated with the real sha256 of a
 # fake AppImage. No network, no 905 MB download, no /etc write is ever touched.
 # Fail-closed: any failure exits 1.
 
@@ -33,6 +34,11 @@ trap 'rm -rf "$T"' EXIT
 mkdir -p "$T/bin" "$T/arm" "$T/sysbin" "$T/home" "$T/tmp"
 export HOME="$T/home"
 export TMPDIR="$T/tmp"
+# Pin the script's env knobs to the sandbox. Sandboxing HOME alone is not
+# enough: a developer who exports ANYTHING_LLM_INSTALL_DIR or XDG_STATE_HOME
+# would have the suite write the fake payload over their real install.
+export ANYTHING_LLM_INSTALL_DIR="$HOME/Applications"
+export XDG_STATE_HOME="$HOME/.local/state"
 STUB_DIR="$T/stubs"
 mkdir -p "$STUB_DIR"
 export STUB_DIR
