@@ -60,6 +60,15 @@ esac
 EOF
 chmod +x "$T/bin/curl"
 
+# Failing `copilot` first on PATH: a copilot that happens to live in
+# /usr/bin or /bin on the runner can never satisfy the skip guard in the
+# fresh-install cases. Only the skip case shadows it via skip-bin.
+cat > "$T/bin/copilot" <<'EOF'
+#!/usr/bin/env bash
+exit 1
+EOF
+chmod +x "$T/bin/copilot"
+
 # Stub copilot (skip guard) and stub uname (unsupported architecture).
 cat > "$T/skip-bin/copilot" <<'EOF'
 #!/usr/bin/env bash
