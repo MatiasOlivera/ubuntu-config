@@ -13,8 +13,9 @@ Install flow (replacing `copilot.sh:11`):
 skip guard (copilot_version)          — unchanged
   └─ mktemp -d private workdir
       ├─ map uname -s/-m  → platform ∈ {linux,darwin}, arch ∈ {x64,arm64}
-      ├─ GET …/releases/latest/download/SHA256SUMS.txt   (curl -fsSL, fail-closed)
-      ├─ GET …/releases/latest/download/copilot-<platform>-<arch>.tar.gz
+      ├─ HEAD …/releases/latest → one release tag (curl -fsSI, fail-closed)
+      ├─ GET …/releases/download/<tag>/SHA256SUMS.txt          (curl -fsSL)
+      ├─ GET …/releases/download/<tag>/copilot-<plat>-<arch>.tar.gz
       ├─ extract the asset's checksum line (grep -F; absent → fail)
       ├─ sha256sum -c the line in the workdir (mismatch → fail)
       ├─ tar -x into the workdir; require ./copilot at archive root
@@ -49,8 +50,11 @@ None persisted. Wire format consumed (verified live, see Assumptions):
 
 Publisher contract (outbound):
 
-- `https://github.com/github/copilot-cli/releases/latest/download/SHA256SUMS.txt`
-- `https://github.com/github/copilot-cli/releases/latest/download/copilot-<platform>-<arch>.tar.gz`
+- `HEAD https://github.com/github/copilot-cli/releases/latest` → the 302
+  Location yields the tag once; both files below are fetched under that one
+  tag, so a mid-run publish cannot mix releases.
+- `https://github.com/github/copilot-cli/releases/download/<tag>/SHA256SUMS.txt`
+- `https://github.com/github/copilot-cli/releases/download/<tag>/copilot-<platform>-<arch>.tar.gz`
 - Requires on the host: `curl`, `sha256sum`, `tar` (explicit pre-checks; the
   test stubs `curl`). `sudo` only when the target dir is not writable (kept
   alive by `install.sh`; standalone runs authenticate normally).
@@ -67,9 +71,11 @@ Repo contract (inbound, unchanged by design):
   - `skip: copilot already installed (<ver>)`
   - `installed: copilot <version-output> to <path>`
 - stderr markers: `error: copilot: <stage-specific message>` for unsupported
-  OS, unsupported architecture, missing curl/sha256sum, checksums download
-  failure, asset download failure, missing checksum line, checksum mismatch,
-  invalid archive, missing binary in archive, install-dir creation/copy failure.
+  OS, unsupported architecture, missing curl/sha256sum, unresolvable latest
+  release tag, checksums download failure, asset download failure, missing
+  checksum line, checksum mismatch, invalid archive, missing binary in
+  archive, install-dir creation/copy failure, installed binary that fails to
+  run.
 
 Test contract: `tests/setup/development/copilot-test.sh` is hermetic — stub
 `curl` serves a fixture release built with `tar` + real `sha256sum`;
@@ -78,7 +84,10 @@ automatically by `tests/test.sh` phase 6 (`find tests -name '*-test.sh'`).
 Conventions follow `deja-vu-test.sh` (STUB_DIR, black-box assertions on rc /
 stdout markers / filesystem state). Scenario coverage maps 1:1 to spec
 scenarios (tamper, missing line, interrupted download via stub exit ≠ 0,
-unsupported arch, skip-without-network, success).
+unsupported arch, skip-without-network, success) plus PR-review additions:
+parent-run containment (sourced, caller EXIT trap intact), un-runnable
+installed binary, and a failing `copilot` stub that keeps host installs
+from skewing the fresh-install cases.
 
 ## Sequencing
 
