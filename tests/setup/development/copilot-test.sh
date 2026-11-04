@@ -28,23 +28,29 @@ mkdir -p "$T/bin" "$T/skip-bin" "$T/arch-bin" "$T/stubs" "$T/release" \
 export STUB_DIR="$T/stubs"
 export STUB_RELEASE="$T/release"
 
-# Stub curl: logs every URL, serves only the fixture release endpoints
-# (SHA256SUMS.txt and releases/latest/download/<asset>), exits 22 otherwise
-# — the same curl failure code. Marker files force per-endpoint failures.
+# Stub curl: logs every URL, answers only the fixture release endpoints
+# (the /releases/latest HEAD probe with a 302 location, SHA256SUMS.txt and
+# the per-tag asset), exits 22 otherwise — the same curl failure code.
+# Marker files force per-endpoint failures.
 cat > "$T/bin/curl" <<'EOF'
 #!/usr/bin/env bash
-dest="" prev="" url=""
+dest="" prev="" url="" head=0
 for a in "$@"; do
 	[[ $prev == "-o" ]] && dest=$a
+	[[ $a == -*I* ]] && head=1
 	case $a in *://*) url=$a ;; esac
 	prev=$a
 done
 printf '%s\n' "$url" >> "$STUB_DIR/curl-calls"
 case $url in
+	*/releases/latest)
+		[[ $head -eq 1 ]] || exit 22
+		[[ -f $STUB_DIR/fail-latest ]] && exit 22
+		printf 'location: https://github.com/github/copilot-cli/releases/tag/v9.9.9\n' ;;
 	*/SHA256SUMS.txt)
 		[[ -f $STUB_DIR/fail-sums ]] && exit 22
 		cp "$STUB_RELEASE/SHA256SUMS.txt" "$dest" ;;
-	*/releases/latest/download/*)
+	*/releases/download/*)
 		[[ -f $STUB_DIR/fail-asset ]] && exit 22
 		asset=${url##*/}
 		[[ -f $STUB_RELEASE/$asset ]] || exit 22
@@ -124,11 +130,11 @@ else
 	fail "verified install (rc=$RC out=[$OUT] err=[$ERR])"
 fi
 
-# 2b. Exactly two downloads: checksums, then the asset — no other URL.
-if [[ "$(wc -l < "$T/stubs/curl-calls" 2>/dev/null)" -eq 2 ]] &&
-	! grep -vqE '/(SHA256SUMS\.txt|copilot-(linux-x64|linux-arm64)\.tar\.gz)$' \
+# 2b. Exactly three downloads: tag probe, checksums, asset — no other URL.
+if [[ "$(wc -l < "$T/stubs/curl-calls" 2>/dev/null)" -eq 3 ]] &&
+	! grep -vqE '/(latest|SHA256SUMS\.txt|copilot-(linux-x64|linux-arm64)\.tar\.gz)$' \
 		"$T/stubs/curl-calls"; then
-	pass "install fetches only checksums and the release asset"
+	pass "install fetches only the tag probe, checksums and release asset"
 else
 	fail "download discipline (calls=[$(cat "$T/stubs/curl-calls" 2>/dev/null)])"
 fi

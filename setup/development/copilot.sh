@@ -22,7 +22,7 @@ install_copilot() {
 # script is deliberately not executed: no checksum or signature is published
 # for it, so piping it into bash would run unverifiable remote code.
 copilot_install_verified() {
-    local tmp=$1 platform arch base asset install_dir
+    local tmp=$1 platform arch tag base asset install_dir
     case "$(uname -s)" in
         Linux*) platform=linux ;;
         Darwin*) platform=darwin ;;
@@ -36,7 +36,13 @@ copilot_install_verified() {
     command -v curl >/dev/null 2>&1 || { printf 'error: copilot: curl required\n' >&2; exit 1; }
     command -v sha256sum >/dev/null 2>&1 || { printf 'error: copilot: sha256sum required\n' >&2; exit 1; }
 
-    base="https://github.com/github/copilot-cli/releases/latest/download"
+    # One tag for both downloads: resolving "latest" twice could straddle a
+    # release published mid-run and fail the checksum with a misleading error.
+    tag="$(curl -fsSI https://github.com/github/copilot-cli/releases/latest |
+        sed -n 's/^[Ll]ocation: .*\/tag\///p' | tr -d '[:space:]')"
+    [[ -n $tag ]] ||
+        { printf 'error: copilot: cannot determine latest release\n' >&2; exit 1; }
+    base="https://github.com/github/copilot-cli/releases/download/$tag"
     asset="copilot-${platform}-${arch}.tar.gz"
     curl -fsSL "$base/SHA256SUMS.txt" -o "$tmp/SHA256SUMS.txt" ||
         { printf 'error: copilot: cannot download checksums\n' >&2; exit 1; }
