@@ -1,6 +1,6 @@
 # Release notes grouping
 
-- Status: proposed
+- Status: accepted
 - Deciders: Matias Olivera
 - Date: 2026-11-04
 
