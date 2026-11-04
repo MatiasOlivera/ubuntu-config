@@ -46,6 +46,7 @@ src desktop-apps/fsearch.sh
 src desktop-apps/chrome.sh
 src desktop-apps/obs.sh
 src desktop-apps/obsidian.sh
+src desktop-apps/anythingllm.sh
 src desktop-apps/spotify.sh
 src desktop-apps/discord.sh
 src desktop-apps/handy/handy.sh
@@ -94,6 +95,7 @@ chk "chrome" chrome_version
 chk "obs" obs_version
 chk "obs-plugins" obs_plugins_version
 chk "obsidian" obsidian_version
+chk "anythingllm" anythingllm_version
 chk "spotify" spotify_version
 chk "discord" discord_version
 chk "handy" handy_version

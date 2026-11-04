@@ -48,6 +48,7 @@ source "$DESKTOP_APPS_DIR/chrome.sh"
 source "$DESKTOP_APPS_DIR/discord.sh"
 source "$DESKTOP_APPS_DIR/obs.sh"
 source "$DESKTOP_APPS_DIR/obsidian.sh"
+source "$DESKTOP_APPS_DIR/anythingllm.sh"
 source "$DESKTOP_APPS_DIR/spotify.sh"
 source "$DESKTOP_APPS_DIR/handy/handy.sh"
 source "$DESKTOP_APPS_DIR/handy/handy-config.sh"
@@ -110,6 +111,7 @@ step install_chrome
 step install_discord
 step install_obs
 step install_obsidian
+step install_anythingllm
 step install_spotify
 step install_handy
 step config_handy

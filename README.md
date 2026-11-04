@@ -50,6 +50,7 @@ bash setup/post-install.sh  # real machine: full apt upgrade
 ### Desktop apps
 
 - Timeshift (system snapshots), FSearch, Google Chrome, OBS Studio (+ plugins), Spotify
+- AnythingLLM Desktop (AppImage in `~/Applications`, verified against the sha256 GitHub publishes for the release asset, plus its AppArmor profile and launcher entry)
 - GNOME browser connector + Deja Vu extension (window geometry memory)
 - Handy speech-to-text (config only - install the AppImage manually, see below)
 
