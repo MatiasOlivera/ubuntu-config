@@ -210,6 +210,32 @@ else
 	fail "un-runnable installed binary (rc=$RC out=[$OUT] err=[$ERR])"
 fi
 
+# 8. Parent-run containment: how setup/install.sh actually uses the script —
+# sourced, then calling install_copilot. A failed install must return to its
+# caller, leave the caller's EXIT trap intact, and let the next step run.
+fresh_release
+printf 'evil-bytes\n' | tee "$T/release/copilot-linux-x64.tar.gz" \
+	"$T/release/copilot-linux-arm64.tar.gz" > /dev/null
+cat > "$T/parent-run.sh" <<'EOF'
+#!/usr/bin/env bash
+source "$1"
+trap 'printf "EXIT_TRAP\n"' EXIT
+install_copilot
+rc=$?
+printf 'SENTINEL rc=%s\n' "$rc"
+exit "$rc"
+EOF
+PARENT="$(env PATH="$T/bin:/usr/bin:/bin" HOME="$T/home" TMPDIR="$T/tmp" \
+	PREFIX="$T/prefix" STUB_DIR="$STUB_DIR" STUB_RELEASE="$STUB_RELEASE" \
+	bash "$T/parent-run.sh" "$SRC" 2>/dev/null)"
+PRC=$?
+if [[ $PRC -eq 1 && $PARENT == *"SENTINEL rc=1"* && $PARENT == *"EXIT_TRAP"* &&
+	! -e "$T/prefix/bin/copilot" ]]; then
+	pass "failed install returns to caller with caller trap intact"
+else
+	fail "parent-run containment (rc=$PRC out=[$PARENT])"
+fi
+
 if (( FAILURES )); then
 	printf '%d failure(s)\n' "$FAILURES" >&2
 	exit 1
