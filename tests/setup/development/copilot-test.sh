@@ -21,7 +21,7 @@ pass() {
 	printf 'ok: %s\n' "$1"
 }
 
-T="$(mktemp -d)"
+T="$(mktemp -d)" || { printf 'error: mktemp failed, refusing to run\n' >&2; exit 1; }
 trap 'rm -rf "$T"' EXIT
 mkdir -p "$T/bin" "$T/skip-bin" "$T/arch-bin" "$T/stubs" "$T/release" \
 	"$T/payload" "$T/prefix" "$T/home" "$T/tmp"
