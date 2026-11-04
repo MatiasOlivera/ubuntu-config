@@ -1,0 +1,12 @@
+# tasks.md - `06-copilot-integrity-check`
+
+| ID | Done | Task | Depends on | Type | Verification |
+| -- | ---- | ---- | ---------- | ---- | ------------ |
+| 1 | [x] | Draft ADR `docs/decisions/0003-remote-installer-integrity.md` (plan-phase inline decision record, status `proposed`) | - | Manual | file exists; options table covers curl\|bash, TOFU pin, checksum artifact, attestations, package managers |
+| 2 | [ ] | Write red functional test `tests/setup/development/copilot-test.sh`: hermetic stub-curl fixture release, all spec scenarios (skip-no-network, verified install, tamper, missing checksum line, interrupted download, unsupported arch, contained failure) asserted on rc/stdout/stderr/filesystem only | 1 | Automated | `bash tests/setup/development/copilot-test.sh` exits 1 against current `copilot.sh` (scenario failures name the missing markers) |
+| 3 | [ ] | Rewrite `setup/development/copilot.sh` install path per plan.md: platform/arch mapping, download sums+artifact, mandatory `grep`/`sha256sum -c`, extract to private temp, install only verified `copilot` binary to `${PREFIX:-/usr/local}/bin`, subshell isolation with caller-side cleanup (no traps) | 2 | Automated | `bash tests/setup/development/copilot-test.sh` exits 0 (green) |
+| 4 | [ ] | Run static verify chain on trusted checkout | 3 | Automated | `./tests/test.sh` phases 1-6 green incl. shellcheck and new functional test |
+| 5 | [ ] | Run isolated static check | 4 | Automated | `docker compose -f tests/compose.yml run --rm test` green |
+| 6 | [ ] | Run Multipass e2e: fresh VM install, then rerun for idempotency | 5 | Manual | `./tests/test.sh --vm --keep` shows copilot step installing verified artifact; `./tests/test.sh --vm --reuse` rerun prints `skip: copilot already installed`; `reports/versions.sh` shows copilot row |
+| 7 | [ ] | Set ADR status `accepted`; stage as two commits — `fix(security)` (copilot.sh + test) then `docs` (ADR + specs/) — and open PR targeting `develop` | 6, explicit user approval | Manual | two independently revertable commits with why-bodies; PR diff contains only the 5 new/changed paths |
+| 8 | [ ] | File follow-up issues: umbrella "eliminate unverifiable execution from remaining setup scripts" with sub-issues (cursor, antigravity-cli, fnm, opencode, ollama, uv), and one issue "align README/AGENTS.md/skills with specs/constitution.md" | 7 | Manual | issue URLs recorded in PR description |
