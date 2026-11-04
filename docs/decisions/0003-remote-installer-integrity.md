@@ -1,6 +1,6 @@
 # Remote Installer Execution Integrity
 
-- Status: proposed
+- Status: accepted
 - Deciders: Matias Olivera
 - Date: 2026-11-04
 
