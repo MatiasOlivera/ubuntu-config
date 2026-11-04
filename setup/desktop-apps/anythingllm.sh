@@ -133,15 +133,20 @@ EOF
 }
 
 anythingllm_desktop_entry() {
-	local entry="$HOME/.local/share/applications/anythingllmdesktop.desktop"
+	local entry="$HOME/.local/share/applications/anythingllmdesktop.desktop" target quoted
 	[[ -f $entry ]] && return 0
+	target=$ANYTHINGLLM_INSTALL_DIR/$ANYTHINGLLM_APP
+	# The desktop-entry spec quotes any Exec argument that leaves its safe
+	# character set and escapes \ " $ and ` inside it; an unquoted space in the
+	# install dir would end the executable name and the launcher would not open.
+	quoted="$(printf '%s' "$target" | sed -e 's/[\\$"`]/\\&/g')"
 	mkdir -p "$(dirname "$entry")" || return 0
 	cat >"$entry" <<EOF
 [Desktop Entry]
 StartupWMClass=anythingllm-desktop
 Type=Application
 Name=AnythingLLM Desktop
-Exec=$ANYTHINGLLM_INSTALL_DIR/$ANYTHINGLLM_APP
+Exec="$quoted"
 Icon=$HOME/.config/anythingllm-desktop/storage/icon.png
 Categories=Utility;
 EOF

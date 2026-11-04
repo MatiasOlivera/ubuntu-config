@@ -151,7 +151,7 @@ apparmor_enabled() { [[ -f /sys/kernel/security/apparmor/profiles ]]; }
 rm -f "$STUB_DIR/sudo-calls"
 out=$(call install 2>&1); rc=$?
 if [[ $rc -eq 0 && -x $APP && $(version_of) == "1.19.0" &&
-	$(grep -c "^Exec=.*$ASSET$" "$DESKTOP") -eq 1 &&
+	$(grep -cE "^Exec=\"[^\"]*$ASSET\"$" "$DESKTOP") -eq 1 &&
 	! -e "$HOME/Applications/$ASSET.part" ]]; then
 	pass "fresh install verifies, installs and reports 1.19.0"
 else
@@ -269,7 +269,21 @@ else
 	pass "empty marker does not report installed"
 fi
 
-# U12. versions.sh reports the row end to end on a closed PATH.
+# U12. An install dir with a space still launches: the desktop-entry spec
+# requires quoting an Exec argument that leaves its safe set, so an unquoted
+# path would end the executable name at the space.
+SPACED="$HOME/My Apps"
+mkdir -p "$SPACED"
+rm -f "$DESKTOP"
+out=$(ANYTHING_LLM_INSTALL_DIR="$SPACED" PATH="$T/bin:$T/sysbin" bash "$SRC" install 2>&1); rc=$?
+if [[ $rc -eq 0 && -x "$SPACED/$ASSET" &&
+	$(grep -c "^Exec=\"$SPACED/$ASSET\"$" "$DESKTOP") -eq 1 ]]; then
+	pass "spaced install dir yields a quoted launcher entry"
+else
+	fail "spaced install dir yields a quoted launcher entry (rc=$rc out=$out entry=$(cat "$DESKTOP" 2>/dev/null | grep '^Exec'))"
+fi
+
+# U13. versions.sh reports the row end to end on a closed PATH.
 set_release "$ASSET" "$GOOD_SHA"
 rm -f "$MARKER"
 call install >/dev/null 2>&1
