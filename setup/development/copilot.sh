@@ -8,7 +8,19 @@ install_copilot() {
         printf 'skip: copilot already installed (%s)\n' "$installed_ver"
         return 0
     fi
-    curl -fsSL https://gh.io/copilot-install | bash
+    local tmp rc
+    tmp="$(mktemp)" || return 1
+    if ! curl -fsSL https://gh.io/copilot-install -o "$tmp"; then
+        rm -f "$tmp"
+        return 1
+    fi
+    if bash "$tmp"; then
+        rc=0
+    else
+        rc=$?
+    fi
+    rm -f "$tmp"
+    return "$rc"
 }
 
 copilot_version() {
