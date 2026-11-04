@@ -59,13 +59,22 @@ apt_candidates() { apt-mark showmanual 2>/dev/null | sort -u; }
 snap_candidates() { snap list 2>/dev/null | awk 'NR>1 {print $1}' | sort -u; }
 flatpak_candidates() { flatpak list --app --columns=application 2>/dev/null | sort -u; }
 appimage_candidates() {
-	local d
+	local d line
 	for d in "$HOME/Applications" "$HOME/.local/bin" /opt /usr/local/bin; do
 		[[ -d $d ]] && find "$d" -maxdepth 2 -type f -iname '*.AppImage' 2>/dev/null
 	done
 	grep -rhEi '^Exec=.*\.(AppImage|appimage)' \
 		"$HOME/.local/share/applications" /usr/share/applications 2>/dev/null |
-		sed -E 's/.*Exec=//; s/ .*$//'
+		while IFS= read -r line; do
+			line=${line#*Exec=}
+			if [[ $line == '"'* ]]; then
+				line=${line#\"}
+				line=${line%%\"*}
+			else
+				line=${line%% *}
+			fi
+			printf '%s\n' "$line"
+		done
 }
 
 version_apt() { dpkg-query -W -f='${Version}' "$1" 2>/dev/null; }
@@ -78,7 +87,8 @@ trap 'rm -rf "$tmpdir"' EXIT
 apt_candidates | grep -vFxf <(managed_apt | sort -u) | grep -vFxf "$BASELINE" >"$tmpdir/apt"
 snap_candidates | grep -vE "$snap_base" | grep -vFxf <(managed_snap | sort -u) >"$tmpdir/snap"
 flatpak_candidates | grep -vFxf <(managed_flatpak | sort -u) >"$tmpdir/flatpak"
-appimage_candidates | xargs -r -n1 basename | sort -u | grep -vFxf <(managed_appimage | sort -u) >"$tmpdir/appimage"
+appimage_candidates | while IFS= read -r p; do basename -- "$p"; done |
+	sort -u | grep -vFxf <(managed_appimage | sort -u) >"$tmpdir/appimage"
 
 section "apt"
 if [[ -s $tmpdir/apt ]]; then
