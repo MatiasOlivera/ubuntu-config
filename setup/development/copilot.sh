@@ -69,9 +69,11 @@ copilot_install_verified() {
     else
         sudo install -m 0755 "$tmp/copilot" "$install_dir/copilot" || exit 1
     fi
-    printf 'installed: copilot %s to %s\n' \
-        "$("$install_dir/copilot" --version 2>/dev/null | head -n 1 | grep .)" \
-        "$install_dir/copilot"
+    # A copy that cannot execute (e.g. noexec mount) must not report success.
+    local ver
+    ver="$("$install_dir/copilot" --version 2>/dev/null | head -n 1 | grep .)" ||
+        { printf 'error: copilot: installed binary failed to run: %s\n' "$install_dir/copilot" >&2; exit 1; }
+    printf 'installed: copilot %s to %s\n' "$ver" "$install_dir/copilot"
 }
 
 copilot_version() {

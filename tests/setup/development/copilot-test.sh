@@ -183,6 +183,24 @@ else
 	fail "unsupported architecture (rc=$RC err=[$ERR])"
 fi
 
+# 7. Checksum-valid but un-runnable binary (e.g. noexec target): the copy
+# succeeds yet the step must not report success.
+fresh_release
+printf '#!/usr/bin/env bash\nexit 3\n' > "$T/payload/copilot"
+chmod +x "$T/payload/copilot"
+tar -czf "$T/release/copilot-linux-x64.tar.gz" -C "$T/payload" copilot
+tar -czf "$T/release/copilot-linux-arm64.tar.gz" -C "$T/payload" copilot
+( cd "$T/release" &&
+	sha256sum copilot-linux-x64.tar.gz copilot-linux-arm64.tar.gz \
+	> SHA256SUMS.txt )
+call
+if [[ $RC -ne 0 && $ERR == *"failed to run"* &&
+	$OUT != *"installed: copilot"* ]]; then
+	pass "un-runnable installed binary reports failure"
+else
+	fail "un-runnable installed binary (rc=$RC out=[$OUT] err=[$ERR])"
+fi
+
 if (( FAILURES )); then
 	printf '%d failure(s)\n' "$FAILURES" >&2
 	exit 1
