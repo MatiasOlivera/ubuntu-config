@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+source "$(dirname "${BASH_SOURCE[0]}")/../helpers/dispatcher.sh"
+
 install_spotify() {
 	local installed_ver
 	if installed_ver="$(spotify_version 2>/dev/null)"; then
@@ -17,3 +19,7 @@ install_spotify_repository() {
 spotify_version() {
 	dpkg -s spotify-client 2>/dev/null | grep "^Version:"
 }
+
+if [[ ${BASH_SOURCE[0]} == "$0" ]]; then
+	dispatch_command "$@"
+fi

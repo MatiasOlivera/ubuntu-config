@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+source "$(dirname "${BASH_SOURCE[0]}")/../helpers/dispatcher.sh"
+
 fonts_dependencies() {
 	sudo apt install -y unzip fontconfig
 }
@@ -36,3 +38,7 @@ fonts_version() {
 		fc-list 2>/dev/null | grep -qi "meslo" &&
 		echo present
 }
+
+if [[ ${BASH_SOURCE[0]} == "$0" ]]; then
+	dispatch_command "$@"
+fi

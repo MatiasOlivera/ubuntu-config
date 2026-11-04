@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+source "$(dirname "${BASH_SOURCE[0]}")/../helpers/dispatcher.sh"
+
 install_timeshift() {
 	local installed_ver
 	if installed_ver="$(timeshift_version 2>/dev/null)"; then
@@ -12,3 +14,7 @@ install_timeshift() {
 timeshift_version() {
 	timeshift --version 2>/dev/null | head -n 1 | grep .
 }
+
+if [[ ${BASH_SOURCE[0]} == "$0" ]]; then
+	dispatch_command "$@"
+fi

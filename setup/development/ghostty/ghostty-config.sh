@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+source "$(dirname "${BASH_SOURCE[0]}")/../../helpers/dispatcher.sh"
+
 config_ghostty() {
     # Set ghostty as the default terminal emulator
     # Open with shortcut `Ctrl + Alt + T`
@@ -7,5 +9,5 @@ config_ghostty() {
 }
 
 if [[ ${BASH_SOURCE[0]} == "$0" ]]; then
-    config_ghostty
+	dispatch_command "$@"
 fi

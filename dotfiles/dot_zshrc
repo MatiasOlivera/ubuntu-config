@@ -157,3 +157,10 @@ alias opencode-config="code ~/.config/opencode/opencode.json"
 # bun
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
+
+# Agent API keys come from GNOME Keyring (see docs/runbooks/agent-credentials-runbook.md), never stored here
+if command -v secret-tool >/dev/null; then
+  export GITHUB_PAT_FOR_CODING_AGENTS="$(secret-tool lookup service github-mcp account personal-access-token 2>/dev/null)"
+  export OPENCODE_API_KEY="$(secret-tool lookup service opencode account api-key 2>/dev/null)"
+  export SOFA_API_KEY="$(secret-tool lookup service sofa account api-key 2>/dev/null)"
+fi

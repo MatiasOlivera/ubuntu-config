@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+source "$(dirname "${BASH_SOURCE[0]}")/../helpers/dispatcher.sh"
+
 install_discord() {
 	local installed_ver
 	if installed_ver="$(discord_version 2>/dev/null)"; then
@@ -14,3 +16,7 @@ install_discord() {
 discord_version() {
 	dpkg -s discord 2>/dev/null | grep "^Version:"
 }
+
+if [[ ${BASH_SOURCE[0]} == "$0" ]]; then
+	dispatch_command "$@"
+fi

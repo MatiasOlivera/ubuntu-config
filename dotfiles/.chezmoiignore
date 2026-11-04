@@ -32,3 +32,6 @@ _netrc
 .zsh_history
 .bash_history
 .cache/**
+# agy github MCP header holds a literal PAT (no env expansion upstream);
+# host-owned via `agy mcp add`, chezmoi must never overwrite it
+.gemini/config/mcp_config.json

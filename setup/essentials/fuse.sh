@@ -1,5 +1,7 @@
 #! /bin/bash
 
+source "$(dirname "${BASH_SOURCE[0]}")/../helpers/dispatcher.sh"
+
 install_fuse() {
     local installed_ver
     if installed_ver="$(fuse_version 2>/dev/null)"; then
@@ -13,3 +15,7 @@ install_fuse() {
 fuse_version() {
     dpkg -s libfuse2t64 2>/dev/null | grep "^Version:"
 }
+
+if [[ ${BASH_SOURCE[0]} == "$0" ]]; then
+	dispatch_command "$@"
+fi

@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+source "$(dirname "${BASH_SOURCE[0]}")/../../helpers/dispatcher.sh"
+
 install_oh_my_zsh_theme() {
     local installed_ver
     if installed_ver="$(oh_my_zsh_theme_version 2>/dev/null)"; then
@@ -12,3 +14,7 @@ install_oh_my_zsh_theme() {
 oh_my_zsh_theme_version() {
     [ -d "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k" ] && echo present
 }
+
+if [[ ${BASH_SOURCE[0]} == "$0" ]]; then
+	dispatch_command "$@"
+fi

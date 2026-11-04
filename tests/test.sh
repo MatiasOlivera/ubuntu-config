@@ -95,6 +95,7 @@ done
 for f in "${ALL_SCRIPTS[@]}"; do
 	case "$f" in
 	"$SETUP_DIR/install.sh" | "$SETUP_DIR/post-install.sh") continue ;;
+	"$SETUP_DIR/helpers/"*) continue ;;
 	esac
 	if grep -qF "$(basename "$f")" "$SETUP_DIR/install.sh" "$SETUP_DIR/post-install.sh"; then
 		pass "sourced $f"
@@ -109,6 +110,7 @@ done
 for f in "${ALL_SCRIPTS[@]}"; do
 	case "$f" in
 	"$SETUP_DIR/install.sh" | "$SETUP_DIR/post-install.sh") continue ;;
+	"$SETUP_DIR/helpers/"*) continue ;;
 	esac
 	if funcs="$(bash -c 'source "$1" && declare -F' _ "$f" 2>/dev/null)" &&
 		printf '%s\n' "$funcs" | grep -qE 'declare -f (install_|config_)'; then
@@ -138,6 +140,16 @@ if command -v shellcheck >/dev/null 2>&1; then
 else
 	printf 'skip: shellcheck (not installed)\n'
 fi
+
+# 6. functional tests: every *-test.sh under tests/ must exit 0.
+# Stubs included: tests must mock secrets/network (never touch the real thing).
+while IFS= read -r f; do
+	if bash "$f"; then
+		pass "functional $f"
+	else
+		fail "functional $f"
+	fi
+done < <(find "$ROOT/tests" -name '*-test.sh' -not -path "$ROOT/.git/*" | sort)
 
 # Phase 2 — Multipass e2e on a fresh Ubuntu VM (only with --vm).
 # Skipped when Phase 1 failed: never boot a VM on a broken tree.

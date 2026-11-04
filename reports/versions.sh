@@ -37,37 +37,47 @@ src essentials/flatpak.sh
 src essentials/pulseaudio-utils.sh
 src essentials/fuse.sh
 src essentials/synaptic.sh
-src essentials/python3/python3-pip.sh
-src essentials/python3/python3-pipx.sh
+src essentials/pip.sh
+src essentials/pipx.sh
+src essentials/keyring.sh
 src essentials/chezmoi.sh
 src desktop-apps/timeshift.sh
 src desktop-apps/fsearch.sh
 src desktop-apps/chrome.sh
-src desktop-apps/obs/obs.sh
+src desktop-apps/obs.sh
 src desktop-apps/obsidian.sh
 src desktop-apps/spotify.sh
 src desktop-apps/discord.sh
 src desktop-apps/handy/handy.sh
-src development/git/git.sh
+src desktop-apps/orca.sh
+src desktop-apps/gnome-extensions/gnome-browser-connector.sh
+src desktop-apps/gnome-extensions/deja-vu.sh
+src development/git.sh
+src development/github-cli.sh
 src development/cursor.sh
 src development/gitkraken.sh
 src development/vscode.sh
 src development/fonts.sh
 src development/docker.sh
+src development/sbx.sh
 src development/postman.sh
 src development/beekeeper-studio.sh
 src development/zsh/zsh.sh
 src development/zoxide.sh
-src development/opencode/opencode.sh
+src development/uv.sh
+src development/opencode.sh
+src development/openusage.sh
 src development/ghostty/ghostty.sh
 src development/oh-my-zsh/oh-my-zsh.sh
 src development/oh-my-zsh/plugins.sh
 src development/oh-my-zsh/theme.sh
-src development/antigravity-cli/antigravity-cli.sh
+src development/antigravity-cli.sh
 src development/fnm/install-fnm.sh
 src development/fnm/fnm-config.sh
 src development/ollama.sh
 src development/homebrew.sh
+src development/bitwarden-cli.sh
+src development/copilot.sh
 
 chk "curl" curl_version
 chk "make" make_version
@@ -77,6 +87,7 @@ chk "fuse" fuse_version
 chk "synaptic" synaptic_version
 chk "pip" pip_version
 chk "pipx" pipx_version
+chk "libsecret-tools" keyring_version
 chk "timeshift" timeshift_version
 chk "fsearch" fsearch_version
 chk "chrome" chrome_version
@@ -86,7 +97,11 @@ chk "obsidian" obsidian_version
 chk "spotify" spotify_version
 chk "discord" discord_version
 chk "handy" handy_version
+chk "orca" orca_version
+chk "gnome-browser-connector" gnome_browser_connector_version
+chk "deja-vu" deja_vu_version
 chk "git" git_version
+chk "github-cli" github_cli_version
 chk "chezmoi" chezmoi_version
 chk "cursor" cursor_cli_version
 chk "cursor-ide" cursor_version
@@ -95,11 +110,14 @@ chk "vscode" vscode_version
 chk "fonts" fonts_version
 chk "docker" docker_version
 chk "docker-compose" docker_compose_version
+chk "sbx" sbx_version
 chk "postman" postman_version
 chk "beekeeper" beekeeper_studio_version
 chk "zsh" zsh_version
 chk "zoxide" zoxide_version
+chk "uv" uv_version
 chk "opencode" opencode_version
+chk "openusage" openusage_version
 chk "ghostty" ghostty_version
 chk "oh-my-zsh" oh_my_zsh_version
 chk "zsh-plugins" oh_my_zsh_plugins_version
@@ -109,6 +127,8 @@ chk "fnm" fnm_version
 chk "node" node_version
 chk "ollama" ollama_version
 chk "homebrew" brew_version
+chk "bitwarden-cli" bitwarden_cli_version
+chk "copilot" copilot_version
 
 printf '\n| Config | Status |\n'
 printf '|---|---|\n'

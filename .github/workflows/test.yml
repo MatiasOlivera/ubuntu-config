@@ -1,0 +1,27 @@
+name: test
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  static:
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install shellcheck (so the gate never skips)
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends shellcheck
+      - run: ./tests/test.sh
+
+  docker-isolated:
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - run: docker compose -f tests/compose.yml run --rm test

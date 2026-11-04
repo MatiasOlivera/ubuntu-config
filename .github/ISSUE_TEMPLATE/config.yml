@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: README Quickstart
+    url: https://github.com/MatiasOlivera/ubuntu-config/blob/main/README.md#quickstart
+    about: Setup and run instructions before filing an issue.
+  - name: Past decisions
+    url: https://github.com/MatiasOlivera/ubuntu-config/tree/main/docs/decisions
+    about: Check recorded MADRs — the "why" may already be answered.

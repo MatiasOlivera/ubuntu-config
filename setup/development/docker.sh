@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+source "$(dirname "${BASH_SOURCE[0]}")/../helpers/dispatcher.sh"
+
 docker_dependencies() {
     sudo apt install -y ca-certificates util-linux-extra
 }
@@ -53,3 +55,7 @@ docker_version() {
 docker_compose_version() {
     docker compose version 2>/dev/null | head -n 1 | grep .
 }
+
+if [[ ${BASH_SOURCE[0]} == "$0" ]]; then
+	dispatch_command "$@"
+fi

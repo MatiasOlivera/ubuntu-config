@@ -1,5 +1,296 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "plugin": ["@dietrichgebert/ponytail"],
-  "lsp": true
+  "model": "opencode/deepseek-v4.1-flash-free",
+  "mcp": {
+    "servers": {
+      "github": {
+        "type": "remote",
+        "url": "https://api.githubcopilot.com/mcp/readonly",
+        "oauth": false,
+        "headers": {
+          "Authorization": "Bearer {env:GITHUB_PAT_FOR_CODING_AGENTS}"
+        },
+        "disabled": false
+      },
+      "sofa": {
+        "type": "remote",
+        "url": "https://agents.stackoverflow.com/mcp",
+        "oauth": false,
+        "headers": {
+          "Authorization": "Bearer {env:SOFA_API_KEY}"
+        },
+        "disabled": false
+      }
+    }
+  },
+  "permissions": [
+    {
+      "action": "shell",
+      "resource": "*",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "git commit",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "git commit *",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "git push",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "git push *",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "gh release create *",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "rm -rf*",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "rm -fr*",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "rm -Rf*",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "rm -r -f *",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "rm -f -r *",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "rm --recursive --force *",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "rm --force --recursive *",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "rm --recursive -f *",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "rm -f --recursive *",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "rm -r --force *",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "rm --force -r *",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "rm -rf /tmp/*",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "rm -fr /tmp/*",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "rm -rf /tmp/* *",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "rm -fr /tmp/* *",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "rm *..*",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "sudo *",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "git push --force*",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "git push -f *",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "git reset --hard *",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "git clean -f*",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "chmod 777 *",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "mkfs*",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "dd if=*",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "shutdown",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "shutdown *",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "reboot",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "reboot *",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "docker system prune *",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "bun publish*",
+      "effect": "deny"
+    },
+    {
+      "action": "edit",
+      "resource": "*",
+      "effect": "allow"
+    },
+    {
+      "action": "edit",
+      "resource": "*.env",
+      "effect": "deny"
+    },
+    {
+      "action": "edit",
+      "resource": "*.env.*",
+      "effect": "deny"
+    },
+    {
+      "action": "edit",
+      "resource": "credentials/**",
+      "effect": "deny"
+    },
+    {
+      "action": "edit",
+      "resource": "~/.config/opencode/**",
+      "effect": "deny"
+    },
+    {
+      "action": "edit",
+      "resource": "~/.claude/**",
+      "effect": "deny"
+    },
+    {
+      "action": "webfetch",
+      "resource": "*",
+      "effect": "allow"
+    },
+    {
+      "action": "external_directory",
+      "resource": "*",
+      "effect": "ask"
+    },
+    {
+      "action": "external_directory",
+      "resource": "~/Documents/Projects/**",
+      "effect": "allow"
+    },
+    {
+      "action": "external_directory",
+      "resource": "/tmp/**",
+      "effect": "allow"
+    }
+  ],
+  "agents": {
+    "title": {
+      "model": "opencode/minimax-m3.1-flash-free"
+    }
+  },
+  "plugins": [
+    "@dietrichgebert/ponytail"
+  ],
+  "providers": {
+    "opencode": {
+      "settings": {
+        "apiKey": "{env:OPENCODE_API_KEY}"
+      }
+    },
+    "ollama": {
+      "name": "Ollama (local)",
+      "models": {
+        "qwen3.5:9b": {
+          "name": "Qwen 3.5 9B",
+          "limit": {
+            "context": 65536,
+            "output": 8192
+          }
+        },
+        "qwen3.5:2b": {
+          "name": "Qwen 3.5 2B",
+          "limit": {
+            "context": 65536,
+            "output": 8192
+          }
+        }
+      },
+      "package": "aisdk:@ai-sdk/openai-compatible",
+      "settings": {
+        "baseURL": "http://localhost:11434/v1"
+      }
+    }
+  }
 }
