@@ -46,7 +46,8 @@ managed_flatpak() {
 		sort -u
 }
 
-# AppImage filenames literally referenced in setup/*.sh (none today).
+# AppImage filenames literally referenced in setup/*.sh (e.g. the AnythingLLM
+# Desktop artifact that setup/desktop-apps/anythingllm.sh downloads).
 managed_appimage() {
 	grep -rhoIE '[A-Za-z0-9._-]+\.(appimage|AppImage)' "$SETUP_DIR" 2>/dev/null |
 		sort -u
@@ -77,7 +78,7 @@ trap 'rm -rf "$tmpdir"' EXIT
 apt_candidates | grep -vFxf <(managed_apt | sort -u) | grep -vFxf "$BASELINE" >"$tmpdir/apt"
 snap_candidates | grep -vE "$snap_base" | grep -vFxf <(managed_snap | sort -u) >"$tmpdir/snap"
 flatpak_candidates | grep -vFxf <(managed_flatpak | sort -u) >"$tmpdir/flatpak"
-appimage_candidates | sort -u | grep -vFxf <(managed_appimage | sort -u) >"$tmpdir/appimage"
+appimage_candidates | xargs -r -n1 basename | sort -u | grep -vFxf <(managed_appimage | sort -u) >"$tmpdir/appimage"
 
 section "apt"
 if [[ -s $tmpdir/apt ]]; then
