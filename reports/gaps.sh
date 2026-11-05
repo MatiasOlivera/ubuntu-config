@@ -46,7 +46,8 @@ managed_flatpak() {
 		sort -u
 }
 
-# AppImage filenames literally referenced in setup/*.sh (none today).
+# AppImage filenames literally referenced in setup/*.sh (e.g. the AnythingLLM
+# Desktop artifact that setup/desktop-apps/anythingllm.sh downloads).
 managed_appimage() {
 	grep -rhoIE '[A-Za-z0-9._-]+\.(appimage|AppImage)' "$SETUP_DIR" 2>/dev/null |
 		sort -u
@@ -57,14 +58,43 @@ snap_base='^(bare|core[0-9]*|gnome-[0-9-]+|gtk-common-themes|mesa-[0-9]+|snapd.*
 apt_candidates() { apt-mark showmanual 2>/dev/null | sort -u; }
 snap_candidates() { snap list 2>/dev/null | awk 'NR>1 {print $1}' | sort -u; }
 flatpak_candidates() { flatpak list --app --columns=application 2>/dev/null | sort -u; }
+# Desktop-entry Exec quoting: a quoted argument escapes \ " $ and ` with a
+# backslash, so the argument ends at the first *unescaped* quote. Taking the
+# path up to any quote turns `My\"Apps/Weird Name.AppImage` into `My\`.
+appimage_exec_path() {
+	local value=${1#*Exec=} out="" char i escaped=0
+	if [[ $value != '"'* ]]; then
+		printf '%s\n' "${value%% *}"
+		return
+	fi
+	value=${value#\"}
+	for ((i = 0; i < ${#value}; i++)); do
+		char=${value:i:1}
+		if ((escaped)); then
+			[[ $char == '\' || $char == '"' || $char == '$' || $char == '`' ]] || out+='\'
+			out+=$char
+			escaped=0
+		elif [[ $char == '\' ]]; then
+			escaped=1
+		elif [[ $char == '"' ]]; then
+			break
+		else
+			out+=$char
+		fi
+	done
+	printf '%s\n' "$out"
+}
+
 appimage_candidates() {
-	local d
+	local d line
 	for d in "$HOME/Applications" "$HOME/.local/bin" /opt /usr/local/bin; do
 		[[ -d $d ]] && find "$d" -maxdepth 2 -type f -iname '*.AppImage' 2>/dev/null
 	done
 	grep -rhEi '^Exec=.*\.(AppImage|appimage)' \
 		"$HOME/.local/share/applications" /usr/share/applications 2>/dev/null |
-		sed -E 's/.*Exec=//; s/ .*$//'
+		while IFS= read -r line; do
+			appimage_exec_path "$line"
+		done
 }
 
 version_apt() { dpkg-query -W -f='${Version}' "$1" 2>/dev/null; }
@@ -77,7 +107,8 @@ trap 'rm -rf "$tmpdir"' EXIT
 apt_candidates | grep -vFxf <(managed_apt | sort -u) | grep -vFxf "$BASELINE" >"$tmpdir/apt"
 snap_candidates | grep -vE "$snap_base" | grep -vFxf <(managed_snap | sort -u) >"$tmpdir/snap"
 flatpak_candidates | grep -vFxf <(managed_flatpak | sort -u) >"$tmpdir/flatpak"
-appimage_candidates | sort -u | grep -vFxf <(managed_appimage | sort -u) >"$tmpdir/appimage"
+appimage_candidates | while IFS= read -r p; do basename -- "$p"; done |
+	sort -u | grep -vFxf <(managed_appimage | sort -u) >"$tmpdir/appimage"
 
 section "apt"
 if [[ -s $tmpdir/apt ]]; then
