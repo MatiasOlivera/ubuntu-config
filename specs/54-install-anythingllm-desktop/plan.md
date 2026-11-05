@@ -114,6 +114,11 @@ Assertions are black-box: exit codes, stdout/stderr markers, filesystem state.
 Scenario coverage maps 1:1 to the spec, including the spaced install dir
 asserted on the quoted `Exec` value. Picked up automatically by `tests/test.sh`
 (`find tests -name '*-test.sh'`), no registration.
+`tests/reports/gaps-test.sh` is the report's own suite, added by the review: a
+fixture `HOME` with four launcher shapes (quoted path with a space, quoted path
+whose directory holds an escaped quote, unquoted path with arguments, the
+artifact setup installs) and stubbed package managers, asserted on the printed
+table so a mis-parse shows up as a failed row rather than a silent gap list.
 
 ## Sequencing
 
