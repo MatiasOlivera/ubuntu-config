@@ -56,8 +56,15 @@ Scenario: verified fresh install
   When the setup AnythingLLM step runs with access to the GitHub release API
   Then the arch-matched AppImage is installed and executable in ~/Applications
   And the installed bytes match the sha256 GitHub publishes for that release asset
-  And a launcher entry exists and points at the installed artifact
+  And a launcher entry exists whose quoted Exec argument names the installed
+  artifact
   And the step reports the installed version
+
+Scenario: install directory with a space still launches
+  Given the install directory path contains a space
+  When the setup AnythingLLM step runs
+  Then the launcher entry's Exec value quotes the path as a single argument
+  And the quoted value names the installed artifact
 
 Scenario: already installed skips without network
   Given AnythingLLM Desktop is installed and the version guard reports a version

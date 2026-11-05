@@ -63,7 +63,10 @@ Two files, both outside version control:
 Wire format consumed (read-only):
 
 - `$HOME/.local/share/applications/anythingllmdesktop.desktop` — INI keys taken
-  verbatim from upstream's installer so a hand edit stays recognizable.
+  from upstream's installer so a hand edit stays recognizable, except `Exec`,
+  which this script quotes: the desktop-entry spec requires quoting any argument
+  outside its safe character set (a space in the install dir would otherwise end
+  the executable name), and escapes `\`, `"`, `$` and backtick inside.
 - `/etc/apparmor.d/anythingllmdesktop` — profile text chosen by
   `apparmor_parser --version` major (≥4: `abi <abi/4.0>,` + `userns,`; else
   classic `#include`). Path pattern `/**/AnythingLLMDesktop.AppImage` keeps the
@@ -80,7 +83,7 @@ Publisher contract (outbound, GitHub REST):
   for a guard that never fires on reruns).
 - `GET https://github.com/Mintplex-Labs/anything-llm/releases/download/<tag>/<asset>`
   — the CDN-backed asset for the tag just resolved.
-- Host prerequisites: `curl`, `python3` (stdlib `json` only), `sha256sum`,
+- Host prerequisites: `curl`, `python3` (stdlib `json` only), `sha256sum`, `sed`,
   `uname`, `sudo` (only when writing the AppArmor profile). `python3` absence
   fails the step closed rather than installing unverified bytes.
 
@@ -101,12 +104,16 @@ Repo contract (inbound, per AGENTS.md / `install-package` skill):
 
 Test contract: `tests/setup/desktop-apps/anythingllm-test.sh` is hermetic,
 modeled on `gnome-extensions/deja-vu-test.sh` — `ANYTHINGLLM_SRC` override,
-sandboxed `HOME`/`TMPDIR`, closed PATH (`$T/bin` stubs for `curl`/`sudo`/
-`apparmor_parser`/`uname`, `$T/sysbin` coreutils symlinks), a
-`python3`-generated release-JSON fixture with a decoy asset, and a tiny real
-fixture whose `sha256sum` is computed for real. Assertions are black-box: exit
-codes, stdout/stderr markers, filesystem state. Picked up automatically by
-`tests/test.sh` (`find tests -name '*-test.sh'`), no registration.
+sandboxed `HOME`/`TMPDIR` with the installer's own knobs
+(`ANYTHING_LLM_INSTALL_DIR`, `XDG_STATE_HOME`) pinned inside it, so a developer
+who exports them cannot have the suite write the fake payload over their real
+install, closed PATH (`$T/bin` stubs for `curl`/`sudo`/`apparmor_parser`/`uname`,
+`$T/sysbin` coreutils symlinks), a `python3`-generated release-JSON fixture with
+a decoy asset, and a tiny real fixture whose `sha256sum` is computed for real.
+Assertions are black-box: exit codes, stdout/stderr markers, filesystem state.
+Scenario coverage maps 1:1 to the spec, including the spaced install dir
+asserted on the quoted `Exec` value. Picked up automatically by `tests/test.sh`
+(`find tests -name '*-test.sh'`), no registration.
 
 ## Sequencing
 
@@ -116,10 +123,14 @@ codes, stdout/stderr markers, filesystem state. Picked up automatically by
    absent-asset, arm64 and marker scenarios all fail against the empty repo.
 3. `setup/desktop-apps/anythingllm.sh` (green) + wiring in `install.sh`,
    `versions.sh`, `README.md`.
-4. `reports/gaps.sh` fix so the managed AppImage stops reporting as a gap.
+4. `reports/gaps.sh` fixes so the managed AppImage stops reporting as a gap:
+   candidates reduced to basenames line-wise (`xargs -n1` split paths on
+   spaces), and `Exec` parsing that keeps a quoted path whole — quoting `Exec`
+   in step 3 makes the old `s/ .*$//` cut produce a bogus candidate.
 5. Verify chain per AGENTS.md: static → docker-isolated → Multipass e2e.
-6. PR onto `develop`; three commits — feat (script, wiring, test), fix (gaps.sh),
-   docs (ADR + specs/).
+6. PR onto `develop`; commits split by concern — feat (script, wiring, test),
+   fix (gaps.sh), docs (ADR + specs/), then the review fixes as their own
+   revertable commits.
 
 ## Decisions
 
