@@ -58,6 +58,33 @@ snap_base='^(bare|core[0-9]*|gnome-[0-9-]+|gtk-common-themes|mesa-[0-9]+|snapd.*
 apt_candidates() { apt-mark showmanual 2>/dev/null | sort -u; }
 snap_candidates() { snap list 2>/dev/null | awk 'NR>1 {print $1}' | sort -u; }
 flatpak_candidates() { flatpak list --app --columns=application 2>/dev/null | sort -u; }
+# Desktop-entry Exec quoting: a quoted argument escapes \ " $ and ` with a
+# backslash, so the argument ends at the first *unescaped* quote. Taking the
+# path up to any quote turns `My\"Apps/Weird Name.AppImage` into `My\`.
+appimage_exec_path() {
+	local value=${1#*Exec=} out="" char i escaped=0
+	if [[ $value != '"'* ]]; then
+		printf '%s\n' "${value%% *}"
+		return
+	fi
+	value=${value#\"}
+	for ((i = 0; i < ${#value}; i++)); do
+		char=${value:i:1}
+		if ((escaped)); then
+			[[ $char == '\' || $char == '"' || $char == '$' || $char == '`' ]] || out+='\'
+			out+=$char
+			escaped=0
+		elif [[ $char == '\' ]]; then
+			escaped=1
+		elif [[ $char == '"' ]]; then
+			break
+		else
+			out+=$char
+		fi
+	done
+	printf '%s\n' "$out"
+}
+
 appimage_candidates() {
 	local d line
 	for d in "$HOME/Applications" "$HOME/.local/bin" /opt /usr/local/bin; do
@@ -66,14 +93,7 @@ appimage_candidates() {
 	grep -rhEi '^Exec=.*\.(AppImage|appimage)' \
 		"$HOME/.local/share/applications" /usr/share/applications 2>/dev/null |
 		while IFS= read -r line; do
-			line=${line#*Exec=}
-			if [[ $line == '"'* ]]; then
-				line=${line#\"}
-				line=${line%%\"*}
-			else
-				line=${line%% *}
-			fi
-			printf '%s\n' "$line"
+			appimage_exec_path "$line"
 		done
 }
 
