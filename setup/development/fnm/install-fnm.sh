@@ -131,8 +131,8 @@ fnm_install_verified() (
     fi
 
     entry="${asset%.zip}/fnm"
-    if ! unzip -p "$artifact" "$entry" > "$tmp/fnm"; then
-        if ! unzip -p "$artifact" fnm > "$tmp/fnm"; then
+    if ! unzip -p "$artifact" "$entry" > "$tmp/fnm" 2>/dev/null; then
+        if ! unzip -p "$artifact" fnm > "$tmp/fnm" 2>/dev/null; then
             printf 'error: fnm: archive has no fnm executable\n' >&2
             return 1
         fi

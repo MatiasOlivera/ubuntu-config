@@ -98,7 +98,10 @@ import zipfile
 try:
     with zipfile.ZipFile(sys.argv[1]) as archive:
         sys.stdout.buffer.write(archive.read(sys.argv[2]))
-except (KeyError, OSError, zipfile.BadZipFile):
+except KeyError:
+    print(f"caution: filename not matched: {sys.argv[2]}", file=sys.stderr)
+    sys.exit(1)
+except (OSError, zipfile.BadZipFile):
     sys.exit(1)
 PYEOF
 	;;
@@ -220,7 +223,7 @@ assert_install() {
 	call_installer
 	if [[ $RC -eq 0 && -x $binary &&
 		$OUT == *"installed: fnm"* && $("$binary" --version) == "fnm fixture 9.9.9" ]] &&
-		cmp -s "$binary" "$STUB_DIR/fnm-fixture" &&
+		cmp -s "$binary" "$STUB_DIR/fnm-fixture" && [[ ! -s $T/stderr ]] &&
 		grep -Fxq "https://api.github.com/repos/Schniz/fnm/releases/latest" "$STUB_DIR/curl-calls" &&
 		[[ $(wc -l < "$STUB_DIR/curl-calls") -eq 2 ]] &&
 		grep -Fxq "https://github.com/Schniz/fnm/releases/download/v9.9.9/$asset" "$STUB_DIR/curl-calls"; then
@@ -255,7 +258,7 @@ assert_install armv7l fnm-arm32.zip
 # 3. The root-entry ZIP layout used by some releases is accepted too.
 prepare_case x86_64 root
 call_installer
-if [[ $RC -eq 0 && -x $(binary_path) ]]; then
+if [[ $RC -eq 0 && -x $(binary_path) && ! -s $T/stderr ]]; then
 	pass "root-entry ZIP layout installs"
 else
 	fail "root-entry ZIP layout (rc=$RC err=[$ERR])"
