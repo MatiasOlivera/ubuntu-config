@@ -24,6 +24,16 @@ such as installation or package components.
 
 ## 2. Follow the script contract
 
+- **Artifact integrity**: before adding or updating a setup artifact, inspect
+  the maintainer's official distribution channels for checksums or signatures
+  covering that exact artifact. Use usable maintainer-published material when
+  available. If none is available, use the GitHub release asset SHA-256 digest
+  when available. If neither source has usable material, fail closed and
+  record an explicit exception decision; never accept unverified bytes or use
+  a self-authored hash pin. Record the artifact/version, sources checked,
+  material found, and the reason for any GitHub fallback in the issue or PR.
+  See [`0007-artifact-integrity-source-priority.md`](../../../docs/decisions/0007-artifact-integrity-source-priority.md).
+
 - Single-purpose script defining one `install_<pkg>()` or `config_<pkg>()`.
 - **Adding an apt source**: define `install_<pkg>_repository()` separately — sources/keys only, **no** `apt update`, no installs. Wired into the repositories phase so the single `apt update` in `install.sh` covers it. Overwrite the `.sources` file (never append) for rerun-safety (see `development/docker.sh`).
 - **Heavy install**: define `<stem>_version()` — fast, exit 0 iff installed, exactly one output line — as the single source of truth. Gate the install step on it:
