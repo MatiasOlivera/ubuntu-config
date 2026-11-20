@@ -43,7 +43,10 @@ The verified path, inside `uv_install_verified "$tmp"`:
 `$HOME/.local/bin` PATH prepend used by both the skip guard and the report.
 
 `tests/setup/development/uv-test.sh` is a black-box hermetic suite in the
-style of `copilot-test.sh`: stub `curl` (fixture release JSON, `.sha256`, and
+style of `copilot-test.sh`. The metadata helper has its own pure unit test at
+`tests/python/test_uv_release.py`, discovered by the repository's Python
+runner (`python3 -m unittest discover -s tests/python -v`) and not called from
+the bash suite. Stub `curl` (fixture release JSON, `.sha256`, and
 a tarball built with real `tar`/`sha256sum`), stub `uname` and a failing `uv`
 on PATH, sandbox `HOME`/`TMPDIR`/install dir, and assert only exit codes,
 stdout/stderr markers, files, and the curl call log. Real `python3`, `tar`,
