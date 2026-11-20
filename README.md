@@ -113,6 +113,11 @@ Report-only list of host-installed apps not tracked by this repo (apt, snap, fla
 
 Baseline: `reports/baselines/ubuntu-26.04.1-desktop-manifest.txt` (names from `https://releases.ubuntu.com/26.04/ubuntu-26.04.1-desktop-amd64.manifest`). See [Updating to a new Ubuntu version](#updating-to-a-new-ubuntu-version) to refresh it after a release bump.
 
+## Security
+
+See [integrity exceptions](docs/integrity-exceptions.md) for setup tools that
+are intentionally retained without publisher-provided integrity material.
+
 ## Updating to a new Ubuntu version
 
 When the repo moves to a newer Ubuntu release:
