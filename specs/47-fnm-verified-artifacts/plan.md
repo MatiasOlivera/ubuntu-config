@@ -45,7 +45,8 @@ None. The release API JSON is consumed as transient metadata only.
   a partial download, accept missing integrity data, or use a self-recorded
   hash.
 - Supported Linux mapping: `x86_64`/`amd64` → `fnm-linux.zip`;
-  `aarch64`/`arm64` → `fnm-arm64.zip`; `arm`/`armv7*` → `fnm-arm32.zip`.
+  `aarch*`/`arm64`/`armv8*` → `fnm-arm64.zip`; `arm`/`armv7*` →
+  `fnm-arm32.zip`.
 - Observable failures name the cause: unsupported architecture, release
   metadata unavailable, asset absent, integrity data absent or malformed,
   artifact download failure, checksum mismatch, invalid ZIP, or missing `fnm`

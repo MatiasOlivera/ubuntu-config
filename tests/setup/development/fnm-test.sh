@@ -31,7 +31,7 @@ export STUB_DIR="$T/stubs"
 
 # Closed set of real tools used by the installer. Network, sudo, uname, and
 # unzip are provided by local stubs in $T/bin.
-for b in awk basename bash cat chmod cp dirname env find grep head ln mkdir mktemp mv python3 rm sha256sum tr uname; do
+for b in awk basename bash cat chmod cmp cp dirname env find grep head ln mkdir mktemp mv python3 rm sha256sum tr uname; do
 	ln -s "$(command -v "$b")" "$T/sysbin/$b"
 done
 
@@ -75,13 +75,13 @@ EOF
 cat > "$T/bin/sudo" <<'EOF'
 #!/usr/bin/env bash
 printf '%s\n' "$*" >> "$STUB_DIR/sudo-calls"
+[[ ! -f $STUB_DIR/fail-sudo ]] || exit 1
 exit 0
 EOF
 
 cat > "$T/bin/uname" <<'EOF'
 #!/usr/bin/env bash
 case $1 in
-	-s) printf 'Linux\n' ;;
 	-m) printf '%s\n' "${FNM_TEST_ARCH:-x86_64}" ;;
 	*) exit 2 ;;
 esac
@@ -89,8 +89,10 @@ EOF
 
 cat > "$T/bin/unzip" <<'EOF'
 #!/usr/bin/env bash
-[[ $1 == -p && $# -eq 3 ]] || exit 2
-python3 - "$2" "$3" <<'PYEOF'
+case $1 in
+-p)
+	[[ $# -eq 3 ]] || exit 2
+	python3 - "$2" "$3" <<'PYEOF'
 import sys
 import zipfile
 try:
@@ -99,6 +101,22 @@ try:
 except (KeyError, OSError, zipfile.BadZipFile):
     sys.exit(1)
 PYEOF
+	;;
+-tqq)
+	[[ $# -eq 2 ]] || exit 2
+	python3 - "$2" <<'PYEOF'
+import sys
+import zipfile
+try:
+    with zipfile.ZipFile(sys.argv[1]) as archive:
+        if archive.testzip() is not None:
+            sys.exit(1)
+except (OSError, zipfile.BadZipFile):
+    sys.exit(1)
+PYEOF
+	;;
+*) exit 2 ;;
+esac
 EOF
 chmod +x "$T/bin/"*
 
@@ -106,12 +124,15 @@ make_artifact() {
 	local asset=$1 layout=${2:-nested} member
 	member="${asset%.zip}/fnm"
 	[[ $layout == root ]] && member=fnm
-	python3 - "$STUB_DIR/artifact.zip" "$member" <<'PYEOF'
+	python3 - "$STUB_DIR/artifact.zip" "$STUB_DIR/fnm-fixture" "$member" <<'PYEOF'
 import sys
 import zipfile
+out, expected, member = sys.argv[1:]
 payload = b"#!/usr/bin/env bash\nprintf 'fnm fixture 9.9.9\\n'\n"
-with zipfile.ZipFile(sys.argv[1], "w", zipfile.ZIP_STORED) as archive:
-    archive.writestr(sys.argv[2], payload)
+with open(expected, "wb") as f:
+    f.write(payload)
+with zipfile.ZipFile(out, "w", zipfile.ZIP_STORED) as archive:
+    archive.writestr(member, payload)
 PYEOF
 }
 
@@ -152,7 +173,8 @@ fresh_case() {
 	rm -rf "$T/home" "$T/tmp"
 	mkdir -p "$T/home" "$T/tmp"
 	rm -f "$STUB_DIR/curl-calls" "$STUB_DIR/sudo-calls" \
-		"$STUB_DIR/fail-api" "$STUB_DIR/fail-asset" "$STUB_DIR/tamper-asset"
+		"$STUB_DIR/fail-api" "$STUB_DIR/fail-asset" "$STUB_DIR/fail-sudo" \
+		"$STUB_DIR/tamper-asset"
 }
 
 prepare_case() {
@@ -160,7 +182,7 @@ prepare_case() {
 	fresh_case
 	case $arch in
 		x86_64 | amd64) asset=fnm-linux.zip ;;
-		aarch64 | arm64) asset=fnm-arm64.zip ;;
+		aarch* | arm64 | armv8*) asset=fnm-arm64.zip ;;
 		arm | armv7*) asset=fnm-arm32.zip ;;
 		*) asset=fnm-linux.zip ;;
 	esac
@@ -174,7 +196,7 @@ call_installer() {
 	ERR=""
 	RC=0
 	if OUT="$(env PATH="$T/bin:$T/sysbin" HOME="$T/home" TMPDIR="$T/tmp" \
-		STUB_DIR="$STUB_DIR" FNM_TEST_ARCH="$FNM_TEST_ARCH" DISPATCH_PACKAGE=fnm \
+		STUB_DIR="$STUB_DIR" FNM_TEST_ARCH="$FNM_TEST_ARCH" \
 		bash "$SRC" install 2>"$T/stderr")"; then
 		RC=0
 	else
@@ -197,8 +219,10 @@ assert_install() {
 	binary="$(binary_path)"
 	call_installer
 	if [[ $RC -eq 0 && -x $binary &&
-		$("$binary" --version) == "fnm fixture 9.9.9" ]] &&
+		$OUT == *"installed: fnm"* && $("$binary" --version) == "fnm fixture 9.9.9" ]] &&
+		cmp -s "$binary" "$STUB_DIR/fnm-fixture" &&
 		grep -Fxq "https://api.github.com/repos/Schniz/fnm/releases/latest" "$STUB_DIR/curl-calls" &&
+		[[ $(wc -l < "$STUB_DIR/curl-calls") -eq 2 ]] &&
 		grep -Fxq "https://github.com/Schniz/fnm/releases/download/v9.9.9/$asset" "$STUB_DIR/curl-calls"; then
 		pass "verified $arch artifact installs and runs"
 	else
@@ -225,6 +249,7 @@ fi
 # 2. Supported architectures select their matching release asset.
 assert_install x86_64 fnm-linux.zip
 assert_install aarch64 fnm-arm64.zip
+assert_install armv8l fnm-arm64.zip
 assert_install armv7l fnm-arm32.zip
 
 # 3. The root-entry ZIP layout used by some releases is accepted too.
@@ -257,6 +282,59 @@ for digest_mode in missing malformed; do
 	fi
 done
 
+# Malformed release contracts fail before following an untrusted URL.
+prepare_case x86_64 nested
+python3 - "$STUB_DIR/release.json" <<'PYEOF'
+import json
+import sys
+with open(sys.argv[1], encoding="utf-8") as f:
+    release = json.load(f)
+del release["tag_name"]
+with open(sys.argv[1], "w", encoding="utf-8") as f:
+    json.dump(release, f)
+PYEOF
+call_installer
+if [[ $RC -ne 0 && $ERR == *"tag"* && ! -e $(binary_path) ]] && tmp_is_empty; then
+	pass "release without a tag is rejected"
+else
+	fail "missing tag (rc=$RC err=[$ERR])"
+fi
+
+prepare_case x86_64 nested
+python3 - "$STUB_DIR/release.json" <<'PYEOF'
+import json
+import sys
+with open(sys.argv[1], encoding="utf-8") as f:
+    release = json.load(f)
+release["assets"].append(release["assets"][-1].copy())
+with open(sys.argv[1], "w", encoding="utf-8") as f:
+    json.dump(release, f)
+PYEOF
+call_installer
+if [[ $RC -ne 0 && $ERR == *"duplicate assets"* && ! -e $(binary_path) ]]; then
+	pass "duplicate matching assets are rejected"
+else
+	fail "duplicate assets (rc=$RC err=[$ERR])"
+fi
+
+prepare_case x86_64 nested
+python3 - "$STUB_DIR/release.json" <<'PYEOF'
+import json
+import sys
+with open(sys.argv[1], encoding="utf-8") as f:
+    release = json.load(f)
+release["assets"][-1]["browser_download_url"] = "https://example.invalid/fnm-linux.zip"
+with open(sys.argv[1], "w", encoding="utf-8") as f:
+    json.dump(release, f)
+PYEOF
+call_installer
+if [[ $RC -ne 0 && $ERR == *"download URL"* && ! -e $(binary_path) ]] &&
+	[[ $(wc -l < "$STUB_DIR/curl-calls") -eq 1 ]] && tmp_is_empty; then
+	pass "non-GitHub asset URLs are rejected before download"
+else
+	fail "invalid asset URL (rc=$RC err=[$ERR])"
+fi
+
 # 5. Malformed release metadata and API/asset transport failures fail closed.
 prepare_case x86_64 nested
 printf '{malformed json' > "$STUB_DIR/release.json"
@@ -279,6 +357,28 @@ for failure in api asset; do
 		fail "$failure transport failure (rc=$RC err=[$ERR])"
 	fi
 done
+
+# Failed dependency installation stops before requesting release metadata.
+prepare_case x86_64 nested
+touch "$STUB_DIR/fail-sudo"
+call_installer
+if [[ $RC -ne 0 && ! -s "$STUB_DIR/curl-calls" && ! -e $(binary_path) ]]; then
+	pass "dependency failure stops before network or install"
+else
+	fail "dependency failure (rc=$RC err=[$ERR])"
+fi
+
+# Missing required network tooling is reported before making a request.
+prepare_case x86_64 nested
+mv "$T/bin/curl" "$T/bin/curl.disabled"
+call_installer
+mv "$T/bin/curl.disabled" "$T/bin/curl"
+if [[ $RC -ne 0 && $ERR == *"curl is required"* &&
+	! -s "$STUB_DIR/curl-calls" && ! -e $(binary_path) ]]; then
+	pass "missing curl is named and fails closed"
+else
+	fail "missing curl (rc=$RC err=[$ERR])"
+fi
 
 # 6. Tampered artifact, invalid ZIP, and ZIP without fnm fail without replacing
 # an existing but non-runnable binary.
