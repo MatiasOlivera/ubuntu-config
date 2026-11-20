@@ -8,14 +8,12 @@ Skills live in `.agents/skills/` (cross-agent: opencode, Cursor, VS Code, Codex,
 
 - Adding or extending a setup script (`install_*`/`config_*`, apt repos, version guards, wiring) → `install-package`.
 - Adding or changing a chezmoi dotfile (`dotfiles/`, `dot_*` → `$HOME`, `.tmpl` data, deny-list sync) → `add-dotfile`.
-- Running or iterating on tests (`./tests/test.sh`, docker-isolated, Multipass e2e, `--reuse` loop) → `run-tests`.
+- Running or iterating on tests (scoped checks, full gate, Docker, Multipass) → `run-tests`.
 - Working with reports (`versions.sh`, `gaps.sh`, `chk`/`src` rows, baseline refresh) → `reports`.
 
-## Commands (verify in this order, stop at first failure)
+## Commands
 
-1. `./tests/test.sh` — static checks on a trusted checkout: `bash -n`, script contract, shellcheck if installed (the source-only check sources library scripts, so use Docker or Multipass for untrusted changes).
-2. `docker compose -f tests/compose.yml run --rm test` — isolated static checks in `ubuntu:26.04`.
-3. `./tests/test.sh --vm --reuse` — Multipass e2e on a **trusted checkout** when the change touches the install path (`--vm` alone for a fresh VM, `--keep` to inspect failures). For **untrusted checkouts** use step 2 (Docker) only — `--vm` runs host-side test phases before entering Multipass.
+Test commands — scoped checks, full gate, Docker and Multipass — live in the `run-tests` skill. Load it before running or iterating on tests.
 
 Anything beyond verify (adding apps, reports, baselines): `README.md` ("Testing", "Reports").
 
@@ -33,7 +31,9 @@ The root `opencode.json` adds command denials for setup scripts and selected hos
 
 ## For changes
 
-- The verify chain above MUST be green before a PR is opened.
+- Run focused checks on the changed files while implementing.
+- Run the full gate (see `run-tests`) before the first local review, stopping at the first failure.
+- Rerun the full gate before the pull request only when review feedback changed code.
 - When a change invalidates agent-facing docs (`AGENTS.md`, `.agents/skills/`), update them in the same PR.
 
 ## Version control
