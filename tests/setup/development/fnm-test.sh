@@ -31,7 +31,7 @@ export STUB_DIR="$T/stubs"
 
 # Closed set of real tools used by the installer. Network, sudo, uname, and
 # unzip are provided by local stubs in $T/bin.
-for b in awk basename bash cat chmod cp dirname env grep head ln mkdir mktemp mv python3 rm sha256sum tr uname; do
+for b in awk basename bash cat chmod cp dirname env find grep head ln mkdir mktemp mv python3 rm sha256sum tr uname; do
 	ln -s "$(command -v "$b")" "$T/sysbin/$b"
 done
 
@@ -46,7 +46,10 @@ done
 printf '%s\n' "$url" >> "$STUB_DIR/curl-calls"
 case $url in
 	*/repos/Schniz/fnm/releases/latest)
-		[[ ! -f $STUB_DIR/fail-api ]] || exit 22
+		if [[ -f $STUB_DIR/fail-api ]]; then
+			[[ -z $dest ]] || printf '{partial' > "$dest"
+			exit 22
+		fi
 		if [[ -n $dest ]]; then
 			cp "$STUB_DIR/release.json" "$dest"
 		else
@@ -54,7 +57,11 @@ case $url in
 		fi
 		;;
 	*/releases/download/*)
-		[[ ! -f $STUB_DIR/fail-asset && -n $dest ]] || exit 22
+		[[ -n $dest ]] || exit 22
+		if [[ -f $STUB_DIR/fail-asset ]]; then
+			printf 'partial artifact bytes\n' > "$dest"
+			exit 22
+		fi
 		if [[ -f $STUB_DIR/tamper-asset ]]; then
 			printf 'tampered artifact bytes\n' > "$dest"
 		else
@@ -180,6 +187,10 @@ binary_path() {
 	printf '%s/.local/share/fnm/fnm\n' "$T/home"
 }
 
+tmp_is_empty() {
+	[[ -z $(find "$T/tmp" -mindepth 1 -print -quit) ]]
+}
+
 assert_install() {
 	local arch=$1 asset=$2 binary
 	prepare_case "$arch" nested
@@ -229,7 +240,7 @@ fi
 prepare_case x86_64 nested
 make_metadata fnm-linux.zip good no
 call_installer
-if [[ $RC -ne 0 && $ERR == *asset* && ! -e $(binary_path) ]]; then
+	if [[ $RC -ne 0 && $ERR == *asset* && ! -e $(binary_path) ]] && tmp_is_empty; then
 	pass "release without matching asset is rejected"
 else
 	fail "missing asset (rc=$RC err=[$ERR])"
@@ -239,7 +250,7 @@ for digest_mode in missing malformed; do
 	prepare_case x86_64 nested
 	make_metadata fnm-linux.zip "$digest_mode"
 	call_installer
-	if [[ $RC -ne 0 && $ERR == *digest* && ! -e $(binary_path) ]]; then
+	if [[ $RC -ne 0 && $ERR == *digest* && ! -e $(binary_path) ]] && tmp_is_empty; then
 		pass "$digest_mode digest is rejected"
 	else
 		fail "$digest_mode digest (rc=$RC err=[$ERR])"
@@ -250,7 +261,7 @@ done
 prepare_case x86_64 nested
 printf '{malformed json' > "$STUB_DIR/release.json"
 call_installer
-if [[ $RC -ne 0 && $ERR == *release* && ! -e $(binary_path) ]]; then
+if [[ $RC -ne 0 && $ERR == *release* && ! -e $(binary_path) ]] && tmp_is_empty; then
 	pass "malformed release metadata is rejected"
 else
 	fail "malformed metadata (rc=$RC err=[$ERR])"
@@ -262,7 +273,7 @@ for failure in api asset; do
 	call_installer
 	expected=release
 	[[ $failure == asset ]] && expected=download
-	if [[ $RC -ne 0 && $ERR == *"$expected"* && ! -e $(binary_path) ]]; then
+	if [[ $RC -ne 0 && $ERR == *"$expected"* && ! -e $(binary_path) ]] && tmp_is_empty; then
 		pass "$failure transport failure leaves fnm uninstalled"
 	else
 		fail "$failure transport failure (rc=$RC err=[$ERR])"
@@ -296,7 +307,7 @@ PYEOF
 	esac
 	call_installer
 	after="$(sha256sum "$(binary_path)")"
-	if [[ $RC -ne 0 && $before == "$after" && $ERR == *"$expected"* ]]; then
+	if [[ $RC -ne 0 && $before == "$after" && $ERR == *"$expected"* ]] && tmp_is_empty; then
 		pass "$failure artifact rejected without changing existing binary"
 	else
 		fail "$failure artifact (rc=$RC err=[$ERR] before=[$before] after=[$after])"
@@ -307,7 +318,7 @@ done
 prepare_case riscv64 nested
 call_installer
 if [[ $RC -ne 0 && $ERR == *"unsupported architecture"* &&
-	! -s "$STUB_DIR/curl-calls" && ! -s "$STUB_DIR/sudo-calls" ]]; then
+	! -s "$STUB_DIR/curl-calls" && ! -s "$STUB_DIR/sudo-calls" ]] && tmp_is_empty; then
 	pass "unsupported architecture fails before dependencies or network"
 else
 	fail "unsupported architecture (rc=$RC err=[$ERR])"
