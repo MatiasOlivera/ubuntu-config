@@ -1,0 +1,79 @@
+# Categories for GitHub-generated release notes (ADR 0004).
+# Sections are evaluated in order; the per-category exclude ladders keep them
+# disjoint, so a pull request that carries both an area label and a type label
+# is listed once, under its area.
+
+changelog:
+  exclude:
+    labels:
+      - release
+    authors:
+      - dependabot[bot]
+      - github-actions[bot]
+  categories:
+    - title: Security
+      labels:
+        - security
+
+    - title: Applications
+      labels:
+        - installation
+      exclude:
+        labels:
+          - security
+
+    - title: Configuration
+      labels:
+        - dotfiles
+      exclude:
+        labels:
+          - security
+          - installation
+
+    - title: Fixes
+      labels:
+        - bug
+      exclude:
+        labels:
+          - security
+          - installation
+          - dotfiles
+
+    - title: Features
+      labels:
+        - enhancement
+      exclude:
+        labels:
+          - security
+          - installation
+          - dotfiles
+          - bug
+
+    - title: Maintenance
+      labels:
+        - chore
+        - ci
+      exclude:
+        labels:
+          - security
+          - installation
+          - dotfiles
+          - bug
+          - enhancement
+
+    - title: Documentation
+      labels:
+        - documentation
+      exclude:
+        labels:
+          - security
+          - installation
+          - dotfiles
+          - bug
+          - enhancement
+          - chore
+          - ci
+
+    - title: Other changes
+      labels:
+        - "*"

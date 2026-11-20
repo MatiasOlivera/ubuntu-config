@@ -50,6 +50,7 @@ bash setup/post-install.sh  # real machine: full apt upgrade
 ### Desktop apps
 
 - Timeshift (system snapshots), FSearch, Google Chrome, OBS Studio (+ plugins), Spotify
+- AnythingLLM Desktop (AppImage in `~/Applications`, verified against the sha256 GitHub publishes for the release asset, plus its AppArmor profile and launcher entry)
 - GNOME browser connector + Deja Vu extension (window geometry memory)
 - Handy speech-to-text (config only - install the AppImage manually, see below)
 
@@ -112,6 +113,11 @@ Report-only list of host-installed apps not tracked by this repo (apt, snap, fla
 
 Baseline: `reports/baselines/ubuntu-26.04.1-desktop-manifest.txt` (names from `https://releases.ubuntu.com/26.04/ubuntu-26.04.1-desktop-amd64.manifest`). See [Updating to a new Ubuntu version](#updating-to-a-new-ubuntu-version) to refresh it after a release bump.
 
+## Security
+
+See [integrity exceptions](docs/integrity-exceptions.md) for setup tools that
+are intentionally retained without publisher-provided integrity material.
+
 ## Updating to a new Ubuntu version
 
 When the repo moves to a newer Ubuntu release:
@@ -133,6 +139,12 @@ Static checks are host-safe and zero-dependency (shellcheck runs only if install
 
 ```sh
 ./tests/test.sh
+```
+
+Python metadata parser unit tests use only Python's standard library and local fixtures (no network access):
+
+```sh
+PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/python -v
 ```
 
 Isolated static check in Docker (`ubuntu:26.04`, repo mounted read-only):
