@@ -4,7 +4,7 @@
 # Hermetic: sources the helper and drives generated runners with stubbed steps;
 # no sudo, network, keyring, or system changes. Fail-closed.
 
-ROOT="$(cd "$(dirname "$0")/../../.." && pwd)"
+ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 SRC="$ROOT/setup/helpers/steps.sh"
 export SRC
 FAILURES=0
