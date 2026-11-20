@@ -12,7 +12,7 @@ for each exception. The general integrity standard remains in
 | Application | Version reviewed | Checked on | Why a verified install is unavailable | Upstream request |
 | --- | --- | --- | --- | --- |
 | Cursor CLI | `2026.11.19-f005e9d` | 2026-11-19 | Cursor's official installer downloads and extracts a versioned archive without a publisher checksum or signature. | [Cursor forum request](https://forum.cursor.com/t/publish-integrity-metadata-for-cursor-cli-releases/178866) |
-| Ollama | unpinned — the installer fetches the current release; `OLLAMA_VERSION` is the upstream pin knob | 2026-11-20 | Upstream publishes `sha256sum.txt` for release assets, but `ollama.com/install.sh` does not consume it. A verified-artifact install would replace upstream GPU detection, ROCm/JetPack bundle selection, NVIDIA driver setup and systemd configuration with a partial reimplementation. Accepts unverified installer execution and downloads. | None filed; re-evaluate if the official installer starts verifying the published checksums |
+| Ollama | unpinned — the installer fetches the current release; `OLLAMA_VERSION` is the upstream pin knob | 2026-11-20 | Upstream publishes `sha256sum.txt` for release assets, but `ollama.com/install.sh` does not consume it. A verified-artifact install would replace upstream GPU detection, ROCm/JetPack bundle selection, NVIDIA driver setup and systemd configuration with a partial reimplementation. Accepts unverified installer execution and downloads. | [Upstream request](https://github.com/ollama/ollama/issues/19787) |
 
 Automatic installation is retained when a tool is part of the configured
 workstation and installing it during setup keeps the fresh-machine environment
