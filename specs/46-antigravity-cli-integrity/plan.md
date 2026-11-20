@@ -68,10 +68,10 @@ touched.
 
 ## Decisions
 
-- `docs/decisions/0006-antigravity-cli-integrity-source.md` — prefer Google's
-  maintainer-published SHA-512; use GitHub's release digest only when a valid
-  publisher response contains no usable checksum/signature; fail closed on
-  publisher transport or parse errors.
+- `docs/decisions/0007-artifact-integrity-source-priority.md` — prefer
+  maintainer-published integrity material and use GitHub's SHA-256 digest only
+  when the maintainer publishes no usable material. This issue applies that
+  rule to Google's SHA-512 manifest; transport or parsing errors fail closed.
 
 ## Risks
 
