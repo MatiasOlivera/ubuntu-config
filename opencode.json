@@ -23,6 +23,8 @@
       "bash -n */setup/*.sh": "allow",
       "bash -n */setup/**/*.sh": "allow",
       "shellcheck *setup/*.sh*": "allow",
+      "bash tests/**/*-test.sh": "allow",
+      "bash ./tests/**/*-test.sh": "allow",
       "cat *setup/*.sh*": "allow",
       "grep *setup/*.sh*": "allow",
       "head *setup/*.sh*": "allow",
