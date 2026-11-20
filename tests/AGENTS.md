@@ -1,19 +1,18 @@
 # Test suite
 
-This repository's tests exercise the Bash setup scripts without changing the host system.
+Tests cover this repository's Bash setup scripts. `tests/test.sh` automatically runs every `*-test.sh` file under `tests/`.
 
-## Test rules
+## Conventions
 
-- Keep functional tests hermetic and deterministic. Stub download and API clients (`curl`, `wget`, or similar) and serve fixture data locally; never call a real download or release server from a test. Unexpected network requests must fail.
-- Use temporary directories for `HOME`, `TMPDIR`, install prefixes, and other writable state. Do not invoke system-mutating setup scripts on the host.
-- Assert observable behavior such as exit status, output, created files, and recorded stub calls. Avoid depending on internal helper names.
-- Build small archive fixtures and their genuine checksums during the test when integrity behavior is under test.
+- Keep `*-test.sh` checks self-contained and deterministic. Stub external commands and network clients; do not depend on live package, release, or download servers. Unexpected external requests should fail.
+- Put writable state such as `HOME`, `TMPDIR`, and install prefixes in per-test temporary directories. Tests must not run system-mutating setup scripts on the host.
+- Assert observable behavior, including status, output, files, and external-command calls. Avoid coupling assertions to private helper names.
 
-## Run and lint tests
+## Commands
 
-- Run one functional test: `bash tests/setup/development/fnm-test.sh` (replace the path with the target test).
-- Run all repository checks: `./tests/test.sh`.
-- Run the isolated static suite: `docker compose -f tests/compose.yml run --rm test`.
+- Run one test: `bash tests/path/to/name-test.sh`.
+- Run the full suite: `./tests/test.sh`.
+- Run in Docker: `docker compose -f tests/compose.yml run --rm test`.
 - Lint test scripts when ShellCheck is available: `find tests -name '*-test.sh' -print0 | xargs -0 shellcheck`.
 
-See the root `AGENTS.md` for trusted-checkout restrictions and the Multipass end-to-end test command.
+See the root `AGENTS.md` for trusted-checkout restrictions and Multipass verification.
