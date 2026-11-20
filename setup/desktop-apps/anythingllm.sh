@@ -27,28 +27,13 @@ anythingllm_version() {
 # publishes for it. Fails closed when the release or the digest is absent, so a
 # missing integrity record is an error instead of an unverified install.
 anythingllm_release_meta() {
-	local asset=$1
+	local asset=$1 script
 	command -v curl >/dev/null 2>&1 || return 1
 	command -v python3 >/dev/null 2>&1 || return 1
+	script="$(dirname "${BASH_SOURCE[0]}")/anythingllm_metadata.py"
 	curl -fsSL --retry 3 -H 'Accept: application/vnd.github+json' \
 		"https://api.github.com/repos/$ANYTHINGLLM_REPO/releases/latest" |
-		python3 -c '
-import json, sys
-try:
-    release = json.load(sys.stdin)
-    tag = release["tag_name"]
-    for asset in release.get("assets", []):
-        if asset.get("name") != sys.argv[1]:
-            continue
-        digest = (asset.get("digest") or "").split(":", 1)
-        if digest[0] != "sha256" or not digest[1]:
-            sys.exit(1)
-        print("%s\t%s" % (tag, digest[1]))
-        sys.exit(0)
-    sys.exit(1)
-except Exception:
-    sys.exit(1)
-' "$asset"
+		python3 "$script" "$asset"
 }
 
 anythingllm_install_appimage() {
