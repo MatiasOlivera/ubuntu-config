@@ -220,6 +220,18 @@ else
 	fail "unapproved formula URL (rc=$RC err=[$ERR])"
 fi
 
+# A V1 formula entry must not satisfy the OpenCode V2 installation contract.
+fresh_release
+sed -i 's/2\.3\.2/1.19.6/g' "$T/stubs/opencode-v2.rb"
+call
+if [[ $RC -ne 0 && $ERR == *"malformed V2 formula"* &&
+	! -e "$T/home/.opencode/bin/opencode" &&
+	"$(wc -l < "$T/stubs/curl-calls")" -eq 1 ]]; then
+	pass "V1 formula entry rejected without artifact download"
+else
+	fail "V1 formula entry (rc=$RC out=[$OUT] err=[$ERR] calls=[$(cat "$T/stubs/curl-calls" 2>/dev/null)])"
+fi
+
 # 8. Formula and artifact transport errors fail closed.
 fresh_release
 touch "$T/stubs/fail-formula"

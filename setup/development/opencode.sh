@@ -73,7 +73,7 @@ with open(formula_path, encoding="utf-8") as formula_file:
     formula = formula_file.read()
 
 versions = re.findall(r'^\s*version\s+"([^"]+)"\s*$', formula, re.MULTILINE)
-if len(versions) != 1:
+if len(versions) != 1 or not versions[0].startswith("2."):
     sys.exit(1)
 
 pair_pattern = re.compile(
