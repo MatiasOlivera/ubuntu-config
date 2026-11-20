@@ -31,6 +31,20 @@ Publisher integrity research (live GitHub release `0.13.9`, inspected
   the implementation PR; ADR 0007 already states the general source priority,
   so no new decision record is needed.
 
+Implementation research (recorded at implementation time, 2026-11-20):
+
+- Release inspected: `0.13.9`, published 2026-11-17; asset
+  `uv-x86_64-unknown-linux-gnu.tar.gz`. The API `releases/latest` response
+  reports `tag_name: 0.13.9` and lists that asset.
+- Channels checked: per-asset `<asset>.sha256` (present, format
+  `<64 hex>  uv-x86_64-unknown-linux-gnu.tar.gz`), combined `sha256.sum`
+  (present), GitHub release-asset `digest: sha256:…` (present), and GitHub
+  Artifact Attestations advertised in the release notes (present).
+- Selected source: the maintainer's per-asset `.sha256`, the preferred source
+  under ADR 0007. No GitHub-digest fallback, no attestation dependency, and
+  no self-authored hash pin. ADR 0007 already carries the general rule, so no
+  exception or new decision record is filed.
+
 ## User stories
 
 - As a person setting up a fresh Ubuntu machine, I want uv installed from its
