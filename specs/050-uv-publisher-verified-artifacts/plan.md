@@ -2,7 +2,9 @@
 
 ## Architecture
 
-Only two code files change; the wiring is already in place. `setup/install.sh`
+Three code files change: `setup/development/uv.sh`, a new
+`setup/development/uv_release.py` helper, and the new hermetic test; the
+wiring is already in place. `setup/install.sh`
 sources `development/uv.sh` and calls `step install_uv`, and
 `reports/versions.sh` has both `src development/uv.sh` and
 `chk "uv" uv_version` (observed at base tip `1b7e335`). No changes to those
@@ -19,7 +21,7 @@ The verified path, inside `uv_install_verified "$tmp"`:
    name before any network call. Check the required commands (`curl`, `tar`,
    `sha256sum`, `python3`).
 2. Fetch `https://api.github.com/repos/astral-sh/uv/releases/latest` once with
-   `curl -fsSL`. A small inline `python3` read parses that one response and
+   `curl -fsSL`. The `uv_release.py` helper parses that one response and
    emits `tag_name` only if `assets[].name` contains the expected artifact
    name. An empty result is a named error, so tag, asset and checksum all
    refer to the same release.
