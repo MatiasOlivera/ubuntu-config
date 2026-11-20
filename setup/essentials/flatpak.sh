@@ -9,7 +9,7 @@ install_flatpak() {
 	else
 		sudo apt install -y flatpak gnome-software-plugin-flatpak
 	fi
-	flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+	sudo flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
 }
 
 flatpak_version() {

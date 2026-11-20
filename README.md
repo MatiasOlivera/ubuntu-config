@@ -88,6 +88,19 @@ Rule of thumb:
 - Declarative files → chezmoi in `dotfiles/`
 - Imperative actions (`chsh`, `gsettings`, clones) → bash in `setup/`
 
+## Failure handling
+
+`install.sh` and `post-install.sh` run every step even if one fails, then
+print a summary naming the failed steps and exit nonzero. Set `FAIL_FAST=1` to
+stop at the first failing step instead:
+
+```sh
+FAIL_FAST=1 ./setup/install.sh
+```
+
+Credential sync is advisory: missing secrets are reported as pending in
+non-interactive runs and never fail the run or count as a failed step.
+
 ## Manual steps
 
 Some apps can't be installed programmatically. See [`setup/manual-installation.md`](setup/manual-installation.md) for the full list.

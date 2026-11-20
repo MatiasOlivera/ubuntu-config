@@ -27,15 +27,7 @@ SCRIPT_DIR=$(dirname "$0")
 
 # ponytail: SECONDS wall-clock per step, no external profiler.
 post_start=$SECONDS
-step() {
-  local label=$1
-  local t0=$SECONDS
-  if [[ $# -gt 1 ]]; then shift; fi
-  "$@"
-  local st=$?
-  printf '[+%ds] %s\n' "$((SECONDS - t0))" "$label"
-  return $st
-}
+source "$SCRIPT_DIR/helpers/steps.sh"
 
 DEVELOPMENT_DIR="$SCRIPT_DIR/development"
 
@@ -57,3 +49,4 @@ step config_fnm
 step versions bash "$SCRIPT_DIR/../reports/versions.sh"
 
 printf '[+%ds] post-install.sh total\n' "$((SECONDS - post_start))"
+report_failed_steps || exit 1
