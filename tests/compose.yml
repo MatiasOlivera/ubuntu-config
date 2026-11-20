@@ -3,5 +3,8 @@ services:
     build:
       context: ..
       dockerfile: tests/Dockerfile
+    # Rebuild every run so a Dockerfile change can't be tested against a stale
+    # image; the layer cache makes it cheap.
+    pull_policy: build
     volumes:
       - ..:/work:ro
