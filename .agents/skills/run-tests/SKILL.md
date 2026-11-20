@@ -5,6 +5,18 @@ description: Use when running or iterating on this repo's checks while changing 
 
 # Run and iterate on tests
 
+## Mandatory log capture for long runs
+
+Any command expected to take more than ~60s — in particular every `./tests/test.sh --vm ...` — MUST run through `tests/run-with-logging.sh`:
+
+```sh
+./tests/run-with-logging.sh e2e ./tests/test.sh --vm --reuse
+```
+
+It prints the log path immediately (watch mid-run with `tail -f <path>`), streams stdout+stderr to `${TMPDIR:-/tmp}/ubuntu-config-<name>-<YYYYmmdd-HHMMSS>-<pid>.log` as the command writes, then prints the exit status and a tail, and returns the command's own status.
+
+Never pipe a long run to `head` or `tail`: `head` sends SIGPIPE mid-run (and `test.sh`'s EXIT trap can delete a kept VM), while `tail` buffers until EOF and returns its own status, hiding a suite failure. Do not pipe the runner itself either — use the printed `log:` path with `tail -f` instead.
+
 ## Static (host-safe, zero-dep)
 
 ```sh
