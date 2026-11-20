@@ -141,6 +141,12 @@ Static checks are host-safe and zero-dependency (shellcheck runs only if install
 ./tests/test.sh
 ```
 
+Python metadata parser unit tests use only Python's standard library and local fixtures (no network access):
+
+```sh
+PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/python -v
+```
+
 Isolated static check in Docker (`ubuntu:26.04`, repo mounted read-only):
 
 ```sh

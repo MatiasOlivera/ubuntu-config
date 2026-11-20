@@ -23,7 +23,7 @@ install_antigravity_cli() {
 
 antigravity_cli_install_verified() {
 	local tmp=$1 arch manifest_url version artifact_url digest asset
-	local bin_dir staged installed_ver checksum_tool github_api
+	local bin_dir staged installed_ver checksum_tool github_api metadata_script
 	case "$(uname -m)" in
 		x86_64 | amd64) arch=amd64 ;;
 		aarch64 | arm64) arch=arm64 ;;
@@ -45,40 +45,13 @@ antigravity_cli_install_verified() {
 		printf 'error: antigravity-cli: sha512sum required\n' >&2
 		return 1
 	}
+	metadata_script="$(dirname "${BASH_SOURCE[0]}")/antigravity_cli_metadata.py"
 	manifest_url="https://antigravity-cli-auto-updater-974169037036.us-central1.run.app/manifests/linux_${arch}.json"
 	curl -fsSL "$manifest_url" -o "$tmp/manifest.json" || {
 		printf 'error: antigravity-cli: cannot download publisher manifest\n' >&2
 		return 1
 	}
-	if ! python3 - "$tmp/manifest.json" > "$tmp/metadata" <<'PY'
-import json
-import re
-import sys
-from urllib.parse import urlparse
-
-try:
-	with open(sys.argv[1], encoding="utf-8") as manifest_file:
-		manifest = json.load(manifest_file)
-except (OSError, json.JSONDecodeError):
-	sys.exit(1)
-
-if not isinstance(manifest, dict):
-	sys.exit(1)
-version = manifest.get("version")
-url = manifest.get("url")
-digest = manifest.get("sha512", "")
-if not isinstance(version, str) or not re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+(?:[-+][A-Za-z0-9.-]+)?", version):
-	sys.exit(1)
-if not isinstance(url, str):
-	sys.exit(1)
-parsed = urlparse(url)
-if parsed.scheme != "https" or parsed.netloc != "storage.googleapis.com" or not parsed.path.startswith("/antigravity-public/antigravity-cli/"):
-	sys.exit(1)
-if not isinstance(digest, str) or (digest and not re.fullmatch(r"[0-9a-fA-F]{128}", digest)):
-	sys.exit(1)
-print("\t".join((version, url, digest)))
-PY
-	then
+	if ! python3 "$metadata_script" manifest "$tmp/manifest.json" > "$tmp/metadata"; then
 		printf 'error: antigravity-cli: malformed publisher manifest\n' >&2
 		return 1
 	fi
@@ -105,45 +78,7 @@ PY
 			printf 'error: antigravity-cli: cannot download GitHub release metadata for %s\n' "$version" >&2
 			return 1
 		}
-		if ! python3 - "$tmp/github-release.json" "$version" "$asset" > "$tmp/github-metadata" <<'PY'
-import json
-import re
-import sys
-from urllib.parse import urlparse
-
-try:
-	with open(sys.argv[1], encoding="utf-8") as release_file:
-		release = json.load(release_file)
-except (OSError, json.JSONDecodeError):
-	sys.exit(1)
-
-version, expected_asset = sys.argv[2:]
-if not isinstance(release, dict):
-	sys.exit(1)
-tag = release.get("tag_name")
-if tag not in (version, "v" + version):
-	sys.exit(1)
-assets = release.get("assets")
-if not isinstance(assets, list):
-	sys.exit(1)
-for asset in assets:
-	if not isinstance(asset, dict) or asset.get("name") != expected_asset:
-		continue
-	digest = asset.get("digest")
-	url = asset.get("browser_download_url")
-	if not isinstance(digest, str) or not re.fullmatch(r"sha256:[0-9a-fA-F]{64}", digest):
-		sys.exit(1)
-	if not isinstance(url, str):
-		sys.exit(1)
-	parsed = urlparse(url)
-	expected_path = f"/google-antigravity/antigravity-cli/releases/download/{tag}/{expected_asset}"
-	if parsed.scheme != "https" or parsed.netloc != "github.com" or parsed.path != expected_path:
-		sys.exit(1)
-	print(url + "\t" + digest.removeprefix("sha256:"))
-	sys.exit(0)
-sys.exit(1)
-PY
-		then
+		if ! python3 "$metadata_script" github-release "$tmp/github-release.json" "$version" "$asset" > "$tmp/github-metadata"; then
 			printf 'error: antigravity-cli: no published GitHub sha256 for %s at %s\n' "$asset" "$version" >&2
 			return 1
 		fi

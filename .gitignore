@@ -1,5 +1,7 @@
 .vscode
 docs/plans
+__pycache__/
+*.py[cod]
 
 # Kilo local scratch (never commit; shared agents/skills/setup stay committable)
 .kilo/plans/

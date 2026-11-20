@@ -17,6 +17,8 @@ jobs:
       - uses: actions/checkout@v5
       - name: Install shellcheck (so the gate never skips)
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends shellcheck
+      - name: Run Python unit tests
+        run: PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/python -v
       - run: ./tests/test.sh
 
   docker-isolated:
