@@ -22,7 +22,7 @@ install_opencode() {
 
 opencode_install_verified() {
     local tmp=$1 arch asset formula_url metadata artifact_url digest
-    local install_dir staged installed_ver
+    local install_dir staged installed_ver metadata_script
     formula_url="https://raw.githubusercontent.com/anomalyco/homebrew-tap/master/opencode-v2.rb"
 
     case "$(uname -s)" in
@@ -63,48 +63,8 @@ opencode_install_verified() {
         return 1
     }
 
-    if ! metadata="$(python3 - "$tmp/opencode-v2.rb" "opencode-linux-$arch.tar.gz" <<'PY'
-import re
-import sys
-from urllib.parse import urlparse
-
-formula_path, asset = sys.argv[1:]
-with open(formula_path, encoding="utf-8") as formula_file:
-    formula = formula_file.read()
-
-versions = re.findall(r'^\s*version\s+"([^"]+)"\s*$', formula, re.MULTILINE)
-if len(versions) != 1 or not versions[0].startswith("2."):
-    sys.exit(1)
-
-pair_pattern = re.compile(
-    r'^[ \t]*url[ \t]+"([^"]+)"[ \t]*\n'
-    r'(?:[ \t]*\n)*[ \t]*sha256[ \t]+"([^"]+)"[ \t]*$',
-    re.MULTILINE,
-)
-matches = []
-for url, digest in pair_pattern.findall(formula):
-    parsed = urlparse(url)
-    parts = parsed.path.split("/")
-    if (
-        parsed.scheme == "https"
-        and parsed.netloc == "opencode.ai"
-        and len(parts) == 5
-        and parts[1:3] == ["files", "bin"]
-        and parts[3] == versions[0]
-        and parts[4] == asset
-        and not parsed.query
-        and not parsed.fragment
-    ):
-        matches.append((url, digest))
-
-if len(matches) != 1:
-    sys.exit(1)
-url, digest = matches[0]
-if not re.fullmatch(r"[0-9a-fA-F]{64}", digest):
-    sys.exit(1)
-print(f"{url}\t{digest.lower()}")
-PY
-    )"; then
+    metadata_script="$(dirname "${BASH_SOURCE[0]}")/opencode_metadata.py"
+    if ! metadata="$(python3 "$metadata_script" "$tmp/opencode-v2.rb" "opencode-linux-$arch.tar.gz")"; then
         printf 'error: opencode: malformed V2 formula or missing checksum for %s\n' \
             "opencode-linux-$arch.tar.gz" >&2
         return 1
