@@ -3,7 +3,7 @@
 | ID  | Done | Task | Depends on | Type      | Verification |
 | --- | ---- | ---- | ---------- | --------- | ------------ |
 | 1   | [x]  | Write `docs/language-package-managers.md` with the three defaults, fallbacks, rejected options, tie-breakers, deferred languages, and links to ADR 0003/0007. | - | Manual | Human reads the doc; all acceptance scenarios about policy content pass. |
-| 2   | [ ]  | Add `tests/setup/development/pnpm-test.sh` (red): skip guard, verified install from stubbed GitHub release, missing/invalid digest, bad URL, missing asset, checksum mismatch, unsupported arch. | - | Automated | `bash tests/setup/development/pnpm-test.sh` fails before task 3. |
+| 2   | [x]  | Add `tests/setup/development/pnpm-test.sh` (red): skip guard, verified install from stubbed GitHub release, missing/invalid digest, bad URL, missing asset, checksum mismatch, unsupported arch. | - | Automated | `bash tests/setup/development/pnpm-test.sh` fails before task 3. |
 | 3   | [ ]  | Implement `setup/development/pnpm.sh` (`install_pnpm`, `pnpm_version`, release metadata helper, `~/.local/bin` target) so task 2 goes green. | 2 | Automated | `bash tests/setup/development/pnpm-test.sh` passes. |
 | 4   | [ ]  | Wire pnpm into `setup/install.sh` (source + step) and `reports/versions.sh` (`src` + `chk`); add README Development bullet. | 3 | Automated | `./tests/test.sh` contract passes; report shows a `pnpm` row. |
 | 5   | [ ]  | Add `tests/setup/development/bun-test.sh` (red): skip guard, publisher `SHASUMS256.txt` verification, missing/mismatched checksum, failed download, absent asset, unsupported arch, preserved `.bun` layout. | - | Automated | `bash tests/setup/development/bun-test.sh` fails before task 6. |
