@@ -68,13 +68,14 @@ chmod +x "$T/bin/"*
 # Real ZIP payload: bun's release archive contains only <asset>/bun.
 make_artifact() {
 	local asset=$1
-	rm -rf "$T/payload/$asset"
-	mkdir -p "$T/payload/$asset"
-	printf '#!/usr/bin/env bash\nprintf "bun fixture 9.9.9\\n"\n' > "$T/payload/$asset/bun"
-	chmod +x "$T/payload/$asset/bun"
-	(cd "$T/payload" && zip -qr "$STUB_RELEASE/$asset" "$asset")
-	rm -f "$STUB_RELEASE/SHASUMS256.txt"
-	(cd "$STUB_RELEASE" && sha256sum "$asset" > SHASUMS256.txt)
+	local entry=${asset%.zip}
+	rm -rf "$T/payload/$entry"
+	mkdir -p "$T/payload/$entry"
+	printf '#!/usr/bin/env bash\nprintf "bun fixture 9.9.9\\n"\n' > "$T/payload/$entry/bun"
+	chmod +x "$T/payload/$entry/bun"
+	(cd "$T/payload" && zip -qr "$STUB_RELEASE/$asset" "$entry")
+	# Publisher SHASUMS256.txt lists every asset; append so both archs stay.
+	(cd "$STUB_RELEASE" && sha256sum "$asset" >> SHASUMS256.txt)
 }
 
 make_metadata() {
@@ -88,6 +89,8 @@ with open(sums_path, encoding="utf-8") as handle:
     sums = handle.read().strip()
 if mode == "bad-sums":
     sums = sums.replace(sums.split()[0], "f" * 64)
+    with open(sums_path, "w", encoding="utf-8") as handle:
+        handle.write(sums + "\n")
 assets = [
     {"name": "decoy.zip", "browser_download_url": "https://github.com/oven-sh/bun/releases/download/bun-v9.9.9/decoy.zip"},
 ]
@@ -113,6 +116,7 @@ fresh_release() {
 	mkdir -p "$T/release" "$T/payload" "$T/home" "$T/tmp"
 	rm -f "$STUB_DIR/curl-calls" "$STUB_DIR/sudo-calls" "$STUB_DIR/fail-latest" \
 		"$STUB_DIR/fail-sums" "$STUB_DIR/fail-asset" "$STUB_DIR/fail-sudo"
+	rm -f "$STUB_RELEASE/SHASUMS256.txt"
 	make_artifact bun-linux-x64.zip
 	make_artifact bun-linux-aarch64.zip
 	make_metadata good
@@ -230,6 +234,7 @@ rm -rf "$T/payload/bun-linux-x64.zip" && mkdir -p "$T/payload/bun-linux-x64.zip"
 printf 'nope\n' > "$T/payload/bun-linux-x64.zip/README"
 (cd "$T/payload" && rm -f "$STUB_RELEASE/bun-linux-x64.zip" && zip -qr "$STUB_RELEASE/bun-linux-x64.zip" bun-linux-x64.zip)
 (cd "$STUB_RELEASE" && sha256sum bun-linux-x64.zip > SHASUMS256.txt)
+make_metadata good
 call
 if [[ $RC -ne 0 && $ERR == *"has no bun binary"* ]] && no_install; then
 	pass "archive missing bun rejected"
