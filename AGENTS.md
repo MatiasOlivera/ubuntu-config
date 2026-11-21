@@ -6,7 +6,7 @@ Fresh-Ubuntu setup: bash scripts (`setup/`) + chezmoi dotfiles (`dotfiles/`). Sc
 
 Skills live in `.agents/skills/` (cross-agent: opencode, Cursor, VS Code, Codex, ...).
 
-- Adding or extending a setup script (`install_*`/`config_*`, apt repos, version guards, wiring) → `install-package`.
+- Adding or extending a setup script (`install_*`/`config_*`, apt repos, version guards, wiring) → `install-package`. For a new app, pick the install method from that skill's "Install method priority" section.
 - Adding or changing a chezmoi dotfile (`dotfiles/`, `dot_*` → `$HOME`, `.tmpl` data, deny-list sync) → `add-dotfile`.
 - Running or iterating on tests (`./tests/test.sh`, docker-isolated, Multipass e2e, `--reuse` loop) → `run-tests`.
 - Working with reports (`versions.sh`, `gaps.sh`, `chk`/`src` rows, baseline refresh) → `reports`.

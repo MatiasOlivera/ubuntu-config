@@ -197,7 +197,7 @@ tests/
 2. `source` it and append its call in `setup/install.sh` or `setup/post-install.sh`, plus a `chk`/`src` row in `reports/versions.sh`.
 3. Config files → `dotfiles/` via chezmoi; commands → bash.
 
-`tests/test.sh` enforces this contract fail-closed. For the full workflow (phases, apt-repo function, version guards, examples) the repo's `install-package` skill covers it.
+`tests/test.sh` enforces this contract fail-closed. For the full workflow (phases, install-method priority, apt-repo function, version guards, examples) the repo's `install-package` skill covers it.
 
 ## Installing one app
 
