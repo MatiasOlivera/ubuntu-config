@@ -19,67 +19,12 @@ install_pnpm() {
     pnpm_install_verified "$asset"
 }
 
-# pnpm publishes no checksum file for its standalone release tarballs, so the
-# GitHub release-asset digest is the fallback allowed by ADR 0007. One release
-# response supplies both the digest and the download URL.
-pnpm_release_asset_info() {
-    python3 - "$1" "$2" <<'PYEOF'
-import json
-import re
-import sys
-from urllib.parse import urlparse
-
-
-def fail(message):
-    print(f"error: pnpm: {message}", file=sys.stderr)
-    raise SystemExit(1)
-
-
-try:
-    with open(sys.argv[1], encoding="utf-8") as response:
-        release = json.load(response)
-except (OSError, json.JSONDecodeError):
-    fail("release metadata is invalid")
-
-if not isinstance(release, dict):
-    fail("release metadata is invalid")
-tag = release.get("tag_name")
-if not isinstance(tag, str) or not tag:
-    fail("release metadata has no tag")
-
-assets = release.get("assets")
-if not isinstance(assets, list):
-    fail("release metadata has no asset list")
-matches = [item for item in assets if isinstance(item, dict) and item.get("name") == sys.argv[2]]
-if not matches:
-    fail(f"release has no asset named {sys.argv[2]}")
-if len(matches) != 1:
-    fail(f"release has duplicate assets named {sys.argv[2]}")
-
-asset = matches[0]
-digest = asset.get("digest")
-if not isinstance(digest, str) or not digest:
-    fail(f"release has no GitHub SHA-256 digest for {sys.argv[2]}")
-if not re.fullmatch(r"sha256:[0-9a-fA-F]{64}", digest):
-    fail(f"release has an invalid GitHub SHA-256 digest for {sys.argv[2]}")
-
-url = asset.get("browser_download_url")
-parsed = urlparse(url if isinstance(url, str) else "")
-expected_prefix = f"/pnpm/pnpm/releases/download/{tag}/"
-if (parsed.scheme != "https" or parsed.netloc != "github.com" or
-        not parsed.path.startswith(expected_prefix) or
-        parsed.path.rsplit("/", 1)[-1] != sys.argv[2]):
-    fail(f"release has an invalid download URL for {sys.argv[2]}")
-
-print(f"{tag}\t{url}\t{digest.split(':', 1)[1].lower()}")
-PYEOF
-}
-
 # Subshell keeps cleanup local and leaves install.sh's EXIT trap untouched.
 pnpm_install_verified() (
     local asset=$1 tag download_url expected_digest raw_info tmp artifact ver
-    local bin_dir staged
+    local bin_dir staged metadata_script
     local api_url=https://api.github.com/repos/pnpm/pnpm/releases/latest
+    metadata_script="$(dirname "${BASH_SOURCE[0]}")/pnpm_release.py"
 
     local tool
     for tool in curl sha256sum tar python3 mktemp mkdir cp chmod mv rm head grep; do
@@ -100,7 +45,7 @@ pnpm_install_verified() (
         printf 'error: pnpm: cannot download release metadata\n' >&2
         return 1
     fi
-    if ! raw_info="$(pnpm_release_asset_info "$tmp/release.json" "$asset")"; then
+    if ! raw_info="$(python3 "$metadata_script" "$asset" "$tmp/release.json")"; then
         return 1
     fi
     IFS=$'\t' read -r tag download_url expected_digest <<< "$raw_info"
