@@ -58,6 +58,7 @@ bash setup/post-install.sh  # real machine: full apt upgrade
 
 - Git, GitHub CLI, Docker (+ Compose, Sandboxes `sbx`), zsh (set as default shell) + config
 - zoxide, uv, Ghostty (+ config + set as GNOME default terminal), Ollama, Homebrew
+- pnpm (JS/TS packages; fnm remains the Node version manager)
 - Cursor CLI, Postman, Beekeeper Studio, opencode
 - oh-my-zsh + `zsh-autosuggestions` + `zsh-syntax-highlighting` + Powerlevel10k theme (`post-install.sh`)
 - `fnm` + Node LTS (`post-install.sh`), Antigravity CLI (`post-install.sh`)
