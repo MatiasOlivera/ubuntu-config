@@ -215,6 +215,7 @@ fresh_release
 rm -rf "$T/payload" && mkdir -p "$T/payload"
 printf 'nope\n' > "$T/payload/README"
 tar -czf "$T/release/pnpm-linux-x64.tar.gz" -C "$T/payload" README
+make_metadata good yes
 call
 if [[ $RC -ne 0 && $ERR == *"has no pnpm binary"* ]] && no_install; then
 	pass "archive missing pnpm rejected"
