@@ -89,6 +89,10 @@ Rule of thumb:
 - Declarative files → chezmoi in `dotfiles/`
 - Imperative actions (`chsh`, `gsettings`, clones) → bash in `setup/`
 
+## Language package managers
+
+New setup scripts follow the [language package-manager policy](docs/language-package-managers.md): uv for Python (pip/pipx stay as agent-compatible fallbacks), fnm for Node versions, pnpm for JS/TS packages, and bun because the shell config references it. Other languages are decided when a script needs them.
+
 ## Manual steps
 
 Some apps can't be installed programmatically. See [`setup/manual-installation.md`](setup/manual-installation.md) for the full list.

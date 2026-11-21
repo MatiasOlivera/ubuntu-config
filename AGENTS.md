@@ -24,6 +24,7 @@ Anything beyond verify (adding apps, reports, baselines): `README.md` ("Testing"
 - Declarative files → chezmoi in `dotfiles/` (`dot_*` → `$HOME`, `*.tmpl` rendered with `~/.config/chezmoi/chezmoi.toml` data); imperative commands (`chsh`, `gsettings`, clones) → stay in bash.
 - Public repo: never commit secrets. Root `.gitignore` (commit deny-list) and `dotfiles/.chezmoiignore` (deploy deny-list) must stay in sync when adding dotfiles.
 - Setup scripts stay rerun-safe and source-only. The host `tests/test.sh` check sources library scripts, so run it only on trusted checkouts.
+- Language package-manager choices (uv/pnpm/bun/fnm, pip/pipx fallbacks) follow the live policy in `docs/language-package-managers.md`; update that file when a pick changes.
 
 ## Execution environment
 
@@ -59,3 +60,6 @@ README.md and docs are for humans; AGENTS.md and skills are for coding agents
 Non-trivial choices (stack, protocol, workflow) MUST be recorded as MADR records
 in `docs/decisions/` (`NNNN-slug.md`); overturns note "supersedes `NNNN-…`" in
 prose. Load the `adr` skill for the template and numbering when available.
+Policy-type decisions that must stay current — notably language package-manager
+picks — live in `docs/language-package-managers.md` instead; that file is the
+authoritative source for those choices.
