@@ -22,7 +22,35 @@ Keep package scripts flat when a directory would contain only one script.
 Use a directory only when it groups multiple related scripts for one package,
 such as installation or package components.
 
-## 2. Follow the script contract
+## 2. Pick the install method
+
+Use the highest rung that actually exists for the tool, in this order
+([decision record](../../../docs/decisions/0008-install-method-priority.md)):
+
+1. **Ubuntu apt** — plain `apt install`, no extra source.
+2. **Vendor apt repository** — GPG key + `.sources`, overwrite, never append;
+   the repo function does not run `apt update`.
+3. **Checksum-verified release artifact** — publisher checksum or signature
+   covering the exact artifact, chosen per
+   [0007](../../../docs/decisions/0007-artifact-integrity-source-priority.md).
+4. **Homebrew** — CLI tools only when the vendor ships no higher rung.
+5. **flatpak / flathub** — desktop apps only.
+6. **snap** — only when the vendor ships nothing else.
+7. **Raw vendor `.deb` via curl** — last resort; explain in the PR why no
+   higher rung exists.
+
+Integrity is a constraint on every rung, not a rung of its own:
+[0003](../../../docs/decisions/0003-remote-installer-integrity.md) forbids
+executing unverifiable remote code. `curl … | sh` is not an option; a tool that
+only has such an installer needs an entry in the
+[integrity exception register](../../../docs/integrity-exceptions.md) first.
+
+Break ties by, in order: idempotent and non-interactive installs; a verifiable
+source; updates through a path this repo actually runs; least privilege.
+State the chosen rung in the PR Verification section when adding an
+application.
+
+## 3. Follow the script contract
 
 - **Artifact integrity**: before adding or updating a setup artifact, inspect
   the maintainer's official distribution channels for checksums or signatures
@@ -58,17 +86,17 @@ such as installation or package components.
   ```
 - Match the surrounding file's indentation (tabs vs spaces varies by file).
 
-## 3. Wire it up — all three places
+## 4. Wire it up — all three places
 
 1. **`setup/install.sh`**: add `source "<dir>/<pkg>.sh"` next to its neighbors, then `step install_<pkg>` / `step config_<pkg>` in the correct phase. `install_<pkg>_repository` calls go in the repositories phase, **before** `step apt_update`. Post-install-category scripts go in `setup/post-install.sh` instead.
 2. **`reports/versions.sh`**: add a `src <path>` line **and** a `chk "<label>" <pkg>_version` row. Missing either breaks the versions table.
 3. **`README.md` structure tree**: only when a new category/script needs listing.
 
-## 4. Verify
+## 5. Verify
 
 - `./tests/test.sh` — static, zero-dep (bash -n, sourced-by-basename, source-only fn, standalone guard, shellcheck if installed).
 - For install-path changes, iterate with the VM loop: seed once `./tests/test.sh --vm --keep`, then `./tests/test.sh --vm --reuse` (idempotency guards skip installed packages).
 
-## 5. Commit
+## 6. Commit
 
 Single atomic commit, conventional type (`feat:`, `docs:`, `refactor:`, …). Never commit secrets; keep `.gitignore` ⇄ `dotfiles/.chezmoiignore` in sync if dotfiles are involved.
