@@ -63,6 +63,40 @@ cat > "$T/bin/uname" <<'EOF'
 [[ $1 == -m ]] || exit 2
 printf '%s\n' "${BUN_TEST_ARCH:-x86_64}"
 EOF
+
+# unzip is stubbed with Python's zipfile so the suite runs where unzip/zip are
+# absent (the isolated Docker check). Handles exactly -tqq and -p <zip> <entry>.
+cat > "$T/bin/unzip" <<'EOF'
+#!/usr/bin/env bash
+case $1 in
+-p)
+	[[ $# -eq 3 ]] || exit 2
+	python3 - "$2" "$3" <<'PYEOF'
+import sys
+import zipfile
+try:
+    with zipfile.ZipFile(sys.argv[1]) as archive:
+        sys.stdout.buffer.write(archive.read(sys.argv[2]))
+except (KeyError, OSError, zipfile.BadZipFile):
+    sys.exit(1)
+PYEOF
+	;;
+-tqq)
+	[[ $# -eq 2 ]] || exit 2
+	python3 - "$2" <<'PYEOF'
+import sys
+import zipfile
+try:
+    with zipfile.ZipFile(sys.argv[1]) as archive:
+        if archive.testzip() is not None:
+            sys.exit(1)
+except (OSError, zipfile.BadZipFile):
+    sys.exit(1)
+PYEOF
+	;;
+*) exit 2 ;;
+esac
+EOF
 chmod +x "$T/bin/"*
 
 # Real ZIP payload: bun's release archive contains only <asset>/bun.
@@ -72,8 +106,13 @@ make_artifact() {
 	rm -rf "$T/payload/$entry"
 	mkdir -p "$T/payload/$entry"
 	printf '#!/usr/bin/env bash\nprintf "bun fixture 9.9.9\\n"\n' > "$T/payload/$entry/bun"
-	chmod +x "$T/payload/$entry/bun"
-	(cd "$T/payload" && zip -qr "$STUB_RELEASE/$asset" "$entry")
+	python3 - "$STUB_RELEASE/$asset" "$T/payload/$entry/bun" "$entry/bun" <<'PY'
+import sys
+import zipfile
+out, source, member = sys.argv[1:]
+with zipfile.ZipFile(out, "w", zipfile.ZIP_STORED) as archive:
+    archive.write(source, member)
+PY
 	# Publisher SHASUMS256.txt lists every asset; append so both archs stay.
 	(cd "$STUB_RELEASE" && sha256sum "$asset" >> SHASUMS256.txt)
 }
@@ -230,9 +269,12 @@ done
 
 # 12. A valid archive without the bun binary must not report success.
 fresh_release
-rm -rf "$T/payload/bun-linux-x64.zip" && mkdir -p "$T/payload/bun-linux-x64.zip"
-printf 'nope\n' > "$T/payload/bun-linux-x64.zip/README"
-(cd "$T/payload" && rm -f "$STUB_RELEASE/bun-linux-x64.zip" && zip -qr "$STUB_RELEASE/bun-linux-x64.zip" bun-linux-x64.zip)
+python3 - "$STUB_RELEASE/bun-linux-x64.zip" <<'PY'
+import sys
+import zipfile
+with zipfile.ZipFile(sys.argv[1], "w", zipfile.ZIP_STORED) as archive:
+    archive.writestr("bun-linux-x64/README", "nope\n")
+PY
 (cd "$STUB_RELEASE" && sha256sum bun-linux-x64.zip > SHASUMS256.txt)
 make_metadata good
 call
