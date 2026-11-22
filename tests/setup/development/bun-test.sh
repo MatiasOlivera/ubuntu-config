@@ -105,7 +105,12 @@ make_artifact() {
 	local entry=${asset%.zip}
 	rm -rf "$T/payload/$entry"
 	mkdir -p "$T/payload/$entry"
-	printf '#!/usr/bin/env bash\nprintf "bun fixture 9.9.9\\n"\n' > "$T/payload/$entry/bun"
+	cat > "$T/payload/$entry/bun" <<'STUB'
+#!/usr/bin/env bash
+if [[ $1 == --version ]]; then printf 'bun fixture 9.9.9\n'; exit 0; fi
+if [[ $1 == completions ]]; then printf '#compdef bun\n' > "$BUN_INSTALL/_bun"; exit 0; fi
+exit 1
+STUB
 	python3 - "$STUB_RELEASE/$asset" "$T/payload/$entry/bun" "$entry/bun" <<'PY'
 import sys
 import zipfile
@@ -193,7 +198,8 @@ for spec in "x86_64:bun-linux-x64.zip" "aarch64:bun-linux-aarch64.zip"; do
 	fresh_release
 	BUN_TEST_ARCH=$arch
 	call
-	if [[ $RC -eq 0 && -x $(binary) && $OUT == *"installed: bun bun fixture 9.9.9"* &&
+	if [[ $RC -eq 0 && -x $(binary) && -s "$T/home/.bun/_bun" &&
+		$OUT == *"installed: bun bun fixture 9.9.9"* &&
 		"$($(binary) --version)" == "bun fixture 9.9.9" ]] &&
 		[[ $(wc -l < "$STUB_DIR/curl-calls") -eq 3 ]] &&
 		grep -Fxq "https://api.github.com/repos/oven-sh/bun/releases/latest" "$STUB_DIR/curl-calls" &&

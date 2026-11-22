@@ -124,6 +124,9 @@ bun_install_verified() (
         return 1
     fi
     staged=""
+    # dot_zshrc sources ~/.bun/_bun; upstream generates it on install.
+    ( IS_BUN_AUTO_UPDATE=true SHELL=zsh BUN_INSTALL="$HOME/.bun" \
+        "$bin_dir/bun" completions >/dev/null 2>&1 ) || true
     printf 'installed: bun %s\n' "$ver"
 )
 
