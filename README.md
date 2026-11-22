@@ -58,6 +58,7 @@ bash setup/post-install.sh  # real machine: full apt upgrade
 
 - Git, GitHub CLI, Docker (+ Compose, Sandboxes `sbx`), zsh (set as default shell) + config
 - zoxide, uv, Ghostty (+ config + set as GNOME default terminal), Ollama, Homebrew
+- pnpm (JS/TS packages; fnm remains the Node version manager), bun
 - Cursor CLI, Postman, Beekeeper Studio, opencode
 - oh-my-zsh + `zsh-autosuggestions` + `zsh-syntax-highlighting` + Powerlevel10k theme (`post-install.sh`)
 - `fnm` + Node LTS (`post-install.sh`), Antigravity CLI (`post-install.sh`)
@@ -87,6 +88,10 @@ Rule of thumb:
 
 - Declarative files → chezmoi in `dotfiles/`
 - Imperative actions (`chsh`, `gsettings`, clones) → bash in `setup/`
+
+## Language package managers
+
+New setup scripts follow the [language package-manager policy](docs/language-package-managers.md): uv for Python (pip/pipx stay as agent-compatible fallbacks), fnm for Node versions, pnpm for JS/TS packages, and bun because the shell config references it. Other languages are decided when a script needs them.
 
 ## Failure handling
 
