@@ -7,6 +7,6 @@
 | 3   | [x]  | Add `--force` to the `step chezmoi` apply command in `setup/install.sh`. | 1 | Automated | The apply-step assertion in `tests/setup/dotfiles-convergence-test.sh` passes |
 | 4   | [x]  | Focused checks on the two changed setup scripts. | 2, 3 | Automated | `bash -n` and shellcheck clean on both scripts; focused test exits 0 |
 | 5   | [x]  | Run the full repository gate. | 4 | Automated | `./tests/test.sh` exits 0 |
-| 6   | [ ]  | Run the isolated static check. | 5 | Automated | `docker compose -f tests/compose.yml run --rm test` exits 0 |
+| 6   | [x]  | Run the isolated static check. | 5 | Automated | `docker compose -f tests/compose.yml run --rm test` exits 0 |
 | 7   | [ ]  | Verify a rerun on an already-configured VM (the #30 regression path). | 6 | Manual | `./tests/test.sh --vm --reuse` (use `--keep` on failure): no TTY error, versions report printed, exit 0 |
 | 8   | [ ]  | Self-review the change against the five acceptance scenarios. | 7 | Manual | Each scenario in `specs/082-chezmoi-apply-prompts-on-rerun/spec.md` is checked off against observed behavior |
