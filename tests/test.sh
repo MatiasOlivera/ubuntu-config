@@ -171,7 +171,7 @@ if [[ $RUN_VM -eq 1 && $FAILURES -eq 0 ]]; then
 			fi
 
 			phase_begin
-			if multipass launch "$UBUNTU_IMAGE" --name "$VM_NAME" --cpus 2 --memory 4G --disk 20G; then
+			if multipass launch "$UBUNTU_IMAGE" --name "$VM_NAME" --cpus 2 --memory 4G --disk 50G; then
 				pass "multipass launch $UBUNTU_IMAGE"
 			else
 				fail "multipass launch $UBUNTU_IMAGE"
