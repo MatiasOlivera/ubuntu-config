@@ -21,15 +21,7 @@ DOTFILES_DIR="$SCRIPT_DIR/../dotfiles"
 
 # ponytail: SECONDS wall-clock per step, no external profiler.
 install_start=$SECONDS
-step() {
-	local label=$1
-	local t0=$SECONDS
-	if [[ $# -gt 1 ]]; then shift; fi
-	"$@"
-	local st=$?
-	printf '[+%ds] %s\n' "$((SECONDS - t0))" "$label"
-	return $st
-}
+source "$SCRIPT_DIR/helpers/steps.sh"
 
 source "$ESSENTIALS_DIR/make.sh"
 source "$ESSENTIALS_DIR/curl.sh"
@@ -167,8 +159,9 @@ step chezmoi chezmoi apply --source "$DOTFILES_DIR"
 
 # Interactive when secrets are missing, silent skip otherwise; never fails
 # a non-interactive run (reports pending and exits 0).
-step config_sync_credentials
+advisory_step config_sync_credentials
 
 step versions bash "$SCRIPT_DIR/../reports/versions.sh"
 
 printf '[+%ds] install.sh total\n' "$((SECONDS - install_start))"
+report_failed_steps || exit 1

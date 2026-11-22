@@ -93,6 +93,19 @@ Rule of thumb:
 
 New setup scripts follow the [language package-manager policy](docs/language-package-managers.md): uv for Python (pip/pipx stay as agent-compatible fallbacks), fnm for Node versions, pnpm for JS/TS packages, and bun because the shell config references it. Other languages are decided when a script needs them.
 
+## Failure handling
+
+`install.sh` and `post-install.sh` run every step even if one fails, then
+print a summary naming the failed steps and exit nonzero. Set `FAIL_FAST=1` to
+stop at the first failing step instead:
+
+```sh
+FAIL_FAST=1 ./setup/install.sh
+```
+
+Credential sync is advisory: missing secrets are reported as pending in
+non-interactive runs and never fail the run or count as a failed step.
+
 ## Manual steps
 
 Some apps can't be installed programmatically. See [`setup/manual-installation.md`](setup/manual-installation.md) for the full list.
@@ -202,7 +215,7 @@ tests/
 2. `source` it and append its call in `setup/install.sh` or `setup/post-install.sh`, plus a `chk`/`src` row in `reports/versions.sh`.
 3. Config files → `dotfiles/` via chezmoi; commands → bash.
 
-`tests/test.sh` enforces this contract fail-closed. For the full workflow (phases, apt-repo function, version guards, examples) the repo's `install-package` skill covers it.
+`tests/test.sh` enforces this contract fail-closed. For the full workflow (phases, install-method priority, apt-repo function, version guards, examples) the repo's `install-package` skill covers it.
 
 ## Installing one app
 

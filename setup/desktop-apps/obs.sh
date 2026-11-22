@@ -8,7 +8,7 @@ install_obs() {
 		printf 'skip: obs already installed (%s)\n' "$installed_ver"
 		return 0
 	fi
-	flatpak install flathub -y com.obsproject.Studio \
+	sudo flatpak install flathub -y com.obsproject.Studio \
 		com.obsproject.Studio.Plugin.SceneSwitcher \
 		com.obsproject.Studio.Plugin.AdvancedMasks \
 		com.obsproject.Studio.Plugin.MoveTransition \

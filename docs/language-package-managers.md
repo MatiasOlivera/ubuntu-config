@@ -43,7 +43,7 @@
    SHA-256 digest where the publisher provides none, as required by
    [ADR 0003](decisions/0003-remote-installer-integrity.md) and
    [ADR 0007](decisions/0007-artifact-integrity-source-priority.md).
-4. OS-level install-method choices belong to issue #7, not this policy.
+4. OS-level install-method choices follow the [install-method priority](decisions/0008-install-method-priority.md) and the `install-package` skill, not this policy.
 
 ## Integrity notes
 
