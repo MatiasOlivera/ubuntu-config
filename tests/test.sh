@@ -4,7 +4,6 @@
 # Fail-closed: any failure exits 1.
 
 UBUNTU_IMAGE="26.04"
-VM_NAME="ubuntu-config-test"
 SNAPSHOT="base"
 
 RUN_VM=0
@@ -157,6 +156,8 @@ if [[ $RUN_VM -eq 1 && $FAILURES -eq 0 ]]; then
 	if ! command -v multipass >/dev/null 2>&1; then
 		fail "multipass not installed"
 	else
+		VM_NAME="$(bash "$ROOT/tests/vm-name.sh" "$ROOT")"
+		printf 'e2e VM for this worktree: %s\n' "$VM_NAME"
 		trap '[[ $KEEP -eq 0 ]] && multipass delete -p "$VM_NAME" >/dev/null 2>&1 || true' EXIT
 		vm_start=$SECONDS
 
