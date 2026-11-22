@@ -52,12 +52,14 @@ Image `ubuntu:26.04` + bash/shellcheck, repo mounted read-only.
 
 `--keep`/`--reuse` are only valid with `--vm`.
 
+The VM name is `ubuntu-config-test-<checkout-dir>-<base62>` (checkout directory slug + base62 digest of its path), so each checkout has its own VM; each `--vm` run prints the name.
+
 ## Iteration loop (fast re-runs)
 
 - Seed once with the full install: `./tests/test.sh --vm --keep` (VM kept alive).
 - Then iterate: `./tests/test.sh --vm --reuse` — idempotency guards skip already-installed packages (~seconds).
 - `--reuse` without a `--keep` seeding run: the VM is deleted on exit and the next run rebuilds fresh.
-- Reset a dirty VM to its clean base with `multipass restore ubuntu-config-test.base`.
+- Reset a dirty VM to its clean base with `multipass restore <vm-name>.base` (`<vm-name>` is the worktree-scoped name printed by each `--vm` run).
 
 ## Test-VM upgrade
 
