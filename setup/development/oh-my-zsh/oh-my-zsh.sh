@@ -8,7 +8,8 @@ install_oh_my_zsh() {
         printf 'skip: oh-my-zsh already installed (%s)\n' "$installed_ver"
         return 0
     fi
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+    # Empty $0 so the flags reach the installer instead of becoming $0.
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --keep-zshrc --unattended
 }
 
 oh_my_zsh_version() {

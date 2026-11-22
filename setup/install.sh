@@ -155,7 +155,7 @@ if [[ ! -f $CHEZMOI_CONFIG ]]; then
 		"${name//\"/\\\"}" "${email//\"/\\\"}" >"$CHEZMOI_CONFIG"
 fi
 
-step chezmoi chezmoi apply --source "$DOTFILES_DIR"
+step chezmoi chezmoi apply --force --source "$DOTFILES_DIR"
 
 # Interactive when secrets are missing, silent skip otherwise; never fails
 # a non-interactive run (reports pending and exits 0).
