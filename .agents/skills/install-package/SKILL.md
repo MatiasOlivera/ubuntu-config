@@ -24,26 +24,23 @@ such as installation or package components.
 
 ## 2. Pick the install method
 
-Use the highest rung that actually exists for the tool, in this order
-([decision record](../../../docs/decisions/0008-install-method-priority.md)):
+Use the highest rung that actually exists for the tool, in this order:
 
 1. **Ubuntu apt** — plain `apt install`, no extra source.
 2. **Vendor apt repository** — GPG key + `.sources`, overwrite, never append;
    the repo function does not run `apt update`.
 3. **Checksum-verified release artifact** — publisher checksum or signature
-   covering the exact artifact, chosen per
-   [0007](../../../docs/decisions/0007-artifact-integrity-source-priority.md).
+   covering the exact artifact.
 4. **Homebrew** — CLI tools only when the vendor ships no higher rung.
 5. **flatpak / flathub** — desktop apps only.
 6. **snap** — only when the vendor ships nothing else.
 7. **Raw vendor `.deb` via curl** — last resort; explain in the PR why no
    higher rung exists.
 
-Integrity is a constraint on every rung, not a rung of its own:
-[0003](../../../docs/decisions/0003-remote-installer-integrity.md) forbids
-executing unverifiable remote code. `curl … | sh` is not an option; a tool that
-only has such an installer needs an entry in the
-[integrity exception register](../../../docs/integrity-exceptions.md) first.
+Integrity is a constraint on every rung, not a rung of its own: never execute
+unverifiable remote code. `curl … | sh` is not an option; a tool that only has
+such an installer needs an entry in the integrity exception register
+(`docs/integrity-exceptions.md`) first.
 
 Break ties by, in order: idempotent and non-interactive installs; a verifiable
 source; updates through a path this repo actually runs; least privilege.
@@ -60,7 +57,7 @@ application.
   record an explicit exception decision; never accept unverified bytes or use
   a self-authored hash pin. Record the artifact/version, sources checked,
   material found, and the reason for any GitHub fallback in the issue or PR.
-  See [`0007-artifact-integrity-source-priority.md`](../../../docs/decisions/0007-artifact-integrity-source-priority.md).
+  See `0007-artifact-integrity-source-priority.md` in `docs/decisions/`.
 
 - Single-purpose script defining one `install_<pkg>()` or `config_<pkg>()`.
 - **Adding an apt source**: define `install_<pkg>_repository()` separately — sources/keys only, **no** `apt update`, no installs. Wired into the repositories phase so the single `apt update` in `install.sh` covers it. Overwrite the `.sources` file (never append) for rerun-safety (see `development/docker.sh`).
