@@ -3,7 +3,7 @@
 | ID  | Done | Task | Depends on | Type      | Verification |
 | --- | ---- | ---- | ---------- | --------- | ------------ |
 | 1   | [x]  | Add `tests/setup/dotfiles-convergence-test.sh`: stub `curl` with a fake oh-my-zsh installer that records its arguments; assert `--keep-zshrc` and `--unattended` are passed, assert the installed guard skips the installer, and assert `install.sh` applies dotfiles with `--force`. Confirm it fails on the unmodified tree. | - | Automated | `bash tests/setup/dotfiles-convergence-test.sh` exits nonzero with all three assertions reported |
-| 2   | [ ]  | Pass `--keep-zshrc --unattended` (with the empty `$0` placeholder) to the oh-my-zsh installer in `install_oh_my_zsh`. | 1 | Automated | The installer-arguments and installed-guard assertions in `tests/setup/dotfiles-convergence-test.sh` pass |
+| 2   | [x]  | Pass `--keep-zshrc --unattended` (with the empty `$0` placeholder) to the oh-my-zsh installer in `install_oh_my_zsh`. | 1 | Automated | The installer-arguments and installed-guard assertions in `tests/setup/dotfiles-convergence-test.sh` pass |
 | 3   | [ ]  | Add `--force` to the `step chezmoi` apply command in `setup/install.sh`. | 1 | Automated | The apply-step assertion in `tests/setup/dotfiles-convergence-test.sh` passes |
 | 4   | [ ]  | Focused checks on the two changed setup scripts. | 2, 3 | Automated | `bash -n` and shellcheck clean on both scripts; focused test exits 0 |
 | 5   | [ ]  | Run the full repository gate. | 4 | Automated | `./tests/test.sh` exits 0 |
