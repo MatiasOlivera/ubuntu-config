@@ -118,7 +118,7 @@ Report-only version table for everything the scripts manage. Installs nothing, a
 
 ```sh
 ./reports/versions.sh
-multipass exec ubuntu-config-test -- bash ubuntu-config/reports/versions.sh  # same, inside the e2e VM
+multipass exec <vm-name> -- bash ubuntu-config/reports/versions.sh  # same, inside the e2e VM (see Testing)
 ```
 
 ### Gaps
@@ -178,6 +178,8 @@ Full e2e on a fresh Multipass VM (requires Multipass on host):
 ./tests/test.sh --vm --keep       # leave VM running on failure for inspection
 ./tests/test.sh --vm --reuse      # reuse existing VM for fast iterations
 ```
+
+The e2e VM is `ubuntu-config-test-<checkout-dir>-<base62>` (see [`tests/vm-name.sh`](tests/vm-name.sh)): the slug is the checkout directory name and the suffix is a base62 digest of its full path. Every checkout — including the original repository rather than a worktree — gets its own stable VM, so concurrent agents cannot overwrite each other. Each `--vm` run prints the name, and `--reuse`/`--keep` affect only that VM.
 
 `tests/test.sh` enforces the script contract: `bash -n` syntax, every library script sourced by `install.sh`/`post-install.sh`, source-only `install_*`/`config_*` functions, standalone `BASH_SOURCE` guard on every `*config*.sh`, plus shellcheck when available.
 
