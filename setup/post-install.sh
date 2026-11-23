@@ -12,6 +12,13 @@ while true; do sudo -n true 2>/dev/null; sleep 50; kill -0 "$$" || exit; done 2>
 SUDO_KEEPALIVE=$!
 trap 'kill "$SUDO_KEEPALIVE" 2>/dev/null' EXIT
 
+SCRIPT_DIR=$(dirname "$0")
+if [[ -n ${OBSERVABILITY_RECORD_DIR:-} ]]; then
+	source "$SCRIPT_DIR/helpers/observability.sh"
+	observability_init "${OBSERVABILITY_RUN_ID:-unknown}" "${OBSERVABILITY_COLLECTOR:-}" ||
+		printf 'warning: e2e observability initialization failed\n' >&2
+fi
+
 # SKIP_UPGRADE=1 skips apt upgrade (fast path for test.sh --vm).
 upgrade_start=$SECONDS
 if [[ ${SKIP_UPGRADE:-0} != 1 ]]; then
@@ -22,8 +29,6 @@ if [[ ${SKIP_UPGRADE:-0} != 1 ]]; then
   sudo apt upgrade -y
   printf '[+%ds] apt upgrade\n' "$((SECONDS - upgrade_start))"
 fi
-
-SCRIPT_DIR=$(dirname "$0")
 
 # ponytail: SECONDS wall-clock per step, no external profiler.
 post_start=$SECONDS

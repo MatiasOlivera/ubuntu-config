@@ -161,6 +161,16 @@ if [[ $RUN_VM -eq 1 && $FAILURES -eq 0 ]]; then
 		trap '[[ $KEEP -eq 0 ]] && multipass delete -p "$VM_NAME" >/dev/null 2>&1 || true' EXIT
 		vm_start=$SECONDS
 
+		# Observability records are written inside the VM, then copied to the
+		# host by the phase wrapper before the cleanup trap can delete the VM.
+		OBSERVABILITY_VM_NAME=$VM_NAME
+		OBSERVABILITY_VM_RECORD_DIR=/home/ubuntu/.ubuntu-config-observability
+		OBSERVABILITY_RUN_ID="$(date -u +%Y%m%dT%H%M%SZ)-$(git -C "$ROOT" rev-parse --short HEAD 2>/dev/null || echo unknown)"
+		OBSERVABILITY_GIT_SHA="$(git -C "$ROOT" rev-parse HEAD 2>/dev/null || true)"
+		OBSERVABILITY_GIT_BRANCH="$(git -C "$ROOT" rev-parse --abbrev-ref HEAD 2>/dev/null || true)"
+		OBSERVABILITY_IMAGE=$UBUNTU_IMAGE
+		export OBSERVABILITY_VM_NAME OBSERVABILITY_VM_RECORD_DIR OBSERVABILITY_RUN_ID OBSERVABILITY_GIT_SHA OBSERVABILITY_GIT_BRANCH OBSERVABILITY_IMAGE
+
 		if [[ $REUSE -eq 1 ]] && multipass list 2>/dev/null | grep -qw "$VM_NAME"; then
 			phase_begin
 			multipass start "$VM_NAME" >/dev/null 2>&1 || true
@@ -184,6 +194,21 @@ if [[ $RUN_VM -eq 1 && $FAILURES -eq 0 ]]; then
 			phase_end "base snapshot"
 		fi
 
+		# A Multipass VM reaches the host through its NAT gateway, not the
+		# host's own default route. Ask the VM once it exists.
+		OBSERVABILITY_COLLECTOR=
+		vm_host_ip="$(multipass exec "$VM_NAME" -- ip -4 route show default 2>/dev/null | awk '{ print $3; exit }')"
+		if [[ -n $vm_host_ip ]] && command -v curl >/dev/null 2>&1; then
+			if curl -sS --max-time 2 -o /dev/null -X POST \
+				-H 'Content-Type: application/json' -d '{"resourceSpans":[]}' \
+				http://localhost:4318/v1/traces 2>/dev/null; then
+				OBSERVABILITY_COLLECTOR="http://$vm_host_ip:4318"
+			else
+				printf 'warning: live observability collector unreachable; continuing with durable records only\n' >&2
+			fi
+		fi
+		export OBSERVABILITY_COLLECTOR
+
 		phase_begin
 		tarball="$(mktemp "$HOME/ubuntu-config-test.XXXXXX.tar.gz")"
 		if tar -czf "$tarball" --exclude=.git -C "$ROOT" . &&
@@ -198,7 +223,15 @@ if [[ $RUN_VM -eq 1 && $FAILURES -eq 0 ]]; then
 		phase_end "transfer repo to VM"
 
 		phase_begin
-		if multipass exec "$VM_NAME" -- env CHEZMOI_NAME="Test" CHEZMOI_EMAIL="test@example.com" bash /home/ubuntu/ubuntu-config/setup/install.sh; then
+		if bash "$ROOT/tests/e2e-observability.sh" install \
+			multipass exec "$VM_NAME" -- env \
+			CHEZMOI_NAME="Test" CHEZMOI_EMAIL="test@example.com" \
+			OBSERVABILITY_RECORD_DIR="$OBSERVABILITY_VM_RECORD_DIR/install" \
+			OBSERVABILITY_E2E_APP_PATHS=/home/ubuntu/ubuntu-config/tests/observability/app-paths.tsv \
+			OBSERVABILITY_RUN_ID="$OBSERVABILITY_RUN_ID" OBSERVABILITY_PHASE=install \
+			OBSERVABILITY_COLLECTOR="$OBSERVABILITY_COLLECTOR" OBSERVABILITY_GIT_SHA="$OBSERVABILITY_GIT_SHA" \
+			OBSERVABILITY_GIT_BRANCH="$OBSERVABILITY_GIT_BRANCH" OBSERVABILITY_VM_NAME="$VM_NAME" OBSERVABILITY_IMAGE="$OBSERVABILITY_IMAGE" \
+			bash /home/ubuntu/ubuntu-config/setup/install.sh; then
 			pass "install.sh in VM"
 		else
 			fail "install.sh in VM"
@@ -206,7 +239,15 @@ if [[ $RUN_VM -eq 1 && $FAILURES -eq 0 ]]; then
 		phase_end "install.sh in VM"
 
 		phase_begin
-		if multipass exec "$VM_NAME" -- env SKIP_UPGRADE=1 bash /home/ubuntu/ubuntu-config/setup/post-install.sh; then
+		if bash "$ROOT/tests/e2e-observability.sh" post-install \
+			multipass exec "$VM_NAME" -- env \
+			SKIP_UPGRADE=1 \
+			OBSERVABILITY_RECORD_DIR="$OBSERVABILITY_VM_RECORD_DIR/post-install" \
+			OBSERVABILITY_E2E_APP_PATHS=/home/ubuntu/ubuntu-config/tests/observability/app-paths.tsv \
+			OBSERVABILITY_RUN_ID="$OBSERVABILITY_RUN_ID" OBSERVABILITY_PHASE=post-install \
+			OBSERVABILITY_COLLECTOR="$OBSERVABILITY_COLLECTOR" OBSERVABILITY_GIT_SHA="$OBSERVABILITY_GIT_SHA" \
+			OBSERVABILITY_GIT_BRANCH="$OBSERVABILITY_GIT_BRANCH" OBSERVABILITY_VM_NAME="$VM_NAME" OBSERVABILITY_IMAGE="$OBSERVABILITY_IMAGE" \
+			bash /home/ubuntu/ubuntu-config/setup/post-install.sh; then
 			pass "post-install.sh in VM"
 		else
 			fail "post-install.sh in VM"

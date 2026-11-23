@@ -1,0 +1,47 @@
+receivers:
+  otlp:
+    protocols:
+      http:
+        endpoint: 0.0.0.0:4318
+  filelog/spans:
+    include:
+      - /records/**/spans.jsonl
+    start_at: beginning
+    operators:
+      - type: json_parser
+  filelog/logs:
+    include:
+      - /records/**/logs/*.log
+    start_at: beginning
+
+processors:
+  batch: {}
+
+exporters:
+  otlp/tempo:
+    endpoint: tempo:4317
+    tls:
+      insecure: true
+    retry_on_failure:
+      enabled: true
+  loki:
+    endpoint: http://loki:3100/loki/api/v1/push
+    retry_on_failure:
+      enabled: true
+  prometheus:
+    endpoint: 0.0.0.0:8889
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp/tempo]
+    logs:
+      receivers: [otlp, filelog/spans, filelog/logs]
+      processors: [batch]
+      exporters: [loki]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [prometheus]
