@@ -24,14 +24,6 @@ exporters:
       insecure: true
   loki:
     endpoint: http://loki:3100/loki/api/v1/push
-    labels:
-      resource:
-        service.name: service.name
-      record:
-        log.file.name: log.file.name
-        run_id: run_id
-        app: app
-        span_id: span_id
   prometheus:
     endpoint: 0.0.0.0:8889
 
