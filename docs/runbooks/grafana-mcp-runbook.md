@@ -52,6 +52,13 @@ kilo mcp list                # expect: grafana project server
 agy mcp list                 # expect: grafana enabled (after the wiring below)
 ```
 
+Kilo does not expand `{env:...}` in MCP `env` values — it passes the literal
+placeholder to the server, which then panics on an invalid URL. Its entry has
+no `env` block and relies on the exported variables above, so run the export
+lines in the shell that starts Kilo. Copilot CLI loads workspace MCP servers
+only in a trusted folder; in an untrusted folder it reports "Skipped workspace
+MCP servers" instead of listing `grafana`.
+
 ### agy needs a literal URL and token (host-only)
 
 agy has no environment-variable expansion, so its entry carries the real URL

@@ -90,12 +90,9 @@ if config is not None:
         check(args[:1] == [version], "kilo: pinned version")
         check(tool_arg(args[1:]) == "--enabled-tools=" + tools,
               "kilo: explicit tool set")
-        environment = server.get("env", {})
-        check(environment.get("GRAFANA_URL") == "{env:GRAFANA_URL}",
-              "kilo: URL env reference")
-        check(environment.get("GRAFANA_SERVICE_ACCOUNT_TOKEN")
-              == "{env:GRAFANA_SERVICE_ACCOUNT_TOKEN}",
-              "kilo: token env reference")
+        # Kilo does not expand {env:...} in MCP env values; it inherits the
+        # exported process environment instead.
+        check("env" not in server, "kilo: no env block (inherits shell env)")
 
 for relative in ("opencode.json", ".github/mcp.json", ".kilocode/mcp.json"):
     path = root / relative

@@ -69,7 +69,7 @@ Per-agent environment syntax (load-bearing, verified from upstream docs):
 | --- | --- | --- | --- |
 | opencode | `mcp.servers.<name>.environment` | `{env:VAR}` | OpenCode MCP docs, `mcp-servers.mdx` (Context7 `/anomalyco/opencode`) |
 | Copilot CLI | `mcpServers.<name>.env` | `${VAR}` | copilot-cli `changelog.md` v0.0.340 (Context7 `/github/copilot-cli`) |
-| Kilo CLI | `mcpServers.<name>.env` | `{env:VAR}` | kilo docs `platforms/cli.md` and `automate/mcp/using-in-cli.md` (Context7 `/kilo-org/kilo`) |
+| Kilo CLI | `mcpServers.<name>` — no `env` block | none — inherits the exported process env; `{env:VAR}` is not expanded in MCP env (observed in Kilo 7.8.8 via `kilo mcp list --print-logs --log-level DEBUG`) | local verification, 2026-11-23 |
 | agy | `~/.gemini/config/mcp_config.json`, `mcpServers.<name>` | none — literal values | existing runbook pattern, `docs/runbooks/agent-credentials-runbook.md:115-152` |
 
 Upstream server facts: the pin is `2.2.0`, the latest version published on PyPI
