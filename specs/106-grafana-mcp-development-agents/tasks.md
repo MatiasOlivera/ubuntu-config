@@ -4,7 +4,7 @@
 
 | ID  | Done | Task | Depends on | Type      | Verification |
 | --- | ---- | ---- | ---------- | --------- | ------------ |
-| 1   | [ ]  | Add `tests/agents/grafana-mcp-config-test.sh` asserting the three configs' shape, pinned version, explicit tool list, env placeholders, no token value, no setup/chezmoi wiring, and intact agy deny-list entries | - | Automated | Run `bash tests/agents/grafana-mcp-config-test.sh` — fails while configs are absent (red) |
+| 1   | [x]  | Add `tests/agents/grafana-mcp-config-test.sh` asserting the three configs' shape, pinned version, explicit tool list, env placeholders, no token value, no setup/chezmoi wiring, and intact agy deny-list entries | - | Automated | Run `bash tests/agents/grafana-mcp-config-test.sh` — fails while configs are absent (red) |
 | 2   | [ ]  | Add `mcp.servers.grafana` to root `opencode.json` with the pinned command, explicit tool list and `{env:...}` references; preserve existing permissions | 1 | Automated | `bash tests/agents/grafana-mcp-config-test.sh` passes its opencode assertions (green) |
 | 3   | [ ]  | Add `.github/mcp.json` with the Copilot CLI `mcpServers.grafana` entry and `${...}` references | 1 | Automated | `bash tests/agents/grafana-mcp-config-test.sh` passes its Copilot assertions |
 | 4   | [ ]  | Add `.kilocode/mcp.json` with the Kilo CLI `mcpServers.grafana` entry and `{env:...}` references | 1 | Automated | `bash tests/agents/grafana-mcp-config-test.sh` passes its Kilo assertions |
