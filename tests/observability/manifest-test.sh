@@ -33,9 +33,12 @@ check_status() {
 
 # Build a fixture manifest from a real step label so validation can check both
 # label coverage and allowed path roots.
-printf 'install_uv\t%s/.local/bin/uv %s/.local/bin/uvx\n' "$HOME" "$HOME" > "$T/good.tsv"
+printf 'install_uv\t$HOME/.local/bin/uv $HOME/.local/bin/uvx\n' > "$T/good.tsv"
 printf 'install_uv\t/\n' > "$T/bad-path.tsv"
-printf 'install_missing_app\t%s/.local/bin/uv\n' "$HOME" > "$T/bad-label.tsv"
+printf 'install_missing_app\t$HOME/.local/bin/uv\n' > "$T/bad-label.tsv"
+
+obs_check_manifest "$ROOT/tests/observability/app-paths.tsv"
+check_status "shipped manifest" 0 $?
 
 for f in good bad-path bad-label; do
 	err="$T/$f.err"
@@ -49,7 +52,8 @@ if grep -q 'path outside allowed roots' "$T/bad-path.err"; then pass "unsafe pat
 # Known file sizes: 4096 + 8192 bytes across two declared paths.
 head -c 4096 /dev/zero > "$HOME/.local/bin/uv"
 head -c 8192 /dev/zero > "$HOME/.local/bin/uvx"
-bytes=$(obs_disk_bytes install_uv "$T/good.tsv")
+obs_disk_bytes install_uv "$T/good.tsv" > "$T/bytes"
+bytes=$(cat "$T/bytes")
 if [[ $bytes -ge 12288 ]]; then pass "disk bytes sum declared paths ($bytes)"; else fail "disk bytes too small: $bytes"; fi
 if [[ ${OBS_DISK_BASIS:-} == approximate ]]; then pass "disk bytes marked approximate"; else fail "disk basis missing"; fi
 

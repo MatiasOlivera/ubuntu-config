@@ -29,14 +29,15 @@ export STUB_DIR="$T/stubs" OBS_RECORD_DIR="$T/records"
 # counter fixture so the shim observes a byte delta after the call.
 cat > "$T/netdev" <<'EOF'
   Inter-|   Receive                                                |  Transmit
-   eth0: 1000    0    0    0    0    0    0    0    0    0     500    0    0    0    0    0    0    0    0    0
+   face |bytes    packets errs drop fifo frame compressed multicast|bytes    packets errs drop fifo colls carrier compressed
+   eth0: 1000    0    0    0    0    0    0    0     500    0    0    0    0    0    0    0
 EOF
 export OBS_E2E_NET_DEV="$T/netdev"
 cat > "$STUB_DIR/real-curl" <<'EOF'
 #!/usr/bin/env bash
 : > "$STUB_DIR/curl-called"
 printf '%s\n' "$*" > "$STUB_DIR/curl-args"
-awk '{ if ($1 ~ /eth0:/) { sub(/eth0:/, "", $1); $2 = $2 + 4096; $10 = $10 + 1024 } print }' \
+awk '{ if ($1 ~ /eth0:/) { $2 = $2 + 4096; $10 = $10 + 1024 } print }' \
 	"$OBS_E2E_NET_DEV" > "$OBS_E2E_NET_DEV.next"
 mv "$OBS_E2E_NET_DEV.next" "$OBS_E2E_NET_DEV"
 exit 0
@@ -92,13 +93,13 @@ check_has() {
 
 check_has "download span" '"kind":"download"'
 check_has "download name is the command" '"name":"curl"'
-check_has "download host attribute" '"url_host":"example.invalid"'
+check_has "download host attribute" '"key":"url_host","value":{"stringValue":"example.invalid"}'
 check_has "package-manager span" '"kind":"package-manager"'
 check_has "package-manager name is apt" '"name":"apt"'
-check_has "network byte delta" '"bytes_net_approx":[1-9][0-9]*'
-check_has "bundled label" '"download_and_install":"bundled"'
+check_has "network byte delta" '"key":"bytes_net_approx","value":{"intValue":[1-9][0-9]*}'
+check_has "bundled label" '"key":"download_and_install","value":{"stringValue":"bundled"}'
 
-step_id=$(grep '"kind":"step"' "$SPANS" | sed -n 's/.*"span_id":"\([0-9a-f]*\)".*/\1/p' | head -n 1)
+step_id=$(grep '"kind":"step"' "$SPANS" | sed -n 's/.*"trace_id":"[^"]*","span_id":"\([0-9a-f]*\)".*/\1/p' | head -n 1)
 if [[ -n $step_id ]] && grep -q "\"parent_span_id\":\"$step_id\"" "$SPANS"; then
 	pass "child spans point at the step span"
 else
