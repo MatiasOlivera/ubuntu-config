@@ -169,16 +169,7 @@ if [[ $RUN_VM -eq 1 && $FAILURES -eq 0 ]]; then
 		OBS_GIT_SHA="$(git -C "$ROOT" rev-parse HEAD 2>/dev/null || true)"
 		OBS_GIT_BRANCH="$(git -C "$ROOT" rev-parse --abbrev-ref HEAD 2>/dev/null || true)"
 		OBS_IMAGE=$UBUNTU_IMAGE
-		OBS_COLLECTOR=
-		host_ip="$(ip -4 route show default 2>/dev/null | awk '{ print $3; exit }')"
-		if [[ -n $host_ip ]] && command -v curl >/dev/null 2>&1; then
-			OBS_COLLECTOR="http://$host_ip:4318"
-			if ! curl -sS --max-time 2 -o /dev/null "$OBS_COLLECTOR/health" 2>/dev/null; then
-				printf 'warning: live observability collector unreachable; continuing with durable records only\n' >&2
-				OBS_COLLECTOR=
-			fi
-		fi
-		export OBS_VM_NAME OBS_VM_RECORD_DIR OBS_RUN_ID OBS_GIT_SHA OBS_GIT_BRANCH OBS_IMAGE OBS_COLLECTOR
+		export OBS_VM_NAME OBS_VM_RECORD_DIR OBS_RUN_ID OBS_GIT_SHA OBS_GIT_BRANCH OBS_IMAGE
 
 		if [[ $REUSE -eq 1 ]] && multipass list 2>/dev/null | grep -qw "$VM_NAME"; then
 			phase_begin
@@ -202,6 +193,21 @@ if [[ $RUN_VM -eq 1 && $FAILURES -eq 0 ]]; then
 			ensure_snapshot
 			phase_end "base snapshot"
 		fi
+
+		# A Multipass VM reaches the host through its NAT gateway, not the
+		# host's own default route. Ask the VM once it exists.
+		OBS_COLLECTOR=
+		vm_host_ip="$(multipass exec "$VM_NAME" -- ip -4 route show default 2>/dev/null | awk '{ print $3; exit }')"
+		if [[ -n $vm_host_ip ]] && command -v curl >/dev/null 2>&1; then
+			if curl -sS --max-time 2 -o /dev/null -X POST \
+				-H 'Content-Type: application/json' -d '{"resourceSpans":[]}' \
+				http://localhost:4318/v1/traces 2>/dev/null; then
+				OBS_COLLECTOR="http://$vm_host_ip:4318"
+			else
+				printf 'warning: live observability collector unreachable; continuing with durable records only\n' >&2
+			fi
+		fi
+		export OBS_COLLECTOR
 
 		phase_begin
 		tarball="$(mktemp "$HOME/ubuntu-config-test.XXXXXX.tar.gz")"
