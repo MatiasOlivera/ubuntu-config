@@ -48,7 +48,11 @@ Covers `bash -n` syntax, every library script sourced by `install.sh`/`post-inst
 docker compose -f tests/compose.yml run --rm test
 ```
 
-Image `ubuntu:26.04` + bash/shellcheck, repo mounted read-only.
+Image `ubuntu:26.04` + shellcheck/python3, repo mounted read-only. This local
+command always builds from `tests/Dockerfile`. CI pulls a prebuilt image from
+GHCR instead; only PRs that change the image definition build locally. A nightly
+cache-free rebuild validates apt and upstream packages, so keep that workflow
+green when changing the toolchain.
 
 ## Full e2e (needs Multipass on host)
 
