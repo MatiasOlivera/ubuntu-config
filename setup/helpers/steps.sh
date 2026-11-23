@@ -9,8 +9,15 @@ step() {
 	local label=$1
 	local t0=$SECONDS
 	[[ $# -gt 1 ]] && shift
-	"$@"
-	local st=$?
+	declare -F obs_step_begin >/dev/null 2>&1 && obs_step_begin "$label"
+	local st
+	if declare -F obs_step_begin >/dev/null 2>&1 && [[ ${OBS_INITIALIZED:-0} == 1 ]]; then
+		"$@" 2>&1 | tee "$OBS_CURRENT_LOG"
+		st=${PIPESTATUS[0]}
+	else
+		"$@"
+		st=$?
+	fi
 	printf '[+%ds] %s\n' "$((SECONDS - t0))" "$label"
 	if [[ $st -ne 0 ]]; then
 		printf 'FAILED: %s (status %d)\n' "$label" "$st" >&2
@@ -19,7 +26,8 @@ step() {
 			exit "$st"
 		fi
 	fi
-	return $st
+	declare -F obs_step_end >/dev/null 2>&1 && obs_step_end "$st"
+	return "$st"
 }
 
 # Advisory steps (credential sync) are timed but never counted or fail the run.
@@ -27,8 +35,17 @@ advisory_step() {
 	local label=$1
 	local t0=$SECONDS
 	[[ $# -gt 1 ]] && shift
-	"$@"
+	declare -F obs_step_begin >/dev/null 2>&1 && obs_step_begin "$label"
+	local st
+	if declare -F obs_step_begin >/dev/null 2>&1 && [[ ${OBS_INITIALIZED:-0} == 1 ]]; then
+		"$@" 2>&1 | tee "$OBS_CURRENT_LOG"
+		st=${PIPESTATUS[0]}
+	else
+		"$@"
+		st=$?
+	fi
 	printf '[+%ds] %s\n' "$((SECONDS - t0))" "$label"
+	declare -F obs_step_end >/dev/null 2>&1 && obs_step_end "$st"
 	return 0
 }
 
