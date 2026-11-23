@@ -33,7 +33,7 @@ the run fails closed with a clear message rather than proceeding unguarded.
 
 Docs updated in the same change: `README.md:196` (Testing section) and
 `.agents/skills/run-tests/SKILL.md:53-70`, which documents VM naming and the
-iteration loop. Decision recorded in `docs/decisions/0010-e2e-run-concurrency.md`.
+iteration loop. Decision recorded in `docs/decisions/0011-e2e-run-concurrency.md`.
 
 ## Data models
 
@@ -55,7 +55,7 @@ read, and no schema, migration, or cleanup applies.
 
 ## Decisions
 
-- `docs/decisions/0010-e2e-run-concurrency.md` (accepted, 2026-11-23): one active
+- `docs/decisions/0011-e2e-run-concurrency.md` (accepted, 2026-11-23): one active
   run per VM, fail fast, per-VM scope, OS-managed release. Rejected: blocking
   wait, opt-in wait flag, host-wide lock, VM-state inference, no guard.
 
