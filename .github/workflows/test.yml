@@ -5,6 +5,9 @@ on:
   pull_request:
   workflow_dispatch:
 
+env:
+  TEST_IMAGE: ghcr.io/matiasolivera/ubuntu-config-test:latest
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -26,4 +29,22 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5
-      - run: docker compose -f tests/compose.yml run --rm test
+      # PRs use the published image so apt mirrors stay off the critical path.
+      # Changes to the image definition are built locally so they can never be
+      # validated against a stale image.
+      - name: Choose image mode
+        id: mode
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          mode="$(bash tests/ci-image-mode.sh "$BASE_REF")"
+          [[ $mode == build || $mode == pull ]] || { echo "invalid mode: $mode" >&2; exit 1; }
+          echo "value=$mode" >> "$GITHUB_OUTPUT"
+      - name: Run suite in published image
+        if: steps.mode.outputs.value == 'pull'
+        run: |
+          docker pull "$TEST_IMAGE"
+          docker run --rm -v "$PWD:/work:ro" "$TEST_IMAGE" ./tests/test.sh
+      - name: Run suite in locally built image
+        if: steps.mode.outputs.value == 'build'
+        run: docker compose -f tests/compose.yml run --rm test
