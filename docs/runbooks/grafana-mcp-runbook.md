@@ -13,7 +13,9 @@ in the local Grafana UI, then store the token once (stdin keeps it out of shell
 history and process arguments):
 
 ```sh
-read -rsp 'Grafana service-account token: ' TOKEN; echo
+printf 'Grafana service-account token: ' >&2
+read -r -s TOKEN
+printf '\n' >&2
 printf '%s' "$TOKEN" | secret-tool store --label grafana-mcp \
   service grafana-mcp account service-account-token
 unset TOKEN
