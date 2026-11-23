@@ -2,6 +2,9 @@
 #
 # vm-lock-test.sh — hermetic checks for tests/vm-lock.sh. No Multipass or network.
 
+# Positional parameters in bash -c strings expand inside that shell, not here.
+# shellcheck disable=SC2016
+
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 SRC="$ROOT/tests/vm-lock.sh"
 FAILURES=0
