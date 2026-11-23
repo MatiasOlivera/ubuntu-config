@@ -64,7 +64,7 @@ green when changing the toolchain.
 
 `--keep`/`--reuse` are only valid with `--vm`.
 
-The VM name is `ubuntu-config-test-<checkout-dir>-<base62>` (checkout directory slug + base62 digest of its path), so each checkout has its own VM; each `--vm` run prints the name.
+The VM name is `ubuntu-config-test-<checkout-dir>-<base62>` (checkout directory slug + base62 digest of its path), so each checkout has its own VM; each `--vm` run prints the name. Only one e2e run may use a given VM at a time: starting a second `--vm` run against the same checkout exits immediately with an error naming the VM. It does not queue, and runs against other worktrees are unaffected. Wait for the active run to finish before retrying.
 
 ## Iteration loop (fast re-runs)
 
