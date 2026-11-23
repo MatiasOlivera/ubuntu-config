@@ -4,7 +4,7 @@
 # Stubs curl and the step commands; no network, sudo or system changes.
 
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-OBS_SRC="$ROOT/setup/helpers/observability.sh"
+OBSERVABILITY_SRC="$ROOT/setup/helpers/observability.sh"
 STEPS_SRC="$ROOT/setup/helpers/steps.sh"
 FAILURES=0
 
@@ -17,8 +17,8 @@ pass() {
 	printf 'ok: %s\n' "$1"
 }
 
-if [[ ! -f $OBS_SRC ]]; then
-	printf 'FAIL: %s missing (red state: no observability helper)\n' "$OBS_SRC" >&2
+if [[ ! -f $OBSERVABILITY_SRC ]]; then
+	printf 'FAIL: %s missing (red state: no observability helper)\n' "$OBSERVABILITY_SRC" >&2
 	exit 1
 fi
 
@@ -87,7 +87,7 @@ check_no_file() {
 }
 
 # Sourcing the helper alone must be silent and side-effect free.
-source_out="$(bash -c 'source "$1"' _ "$OBS_SRC" 2>&1)"
+source_out="$(bash -c 'source "$1"' _ "$OBSERVABILITY_SRC" 2>&1)"
 check_status "source-only" 0 $?
 if [[ -z $source_out ]]; then
 	pass "source-only: no output"
@@ -99,7 +99,7 @@ fi
 # path with no spans, logs or forwarding attempts.
 cat > "$T/uninitialized.sh" <<EOF
 #!/usr/bin/env bash
-source "$OBS_SRC"
+source "$OBSERVABILITY_SRC"
 source "$STEPS_SRC"
 ok_step() { printf 'step output\\n'; }
 step ok_step
@@ -117,11 +117,11 @@ check_no_file "uninitialized" "$T/stubs/curl-called"
 # must be a single stderr line.
 cat > "$T/initialized.sh" <<EOF
 #!/usr/bin/env bash
-source "$OBS_SRC"
+source "$OBSERVABILITY_SRC"
 source "$STEPS_SRC"
-export OBS_RECORD_DIR="$T/records"
-export OBS_PHASE=install
-obs_init test-run http://127.0.0.1:1
+export OBSERVABILITY_RECORD_DIR="$T/records"
+export OBSERVABILITY_PHASE=install
+observability_init test-run http://127.0.0.1:1
 ok_step() { printf 'step output\\n'; }
 step ok_step
 report_failed_steps || exit 1

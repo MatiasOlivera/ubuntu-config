@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 #
 # shims-test.sh — hermetic tests for download/package-manager child spans.
-# Real binaries are stubbed through OBS_E2E_REAL_*; no network or sudo is used.
+# Real binaries are stubbed through OBSERVABILITY_E2E_REAL_*; no network or sudo is used.
 
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-OBS_SRC="$ROOT/setup/helpers/observability.sh"
+OBSERVABILITY_SRC="$ROOT/setup/helpers/observability.sh"
 SHIM_DIR="$ROOT/setup/helpers/observability-shims"
 FAILURES=0
 
@@ -15,15 +15,15 @@ if [[ ! -d $SHIM_DIR ]]; then
 	printf 'FAIL: %s missing (red state: no shims)\n' "$SHIM_DIR" >&2
 	exit 1
 fi
-if ! grep -q '^obs_install_shims()' "$OBS_SRC" 2>/dev/null; then
-	printf 'FAIL: obs_install_shims missing (red state)\n' >&2
+if ! grep -q '^observability_install_shims()' "$OBSERVABILITY_SRC" 2>/dev/null; then
+	printf 'FAIL: observability_install_shims missing (red state)\n' >&2
 	exit 1
 fi
 
 T="$(mktemp -d)" || { printf 'error: mktemp failed\n' >&2; exit 1; }
 trap 'rm -rf "$T"' EXIT
 mkdir -p "$T/stubs" "$T/records" "$T/helper"
-export STUB_DIR="$T/stubs" OBS_RECORD_DIR="$T/records"
+export STUB_DIR="$T/stubs" OBSERVABILITY_RECORD_DIR="$T/records"
 
 # Each stub records its invocation. The curl stub also bumps the network
 # counter fixture so the shim observes a byte delta after the call.
@@ -32,14 +32,14 @@ cat > "$T/netdev" <<'EOF'
    face |bytes    packets errs drop fifo frame compressed multicast|bytes    packets errs drop fifo colls carrier compressed
    eth0: 1000    0    0    0    0    0    0    0     500    0    0    0    0    0    0    0
 EOF
-export OBS_E2E_NET_DEV="$T/netdev"
+export OBSERVABILITY_E2E_NET_DEV="$T/netdev"
 cat > "$STUB_DIR/real-curl" <<'EOF'
 #!/usr/bin/env bash
 : > "$STUB_DIR/curl-called"
 printf '%s\n' "$*" > "$STUB_DIR/curl-args"
 awk '{ if ($1 ~ /eth0:/) { $2 = $2 + 4096; $10 = $10 + 1024 } print }' \
-	"$OBS_E2E_NET_DEV" > "$OBS_E2E_NET_DEV.next"
-mv "$OBS_E2E_NET_DEV.next" "$OBS_E2E_NET_DEV"
+	"$OBSERVABILITY_E2E_NET_DEV" > "$OBSERVABILITY_E2E_NET_DEV.next"
+mv "$OBSERVABILITY_E2E_NET_DEV.next" "$OBSERVABILITY_E2E_NET_DEV"
 exit 0
 EOF
 cat > "$STUB_DIR/real-sudo" <<EOF
@@ -50,18 +50,18 @@ exit 0
 EOF
 chmod +x "$STUB_DIR/real-curl" "$STUB_DIR/real-sudo"
 
-export OBS_E2E_REAL_CURL="$STUB_DIR/real-curl"
-export OBS_E2E_REAL_WGET="$STUB_DIR/real-curl"
-export OBS_E2E_REAL_GIT="$STUB_DIR/real-curl"
-export OBS_E2E_REAL_SUDO="$STUB_DIR/real-sudo"
-export OBS_E2E_HELPER="$OBS_SRC"
-export OBS_PHASE=install
+export OBSERVABILITY_E2E_REAL_CURL="$STUB_DIR/real-curl"
+export OBSERVABILITY_E2E_REAL_WGET="$STUB_DIR/real-curl"
+export OBSERVABILITY_E2E_REAL_GIT="$STUB_DIR/real-curl"
+export OBSERVABILITY_E2E_REAL_SUDO="$STUB_DIR/real-sudo"
+export OBSERVABILITY_E2E_HELPER="$OBSERVABILITY_SRC"
+export OBSERVABILITY_PHASE=install
 
 cat > "$T/run.sh" <<EOF
 #!/usr/bin/env bash
-source "$OBS_SRC"
+source "$OBSERVABILITY_SRC"
 source "$ROOT/setup/helpers/steps.sh"
-obs_init shims-run http://127.0.0.1:1
+observability_init shims-run http://127.0.0.1:1
 # keepalive must not produce a child span
 sudo -n true
 fake_app() {

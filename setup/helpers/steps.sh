@@ -9,10 +9,10 @@ step() {
 	local label=$1
 	local t0=$SECONDS
 	[[ $# -gt 1 ]] && shift
-	declare -F obs_step_begin >/dev/null 2>&1 && obs_step_begin "$label"
+	declare -F observability_step_begin >/dev/null 2>&1 && observability_step_begin "$label"
 	local st
-	if declare -F obs_step_begin >/dev/null 2>&1 && [[ ${OBS_INITIALIZED:-0} == 1 ]]; then
-		"$@" 2>&1 | tee "$OBS_CURRENT_LOG"
+	if declare -F observability_step_begin >/dev/null 2>&1 && [[ ${OBSERVABILITY_INITIALIZED:-0} == 1 ]]; then
+		"$@" 2>&1 | tee "$OBSERVABILITY_CURRENT_LOG"
 		st=${PIPESTATUS[0]}
 	else
 		"$@"
@@ -26,7 +26,7 @@ step() {
 			exit "$st"
 		fi
 	fi
-	declare -F obs_step_end >/dev/null 2>&1 && obs_step_end "$st"
+	declare -F observability_step_end >/dev/null 2>&1 && observability_step_end "$st"
 	return "$st"
 }
 
@@ -35,17 +35,17 @@ advisory_step() {
 	local label=$1
 	local t0=$SECONDS
 	[[ $# -gt 1 ]] && shift
-	declare -F obs_step_begin >/dev/null 2>&1 && obs_step_begin "$label"
+	declare -F observability_step_begin >/dev/null 2>&1 && observability_step_begin "$label"
 	local st
-	if declare -F obs_step_begin >/dev/null 2>&1 && [[ ${OBS_INITIALIZED:-0} == 1 ]]; then
-		"$@" 2>&1 | tee "$OBS_CURRENT_LOG"
+	if declare -F observability_step_begin >/dev/null 2>&1 && [[ ${OBSERVABILITY_INITIALIZED:-0} == 1 ]]; then
+		"$@" 2>&1 | tee "$OBSERVABILITY_CURRENT_LOG"
 		st=${PIPESTATUS[0]}
 	else
 		"$@"
 		st=$?
 	fi
 	printf '[+%ds] %s\n' "$((SECONDS - t0))" "$label"
-	declare -F obs_step_end >/dev/null 2>&1 && obs_step_end "$st"
+	declare -F observability_step_end >/dev/null 2>&1 && observability_step_end "$st"
 	return 0
 }
 

@@ -52,8 +52,8 @@ export FIXTURE_ARCHIVE="$T/fixture.tgz"
 run_wrapper() {
 	local out=$1
 	shift
-	E2E_OBSERVABILITY_DIR="$records_root" OBS_VM_NAME=fake-vm \
-		OBS_VM_RECORD_DIR=/tmp/vm-records OBS_COLLECTOR=http://127.0.0.1:1 \
+	E2E_OBSERVABILITY_DIR="$records_root" OBSERVABILITY_VM_NAME=fake-vm \
+		OBSERVABILITY_VM_RECORD_DIR=/tmp/vm-records OBSERVABILITY_COLLECTOR=http://127.0.0.1:1 \
 		bash "$WRAPPER" "$@" > "$out" 2> "$out.err"
 }
 
@@ -88,8 +88,8 @@ else
 	fail "collector: no warning on unreachable endpoint"
 fi
 
-E2E_OBSERVABILITY_DIR="$T/root2" XDG_DATA_HOME="$T/xdg" OBS_VM_NAME=fake-vm \
-	OBS_VM_RECORD_DIR=/tmp/vm-records OBS_COLLECTOR= \
+E2E_OBSERVABILITY_DIR="$T/root2" XDG_DATA_HOME="$T/xdg" OBSERVABILITY_VM_NAME=fake-vm \
+	OBSERVABILITY_VM_RECORD_DIR=/tmp/vm-records OBSERVABILITY_COLLECTOR= \
 	bash -c 'unset E2E_OBSERVABILITY_DIR; exec bash "$0" install true' "$WRAPPER" > "$T/xdg.out" 2>&1
 xdg_records=$(sed -n 's/^records: //p' "$T/xdg.out" | sed -n 1p)
 if [[ $xdg_records == "$T/xdg/ubuntu-config/observability/"* ]]; then

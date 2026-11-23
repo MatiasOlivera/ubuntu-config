@@ -3,11 +3,11 @@
 source "$(dirname "$0")/common.sh"
 case ${1:-} in
 apt | apt-get | snap | flatpak)
-	obs_shim_run package-manager "$1" "$OBS_E2E_REAL_SUDO" "$@"
+	observability_shim_run package-manager "$1" "$OBSERVABILITY_E2E_REAL_SUDO" "$@"
 	exit $?
 	;;
 *)
 	# Keepalive and unrelated sudo calls are not install work.
-	exec "$OBS_E2E_REAL_SUDO" "$@"
+	exec "$OBSERVABILITY_E2E_REAL_SUDO" "$@"
 	;;
 esac

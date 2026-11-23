@@ -65,11 +65,11 @@ the collector inside the VM (Docker is not installed until late in the run).
 
 ## Interface contracts
 
-- `obs_init <run_id> <collector_endpoint>` — idempotent; creates VM record
+- `observability_init <run_id> <collector_endpoint>` — idempotent; creates VM record
   dirs, records real binary paths, installs shims. Emits nothing to stdout.
-- `obs_step_begin <label>` / `obs_step_end <status>` — no-op when uninitialized;
+- `observability_step_begin <label>` / `observability_step_end <status>` — no-op when uninitialized;
   otherwise open/close a step span and emit its log reference.
-- `obs_span <kind> <name> <start_ns> <end_ns> <attrs...>` — appends one span to
+- `observability_span <kind> <name> <start_ns> <end_ns> <attrs...>` — appends one span to
   `spans.jsonl` and posts the same OTLP/HTTP JSON to the collector with a short
   timeout; forwarding failure prints one warning and is never fatal.
 - `tests/e2e-observability.sh <phase> <cmd...>` — replacement for the deleted
@@ -77,7 +77,7 @@ the collector inside the VM (Docker is not installed until late in the run).
   VM records out after completion, and shows a short tail only after the
   command has finished (never a pipe into `head`/`tail`). Returns the wrapped
   command's status. No new option flags on `tests/test.sh`.
-- `tests/test.sh` passes `E2E_OBSERVABILITY_DIR`, `OBS_COLLECTOR`, `run_id`,
+- `tests/test.sh` passes `E2E_OBSERVABILITY_DIR`, `OBSERVABILITY_COLLECTOR`, `run_id`,
   git metadata, VM name and image into both `multipass exec` calls; default
   host path is `${E2E_OBSERVABILITY_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/ubuntu-config/observability}/<run-id>/`.
 - Compose stack exposes OTLP/HTTP to the VM and reads the durable directory

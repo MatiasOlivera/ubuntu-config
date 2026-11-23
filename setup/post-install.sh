@@ -13,9 +13,9 @@ SUDO_KEEPALIVE=$!
 trap 'kill "$SUDO_KEEPALIVE" 2>/dev/null' EXIT
 
 SCRIPT_DIR=$(dirname "$0")
-if [[ -n ${OBS_RECORD_DIR:-} ]]; then
+if [[ -n ${OBSERVABILITY_RECORD_DIR:-} ]]; then
 	source "$SCRIPT_DIR/helpers/observability.sh"
-	obs_init "${OBS_RUN_ID:-unknown}" "${OBS_COLLECTOR:-}" ||
+	observability_init "${OBSERVABILITY_RUN_ID:-unknown}" "${OBSERVABILITY_COLLECTOR:-}" ||
 		printf 'warning: e2e observability initialization failed\n' >&2
 fi
 

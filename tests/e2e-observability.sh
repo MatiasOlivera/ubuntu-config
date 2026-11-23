@@ -23,13 +23,13 @@ log="$run_dir/$phase-console.log"
 printf 'records: %s\nlog: %s\n' "$run_dir" "$log"
 
 # One bounded probe: an unreachable collector only disables live forwarding.
-if [[ -n ${OBS_COLLECTOR:-} ]]; then
-	if ! curl -sS --max-time 2 -o /dev/null "$OBS_COLLECTOR/health" 2>/dev/null; then
+if [[ -n ${OBSERVABILITY_COLLECTOR:-} ]]; then
+	if ! curl -sS --max-time 2 -o /dev/null "$OBSERVABILITY_COLLECTOR/health" 2>/dev/null; then
 		printf 'warning: live observability collector unreachable; continuing with durable records only\n' >&2
-		OBS_COLLECTOR=
+		OBSERVABILITY_COLLECTOR=
 	fi
 fi
-export OBS_COLLECTOR
+export OBSERVABILITY_COLLECTOR
 
 "$@" 2>&1 | tee "$log"
 rc=$?
@@ -37,11 +37,11 @@ rc=$?
 copy_records() {
 	local archive="/tmp/ubuntu-config-observability-$$.tgz"
 	local staging="$HOME/ubuntu-config-observability-$$-$phase.tgz"
-	[[ -n ${OBS_VM_NAME:-} && -n ${OBS_VM_RECORD_DIR:-} ]] || return 0
+	[[ -n ${OBSERVABILITY_VM_NAME:-} && -n ${OBSERVABILITY_VM_RECORD_DIR:-} ]] || return 0
 	# multipass is snap-confined: it cannot write into hidden directories such
 	# as ~/.local/share, so transfer to a plain home path and move afterwards.
-	if multipass exec "$OBS_VM_NAME" -- tar -czf "$archive" -C "$OBS_VM_RECORD_DIR" . >/dev/null 2>&1 &&
-		multipass transfer "$OBS_VM_NAME:$archive" "$staging" >/dev/null 2>&1; then
+	if multipass exec "$OBSERVABILITY_VM_NAME" -- tar -czf "$archive" -C "$OBSERVABILITY_VM_RECORD_DIR" . >/dev/null 2>&1 &&
+		multipass transfer "$OBSERVABILITY_VM_NAME:$archive" "$staging" >/dev/null 2>&1; then
 		mv "$staging" "$run_dir/records.tgz" || return 0
 		tar -xzf "$run_dir/records.tgz" -C "$run_dir" 2>/dev/null || true
 		rm -f "$run_dir/records.tgz"
