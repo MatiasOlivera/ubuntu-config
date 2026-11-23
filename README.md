@@ -204,7 +204,7 @@ docker compose -f tests/observability/compose.yml down
 Live forwarding from the VM is best effort; an unreachable collector warns once
 and the durable records remain complete.
 
-The e2e VM is `ubuntu-config-test-<checkout-dir>-<base62>` (see [`tests/vm-name.sh`](tests/vm-name.sh)): the slug is the checkout directory name and the suffix is a base62 digest of its full path. Every checkout — including the original repository rather than a worktree — gets its own stable VM, so concurrent agents cannot overwrite each other. Each `--vm` run prints the name, and `--reuse`/`--keep` affect only that VM.
+The e2e VM is `ubuntu-config-test-<checkout-dir>-<base62>` (see [`tests/vm-name.sh`](tests/vm-name.sh)): the slug is the checkout directory name and the suffix is a base62 digest of its full path. Every checkout — including the original repository rather than a worktree — gets its own stable VM, so concurrent agents cannot overwrite each other. Each `--vm` run prints the name, and `--reuse`/`--keep` affect only that VM. Only one e2e run may use a given VM at a time: a second run against the same checkout exits immediately with an error naming the VM, without waiting or touching the VM. Runs against other worktrees remain independent.
 
 `tests/test.sh` enforces the script contract: `bash -n` syntax, every library script sourced by `install.sh`/`post-install.sh`, source-only `install_*`/`config_*` functions, standalone `BASH_SOURCE` guard on every `*config*.sh`, plus shellcheck when available.
 

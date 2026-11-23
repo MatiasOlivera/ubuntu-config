@@ -40,6 +40,19 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 SETUP_DIR="$ROOT/setup"
 FAILURES=0
 
+# shellcheck source=tests/vm-lock.sh
+source "$ROOT/tests/vm-lock.sh"
+
+VM_NAME=
+if [[ $RUN_VM -eq 1 ]]; then
+	VM_NAME="$(bash "$ROOT/tests/vm-name.sh" "$ROOT")"
+	# Reject a contender before any VM work or static check runs.
+	if ! vm_lock_acquire "$VM_NAME"; then
+		exit 1
+	fi
+	printf 'e2e VM for this worktree: %s\n' "$VM_NAME"
+fi
+
 printf 'versions: bash=%s shellcheck=%s multipass=%s\n' \
 	"$BASH_VERSION" \
 	"$(command -v shellcheck >/dev/null 2>&1 && shellcheck --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -n 1 || echo missing)" \
@@ -156,8 +169,6 @@ if [[ $RUN_VM -eq 1 && $FAILURES -eq 0 ]]; then
 	if ! command -v multipass >/dev/null 2>&1; then
 		fail "multipass not installed"
 	else
-		VM_NAME="$(bash "$ROOT/tests/vm-name.sh" "$ROOT")"
-		printf 'e2e VM for this worktree: %s\n' "$VM_NAME"
 		trap '[[ $KEEP -eq 0 ]] && multipass delete -p "$VM_NAME" >/dev/null 2>&1 || true' EXIT
 		vm_start=$SECONDS
 
