@@ -30,7 +30,8 @@ export GRAFANA_URL="${GRAFANA_URL:-http://localhost:3000}"
 export GRAFANA_SERVICE_ACCOUNT_TOKEN="$(secret-tool lookup service grafana-mcp account service-account-token 2>/dev/null)"
 ```
 
-The configs pin `mcp-grafana==v2.3.0` and pass this explicit tool set, replacing
+The configs pin `mcp-grafana==2.2.0` (the latest version published on PyPI, which
+`uvx` resolves) and pass this explicit tool set, replacing
 the upstream defaults:
 
 ```text

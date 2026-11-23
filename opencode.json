@@ -6,7 +6,7 @@
         "type": "local",
         "command": [
           "uvx",
-          "mcp-grafana==v2.3.0",
+          "mcp-grafana==2.2.0",
           "--enabled-tools=search,datasource,prometheus,loki,alerting,dashboard,tempo"
         ],
         "environment": {

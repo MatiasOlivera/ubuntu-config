@@ -23,7 +23,7 @@ cfg = json.loads(cfg_path.read_text()) if cfg_path.exists() else {}
 cfg.setdefault("mcpServers", {})["grafana"] = {
     "command": "uvx",
     "args": [
-        "mcp-grafana==v2.3.0",
+        "mcp-grafana==2.2.0",
         "--enabled-tools=search,datasource,prometheus,loki,alerting,dashboard,tempo",
     ],
     "env": {

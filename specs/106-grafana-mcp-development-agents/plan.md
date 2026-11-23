@@ -17,7 +17,7 @@ changes are part of this plan.
 | `tests/agents/grafana-mcp-config-test.sh` (new) | Hermetic config contract test |
 
 - Root `opencode.json` (existing): add `mcp.servers.grafana` with `type: "local"`,
-  `command: ["uvx", "mcp-grafana==v2.3.0", "--enabled-tools=<list>"]` and
+  `command: ["uvx", "mcp-grafana==2.2.0", "--enabled-tools=<list>"]` and
   `environment` using `{env:GRAFANA_URL}` / `{env:GRAFANA_SERVICE_ACCOUNT_TOKEN}`.
   Preserve the existing `permission.bash` deny-list.
 - `.github/mcp.json` (new): Copilot CLI workspace config, auto-loaded per upstream
@@ -39,7 +39,7 @@ changes are part of this plan.
   deny-lists (`.gitignore:64`, `dotfiles/.chezmoiignore:37`).
 
 Data flow: the agent reads its project config, expands the environment
-references, and starts `uvx mcp-grafana==v2.3.0` with `GRAFANA_URL` and
+references, and starts `uvx mcp-grafana==2.2.0` with `GRAFANA_URL` and
 `GRAFANA_SERVICE_ACCOUNT_TOKEN`; tool calls go to the local Grafana instance.
 For agy the runbook writes the same values literally into
 `~/.gemini/config/mcp_config.json`, which both deny-lists already exclude, so
@@ -72,9 +72,10 @@ Per-agent environment syntax (load-bearing, verified from upstream docs):
 | Kilo CLI | `mcpServers.<name>.env` | `{env:VAR}` | kilo docs `platforms/cli.md` and `automate/mcp/using-in-cli.md` (Context7 `/kilo-org/kilo`) |
 | agy | `~/.gemini/config/mcp_config.json`, `mcpServers.<name>` | none — literal values | existing runbook pattern, `docs/runbooks/agent-credentials-runbook.md:115-152` |
 
-Upstream server facts: v2.3.0 is the latest release (GitHub release API,
-queried 2026-11-23); `--enabled-tools` replaces the default category set, which
-includes `tempo` (upstream
+Upstream server facts: the pin is `2.2.0`, the latest version published on PyPI
+(PyPI JSON API, queried 2026-11-23); the GitHub tag `v2.3.0` has no PyPI release
+and `uvx` cannot resolve it. At tag `v2.2.0`, `--enabled-tools` replaces the
+default category set, which includes `tempo` (upstream
 `docs/sources/configure/command-line-flags.md`, "Configure tool categories").
 
 Acceptance scenario mapping: opencode/Copilot/Kilo agent scenarios map to the
@@ -107,8 +108,8 @@ development dependency.
 
 ## Assumptions
 
-- Latest upstream release v2.3.0 — GitHub release API, 2026-11-23; verify with
-  `gh release view grafana/mcp-grafana`.
+- Latest PyPI release 2.2.0 — PyPI JSON API, 2026-11-23; verify with
+  `uvx mcp-grafana==2.2.0 --version`.
 - Local Grafana at `http://localhost:3000` — `AGENTS.md` end-to-end
   observability section and `tests/observability/compose.yml`; verify by
   starting the stack.

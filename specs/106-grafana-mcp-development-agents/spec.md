@@ -30,7 +30,7 @@ Design decisions settled with the issue owner:
   environment variables, so its entry is written to a host-local config that
   is excluded from both deny-lists, by a documented manual step — never by
   `install.sh`.
-- `uvx` runs a pinned `mcp-grafana==v2.3.0` on every agent, and a small hermetic
+- `uvx` runs a pinned `mcp-grafana==2.2.0` on every agent, and a small hermetic
   test checks the committed configs for the expected shape and the absence of
   a token value.
 - One Grafana MCP is enough: its Tempo tools (`search_tempo_traces`,
@@ -112,8 +112,9 @@ Scenario: verification gate stays green
 
 ## Assumptions
 
-- The latest upstream release is v2.3.0 (GitHub release API, queried
-  2026-11-23); verify with `gh release view grafana/mcp-grafana` before pinning.
+- The pin is `2.2.0`, the latest version published on PyPI (PyPI JSON API,
+  queried 2026-11-23); the newer GitHub tag `v2.3.0` has no PyPI release, so
+  `uvx` cannot resolve it. Verify with `uvx mcp-grafana==2.2.0 --version`.
 - The local Grafana endpoint is `http://localhost:3000` (AGENTS.md and
   `tests/observability/compose.yml`); verify by starting the stack.
 - Tempo tools are enabled by default (upstream command-line-flags reference);

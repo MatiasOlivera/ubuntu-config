@@ -5,7 +5,7 @@
 
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 FAILURES=0
-VERSION="mcp-grafana==v2.3.0"
+VERSION="mcp-grafana==2.2.0"
 TOOLS="search,datasource,prometheus,loki,alerting,dashboard,tempo"
 
 fail() { printf 'FAIL: %s\n' "$1" >&2; FAILURES=$((FAILURES + 1)); }
