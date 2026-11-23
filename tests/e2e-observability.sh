@@ -36,13 +36,18 @@ rc=$?
 
 copy_records() {
 	local archive="/tmp/ubuntu-config-observability-$$.tgz"
+	local staging="$HOME/ubuntu-config-observability-$$-$phase.tgz"
 	[[ -n ${OBS_VM_NAME:-} && -n ${OBS_VM_RECORD_DIR:-} ]] || return 0
+	# multipass is snap-confined: it cannot write into hidden directories such
+	# as ~/.local/share, so transfer to a plain home path and move afterwards.
 	if multipass exec "$OBS_VM_NAME" -- tar -czf "$archive" -C "$OBS_VM_RECORD_DIR" . >/dev/null 2>&1 &&
-		multipass transfer "$OBS_VM_NAME:$archive" "$run_dir/records.tgz" >/dev/null 2>&1; then
+		multipass transfer "$OBS_VM_NAME:$archive" "$staging" >/dev/null 2>&1; then
+		mv "$staging" "$run_dir/records.tgz" || return 0
 		tar -xzf "$run_dir/records.tgz" -C "$run_dir" 2>/dev/null || true
 		rm -f "$run_dir/records.tgz"
 	else
 		printf 'warning: could not copy e2e records from the VM\n' >&2
+		rm -f "$staging"
 	fi
 }
 

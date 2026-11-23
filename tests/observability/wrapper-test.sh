@@ -17,8 +17,9 @@ fi
 
 T="$(mktemp -d)" || { printf 'error: mktemp failed\n' >&2; exit 1; }
 trap 'rm -rf "$T"' EXIT
-mkdir -p "$T/stubs" "$T/fixture" "$T/root" "$T/xdg"
-export STUB_DIR="$T/stubs"
+mkdir -p "$T/stubs" "$T/fixture" "$T/xdg" "$T/home"
+export STUB_DIR="$T/stubs" HOME="$T/home"
+records_root="$HOME/.local/share/ubuntu-config/observability"
 
 cat > "$STUB_DIR/curl" <<'EOF'
 #!/usr/bin/env bash
@@ -28,6 +29,12 @@ cat > "$STUB_DIR/multipass" <<'EOF'
 #!/usr/bin/env bash
 printf '%s\n' "$*" >> "$STUB_DIR/multipass-calls"
 if [[ $1 == transfer ]]; then
+	case $3 in
+	*/.[!/.]*)
+		printf 'snap confinement: hidden local path denied\n' >&2
+		exit 2
+		;;
+	esac
 	cp "$FIXTURE_ARCHIVE" "$3"
 fi
 exit 0
@@ -45,7 +52,7 @@ export FIXTURE_ARCHIVE="$T/fixture.tgz"
 run_wrapper() {
 	local out=$1
 	shift
-	E2E_OBSERVABILITY_DIR="$T/root" OBS_VM_NAME=fake-vm \
+	E2E_OBSERVABILITY_DIR="$records_root" OBS_VM_NAME=fake-vm \
 		OBS_VM_RECORD_DIR=/tmp/vm-records OBS_COLLECTOR=http://127.0.0.1:1 \
 		bash "$WRAPPER" "$@" > "$out" 2> "$out.err"
 }
@@ -56,13 +63,18 @@ if [[ $status -eq 0 ]]; then pass "success: status 0"; else fail "success: statu
 
 records=$(sed -n 's/^records: //p' "$T/success.out" | sed -n 1p)
 log=$(sed -n 's/^log: //p' "$T/success.out" | sed -n 1p)
-if [[ $records == "$T/root"/* ]]; then pass "success: records under E2E_OBSERVABILITY_DIR"; else fail "success: bad records path '$records'"; fi
+if [[ $records == "$records_root"/* ]]; then pass "success: records under E2E_OBSERVABILITY_DIR"; else fail "success: bad records path '$records'"; fi
 if [[ -n $log && -f $log ]]; then pass "success: transcript written"; else fail "success: transcript missing"; fi
 if grep -q 'hello from vm' "$log" 2>/dev/null; then pass "success: output teed live"; else fail "success: output not teed"; fi
 if [[ -f $records/spans.jsonl ]]; then pass "success: VM records copied out"; else fail "success: records not copied"; fi
 if grep -q '^label' "$records/summary.tsv" 2>/dev/null; then pass "success: summary written"; else fail "success: summary missing"; fi
 if grep -q 'install_uv' "$records/summary.tsv" 2>/dev/null; then pass "success: summary names the app"; else fail "success: summary has no app row"; fi
 if grep -q $'install_fnm\tinstall' "$records/summary.tsv" 2>/dev/null; then pass "success: nested phase records summarized"; else fail "success: nested phase rows missing"; fi
+if compgen -G "$HOME/ubuntu-config-observability-*.tgz" >/dev/null; then
+	fail "success: staging archive left behind"
+else
+	pass "success: staging archive cleaned up"
+fi
 
 run_wrapper "$T/failure.out" install bash -c 'printf "boom\n" >&2; exit 3'
 status=$?
