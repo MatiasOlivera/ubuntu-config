@@ -179,6 +179,20 @@ Full e2e on a fresh Multipass VM (requires Multipass on host):
 ./tests/test.sh --vm --reuse      # reuse existing VM for fast iterations
 ```
 
+Each `--vm` phase writes per-app spans, logs and a summary under
+`E2E_OBSERVABILITY_DIR` (default
+`${XDG_DATA_HOME:-$HOME/.local/share}/ubuntu-config/observability/<run-id>/`) and
+prints `records:` and `log:` paths. Start the local stack to browse traces,
+correlated logs and metrics in Grafana at `http://localhost:3000` (`admin`/`admin`):
+
+```sh
+docker compose -f tests/observability/compose.yml up -d
+docker compose -f tests/observability/compose.yml down
+```
+
+Live forwarding from the VM is best effort; an unreachable collector warns once
+and the durable records remain complete.
+
 The e2e VM is `ubuntu-config-test-<checkout-dir>-<base62>` (see [`tests/vm-name.sh`](tests/vm-name.sh)): the slug is the checkout directory name and the suffix is a base62 digest of its full path. Every checkout — including the original repository rather than a worktree — gets its own stable VM, so concurrent agents cannot overwrite each other. Each `--vm` run prints the name, and `--reuse`/`--keep` affect only that VM.
 
 `tests/test.sh` enforces the script contract: `bash -n` syntax, every library script sourced by `install.sh`/`post-install.sh`, source-only `install_*`/`config_*` functions, standalone `BASH_SOURCE` guard on every `*config*.sh`, plus shellcheck when available.

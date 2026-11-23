@@ -17,6 +17,23 @@ Test commands — scoped checks, full gate, Docker and Multipass — live in the
 
 Anything beyond verify (adding apps, reports, baselines): `README.md` ("Testing", "Reports").
 
+## End-to-end observability
+
+Each `./tests/test.sh --vm` phase records per-app spans, logs and a summary under
+`E2E_OBSERVABILITY_DIR` (default
+`${XDG_DATA_HOME:-$HOME/.local/share}/ubuntu-config/observability/<run-id>/`) and
+prints `records:` and `log:` paths. Start the local stack before or after a run
+to browse traces, correlated logs and metrics in Grafana:
+
+```sh
+docker compose -f tests/observability/compose.yml up -d
+# Grafana: http://localhost:3000 (admin/admin)
+```
+
+Live forwarding from the VM is best effort: an unreachable collector warns once
+and durable records stay complete. Stop with
+`docker compose -f tests/observability/compose.yml down`.
+
 ## Rules
 
 - Declarative files → chezmoi in `dotfiles/` (`dot_*` → `$HOME`, `*.tmpl` rendered with `~/.config/chezmoi/chezmoi.toml` data); imperative commands (`chsh`, `gsettings`, clones) → stay in bash.
