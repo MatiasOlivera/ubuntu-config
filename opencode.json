@@ -1,5 +1,21 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "servers": {
+      "grafana": {
+        "type": "local",
+        "command": [
+          "uvx",
+          "mcp-grafana==2.2.0",
+          "--enabled-tools=search,datasource,prometheus,loki,alerting,dashboard,tempo"
+        ],
+        "environment": {
+          "GRAFANA_URL": "{env:GRAFANA_URL}",
+          "GRAFANA_SERVICE_ACCOUNT_TOKEN": "{env:GRAFANA_SERVICE_ACCOUNT_TOKEN}"
+        }
+      }
+    }
+  },
   "permission": {
     "bash": {
       "setup/*": "deny",
