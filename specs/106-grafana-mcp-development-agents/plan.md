@@ -12,7 +12,8 @@ changes are part of this plan.
 | `opencode.json` (existing) | Add Grafana MCP entry; keep permissions |
 | `.github/mcp.json` (new) | Copilot CLI workspace MCP entry |
 | `.kilocode/mcp.json` (new) | Kilo CLI project MCP entry |
-| `docs/runbooks/agent-credentials-runbook.md` (existing) | Development-only setup and agy wiring |
+| `docs/runbooks/grafana-mcp-runbook.md` (new) | Development-only setup and agy wiring |
+| `docs/runbooks/agy-grafana-mcp.py` (new) | Host-local agy entry writer |
 | `tests/agents/grafana-mcp-config-test.sh` (new) | Hermetic config contract test |
 
 - Root `opencode.json` (existing): add `mcp.servers.grafana` with `type: "local"`,
@@ -24,11 +25,12 @@ changes are part of this plan.
   and `env` using `${GRAFANA_URL}` / `${GRAFANA_SERVICE_ACCOUNT_TOKEN}`.
 - `.kilocode/mcp.json` (new): Kilo CLI project-level MCP config per upstream docs.
   `mcpServers.grafana` with `command`, `args` and `env` using `{env:...}`.
-- `docs/runbooks/agent-credentials-runbook.md` (existing): add a development-only
-  Grafana MCP section — one-time keyring storage, shell exports, the recorded
+- `docs/runbooks/grafana-mcp-runbook.md` (new): development-only
+  Grafana MCP workflow — one-time keyring storage, shell exports, the recorded
   tool set, per-agent `mcp list` checks, and the host-local agy wiring (literal
-  URL and token, `0600`, merge sibling servers, re-run after rotation). State
-  explicitly that install-time provisioning is untouched.
+  URL and token, `0600`, merge sibling servers, re-run after rotation) via
+  `docs/runbooks/agy-grafana-mcp.py`. State explicitly that install-time
+  provisioning is untouched.
 - `tests/agents/grafana-mcp-config-test.sh` (new): hermetic contract test
   auto-discovered by `tests/test.sh` (`tests/test.sh:143-151`). Parses the three
   JSON configs; asserts the pinned version, explicit tool list, env placeholders
