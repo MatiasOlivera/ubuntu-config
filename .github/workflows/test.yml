@@ -39,6 +39,12 @@ jobs:
         run: |
           mode="$(bash tests/ci-image-mode.sh "$BASE_REF")"
           [[ $mode == build || $mode == pull ]] || { echo "invalid mode: $mode" >&2; exit 1; }
+          # The image is published only after this workflow reaches develop, so
+          # a first run (or a registry outage) must not fail the gate.
+          if [[ $mode == pull ]] && ! docker pull "$TEST_IMAGE"; then
+            printf 'warning: published image unavailable; building locally\n' >&2
+            mode=build
+          fi
           echo "value=$mode" >> "$GITHUB_OUTPUT"
       - name: Run suite in published image
         if: steps.mode.outputs.value == 'pull'
