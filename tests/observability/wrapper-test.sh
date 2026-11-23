@@ -37,7 +37,9 @@ PATH="$STUB_DIR:$PATH"
 export PATH
 
 printf '{"kind":"step","name":"install_uv","status":"ok","duration_ms":42}\n' > "$T/fixture/spans.jsonl"
-tar -czf "$T/fixture.tgz" -C "$T/fixture" spans.jsonl
+mkdir -p "$T/fixture/install"
+printf '{"kind":"step","name":"install_fnm","status":"ok","duration_ms":7}\n' > "$T/fixture/install/spans.jsonl"
+tar -czf "$T/fixture.tgz" -C "$T/fixture" spans.jsonl install/spans.jsonl
 export FIXTURE_ARCHIVE="$T/fixture.tgz"
 
 run_wrapper() {
@@ -60,6 +62,7 @@ if grep -q 'hello from vm' "$log" 2>/dev/null; then pass "success: output teed l
 if [[ -f $records/spans.jsonl ]]; then pass "success: VM records copied out"; else fail "success: records not copied"; fi
 if grep -q '^label' "$records/summary.tsv" 2>/dev/null; then pass "success: summary written"; else fail "success: summary missing"; fi
 if grep -q 'install_uv' "$records/summary.tsv" 2>/dev/null; then pass "success: summary names the app"; else fail "success: summary has no app row"; fi
+if grep -q $'install_fnm\tinstall' "$records/summary.tsv" 2>/dev/null; then pass "success: nested phase records summarized"; else fail "success: nested phase rows missing"; fi
 
 run_wrapper "$T/failure.out" install bash -c 'printf "boom\n" >&2; exit 3'
 status=$?

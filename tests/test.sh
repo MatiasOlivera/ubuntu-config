@@ -161,6 +161,25 @@ if [[ $RUN_VM -eq 1 && $FAILURES -eq 0 ]]; then
 		trap '[[ $KEEP -eq 0 ]] && multipass delete -p "$VM_NAME" >/dev/null 2>&1 || true' EXIT
 		vm_start=$SECONDS
 
+		# Observability records are written inside the VM, then copied to the
+		# host by the phase wrapper before the cleanup trap can delete the VM.
+		OBS_VM_NAME=$VM_NAME
+		OBS_VM_RECORD_DIR=/home/ubuntu/.ubuntu-config-observability
+		OBS_RUN_ID="$(date -u +%Y%m%dT%H%M%SZ)-$(git -C "$ROOT" rev-parse --short HEAD 2>/dev/null || echo unknown)"
+		OBS_GIT_SHA="$(git -C "$ROOT" rev-parse HEAD 2>/dev/null || true)"
+		OBS_GIT_BRANCH="$(git -C "$ROOT" rev-parse --abbrev-ref HEAD 2>/dev/null || true)"
+		OBS_IMAGE=$UBUNTU_IMAGE
+		OBS_COLLECTOR=
+		host_ip="$(ip -4 route show default 2>/dev/null | awk '{ print $3; exit }')"
+		if [[ -n $host_ip ]] && command -v curl >/dev/null 2>&1; then
+			OBS_COLLECTOR="http://$host_ip:4318"
+			if ! curl -sS --max-time 2 -o /dev/null "$OBS_COLLECTOR/health" 2>/dev/null; then
+				printf 'warning: live observability collector unreachable; continuing with durable records only\n' >&2
+				OBS_COLLECTOR=
+			fi
+		fi
+		export OBS_VM_NAME OBS_VM_RECORD_DIR OBS_RUN_ID OBS_GIT_SHA OBS_GIT_BRANCH OBS_IMAGE OBS_COLLECTOR
+
 		if [[ $REUSE -eq 1 ]] && multipass list 2>/dev/null | grep -qw "$VM_NAME"; then
 			phase_begin
 			multipass start "$VM_NAME" >/dev/null 2>&1 || true
@@ -198,7 +217,15 @@ if [[ $RUN_VM -eq 1 && $FAILURES -eq 0 ]]; then
 		phase_end "transfer repo to VM"
 
 		phase_begin
-		if multipass exec "$VM_NAME" -- env CHEZMOI_NAME="Test" CHEZMOI_EMAIL="test@example.com" bash /home/ubuntu/ubuntu-config/setup/install.sh; then
+		if bash "$ROOT/tests/e2e-observability.sh" install \
+			multipass exec "$VM_NAME" -- env \
+			CHEZMOI_NAME="Test" CHEZMOI_EMAIL="test@example.com" \
+			OBS_RECORD_DIR="$OBS_VM_RECORD_DIR/install" \
+			OBS_E2E_APP_PATHS=/home/ubuntu/ubuntu-config/tests/observability/app-paths.tsv \
+			OBS_RUN_ID="$OBS_RUN_ID" OBS_PHASE=install \
+			OBS_COLLECTOR="$OBS_COLLECTOR" OBS_GIT_SHA="$OBS_GIT_SHA" \
+			OBS_GIT_BRANCH="$OBS_GIT_BRANCH" OBS_VM_NAME="$VM_NAME" OBS_IMAGE="$OBS_IMAGE" \
+			bash /home/ubuntu/ubuntu-config/setup/install.sh; then
 			pass "install.sh in VM"
 		else
 			fail "install.sh in VM"
@@ -206,7 +233,15 @@ if [[ $RUN_VM -eq 1 && $FAILURES -eq 0 ]]; then
 		phase_end "install.sh in VM"
 
 		phase_begin
-		if multipass exec "$VM_NAME" -- env SKIP_UPGRADE=1 bash /home/ubuntu/ubuntu-config/setup/post-install.sh; then
+		if bash "$ROOT/tests/e2e-observability.sh" post-install \
+			multipass exec "$VM_NAME" -- env \
+			SKIP_UPGRADE=1 \
+			OBS_RECORD_DIR="$OBS_VM_RECORD_DIR/post-install" \
+			OBS_E2E_APP_PATHS=/home/ubuntu/ubuntu-config/tests/observability/app-paths.tsv \
+			OBS_RUN_ID="$OBS_RUN_ID" OBS_PHASE=post-install \
+			OBS_COLLECTOR="$OBS_COLLECTOR" OBS_GIT_SHA="$OBS_GIT_SHA" \
+			OBS_GIT_BRANCH="$OBS_GIT_BRANCH" OBS_VM_NAME="$VM_NAME" OBS_IMAGE="$OBS_IMAGE" \
+			bash /home/ubuntu/ubuntu-config/setup/post-install.sh; then
 			pass "post-install.sh in VM"
 		else
 			fail "post-install.sh in VM"

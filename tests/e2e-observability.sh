@@ -47,16 +47,26 @@ copy_records() {
 }
 
 write_summary() {
-	local spans="$run_dir/spans.jsonl" out="$run_dir/summary.tsv" line name status duration
+	local out="$run_dir/summary.tsv" line name status duration spans
 	printf 'label\tphase\tstatus\tduration_ms\n' > "$out"
-	[[ -f $spans ]] || return 0
-	while IFS= read -r line; do
-		[[ $line == *'"kind":"step"'* ]] || continue
-		name=$(printf '%s\n' "$line" | sed -n 's/.*"name":"\([^"]*\)".*/\1/p')
-		status=$(printf '%s\n' "$line" | sed -n 's/.*"status":"\([^"]*\)".*/\1/p')
-		duration=$(printf '%s\n' "$line" | sed -n 's/.*"duration_ms":\([0-9]*\).*/\1/p')
-		printf '%s\t%s\t%s\t%s\n' "$name" "$phase" "$status" "$duration" >> "$out"
-	done < "$spans"
+	local -a files=("$run_dir/spans.jsonl")
+	shopt -s nullglob
+	files+=("$run_dir"/*/spans.jsonl)
+	shopt -u nullglob
+	for spans in "${files[@]}"; do
+		[[ -f $spans ]] || continue
+		local phase_name=$phase
+		if [[ $spans != "$run_dir/spans.jsonl" ]]; then
+			phase_name=$(basename "$(dirname "$spans")")
+		fi
+		while IFS= read -r line; do
+			[[ $line == *'"kind":"step"'* ]] || continue
+			name=$(printf '%s\n' "$line" | sed -n 's/.*"name":"\([^"]*\)".*/\1/p')
+			status=$(printf '%s\n' "$line" | sed -n 's/.*"status":"\([^"]*\)".*/\1/p')
+			duration=$(printf '%s\n' "$line" | sed -n 's/.*"duration_ms":\([0-9]*\).*/\1/p')
+			printf '%s\t%s\t%s\t%s\n' "$name" "$phase_name" "$status" "$duration" >> "$out"
+		done < "$spans"
+	done
 }
 
 copy_records

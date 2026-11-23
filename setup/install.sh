@@ -22,6 +22,11 @@ DOTFILES_DIR="$SCRIPT_DIR/../dotfiles"
 # ponytail: SECONDS wall-clock per step, no external profiler.
 install_start=$SECONDS
 source "$SCRIPT_DIR/helpers/steps.sh"
+if [[ -n ${OBS_RECORD_DIR:-} ]]; then
+	source "$SCRIPT_DIR/helpers/observability.sh"
+	obs_init "${OBS_RUN_ID:-unknown}" "${OBS_COLLECTOR:-}" ||
+		printf 'warning: e2e observability initialization failed\n' >&2
+fi
 
 source "$ESSENTIALS_DIR/make.sh"
 source "$ESSENTIALS_DIR/curl.sh"
