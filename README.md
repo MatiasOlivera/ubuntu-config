@@ -140,7 +140,7 @@ are intentionally retained without publisher-provided integrity material.
 
 When the repo moves to a newer Ubuntu release:
 
-1. Bump the version pins: `UBUNTU_IMAGE` in `tests/test.sh`, the image in `tests/compose.yml` and `tests/Dockerfile`, and the tested-release note above.
+1. Bump the version pins: `UBUNTU_IMAGE` in `tests/test.sh`, the image in `tests/compose.yml` and `tests/Dockerfile`, and the tested-release note above. Both file changes trigger the `test-image` workflow to rebuild and publish the CI image.
 2. Refresh the gaps baseline from the point-release desktop manifest (use the exact release, e.g. `26.04.1`):
 
    ```sh
@@ -170,6 +170,17 @@ Isolated static check in Docker (`ubuntu:26.04`, repo mounted read-only):
 ```sh
 docker compose -f tests/compose.yml run --rm test
 ```
+
+This local command always builds from `tests/Dockerfile`, so it is authoritative
+when you change the toolchain image. CI instead pulls a prebuilt image from GHCR
+so apt mirrors stay off the pull-request critical path; the `test-image` workflow
+refreshes it nightly with a cache-free build and the full suite, which is where
+broken apt repositories and changed toolchain packages surface. A PR that changes
+`tests/Dockerfile` or `tests/compose.yml` builds locally instead, so a stale image
+cannot hide a bad change. If the image cannot be pulled (before the first
+publish or during a registry outage), CI warns and falls back to a local build.
+One-time setup: make the `ubuntu-config-test` GHCR package public so fork PRs
+can pull it without credentials.
 
 Full e2e on a fresh Multipass VM (requires Multipass on host):
 
