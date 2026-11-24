@@ -6,78 +6,98 @@
 
 ## Architecture
 
-Four touch points, sequenced so the measurement exists before any optimization:
+Two phases, in sequencing order.
 
-1. `setup/helpers/observability.sh` — add `observability_phase_begin <label>`
-   and `observability_phase_end <status>`. They record a start timestamp even
-   before observability is initialized and emit one `kind="phase"` span through
-   the existing `observability_span` when enabled. The phase span is standalone:
-   step spans keep their current parent, so `steps.sh` is untouched.
-2. `setup/install.sh` and `setup/post-install.sh` — begin a phase at the point
-   their existing `[+Ns] ... total` timer starts; end it just before
-   `report_failed_steps`, with status derived from `FAILED_STEPS`. Non-e2e runs
-   emit nothing because the helpers no-op when observability is disabled.
-3. `tests/observability/dashboards/e2e-runs.json` — add a `run_id` template
-   variable; show the per-run phase total as a sortable table (long run ids make
-   a single stretched bar unreadable); add panels for time by call type and
-   package-manager time by tool; keep the existing slowest-steps and
-   download-by-host bar-gauge styling and sort both by descending duration with
-   a reduce → sort-by-value → rows-to-fields transform chain, scoped by run.
-   Update in place under the existing uid, keeping live and alert panels
-   unchanged.
-4. `docs/runbooks/grafana-query-cookbook.md` — add the record-backed queries
-   used by the new panels.
+**Phase 1 — measurement (shipped).**
 
-A hermetic test (`tests/observability/phase-span-test.sh`) covers emission before
-the dashboard work; the static gate covers the rest.
+1. `setup/helpers/observability.sh` — `observability_phase_begin <label>` and
+   `observability_phase_end <status>` emit one `kind="phase"` span per setup
+   phase without touching `steps.sh`.
+2. `setup/install.sh` and `setup/post-install.sh` — begin/end the phase at their
+   existing total timers; non-e2e runs emit nothing.
+3. `tests/observability/dashboards/e2e-runs.json` — `run_id` variable, per-run
+   total as a table, call-type and package-manager-tool panels, slowest-steps
+   and download-host gauges sorted descending via a transform chain.
+4. `tests/observability/phase-span-test.sh` and `tests/observability/shims-test.sh`
+   cover phase emission and the queryable `url_host` field; the cookbook carries
+   the queries.
+
+**Phase 2 — repeat-run overhead (this plan).**
+
+1. Benchmarks first, already run: a warm-VM `--reuse` run (105 s total vs 20 s +
+   2 s of scripts), bare exec (~0.2 s), wrapper with record copy (~2 s), an
+   orphaned-sleep reproduction, transfer vs `classic`/`native` mounts, and a
+   fresh install at 4 CPU / 8 G. Results are in the spec context and ADR 0014.
+2. Change the two sudo keepalive loops in `setup/install.sh` and
+   `setup/post-install.sh` so their output streams are fully redirected. No
+   harness restructuring: the measured per-call cost is too small to justify it.
+3. Keep the single repo transfer and the record-copy step; the mount comparison
+   showed sub-second data movement in both directions and no usable `native`
+   mount on a running VM.
+4. Keep the VM defaults at 2 CPU / 4 G / 50 G; the one larger-allocation sample
+   is not enough to justify a change.
+5. Add a hermetic regression test that fails if either keepalive loop regains an
+   inherited output stream, using a small reproduced pipe scenario and a
+   contract check on both entry scripts.
+6. Record the before/after warm-run timing and update agent-facing docs only if
+   the documented workflow changes.
 
 ## Data models
 
-New span kind `phase` in `spans.jsonl`, using the existing span shape: `name` is
-`install.sh` or `post-install.sh`, `kind` is `phase`, `phase` is the e2e phase,
-`run_id`, `duration_ms`, `status` and `exit_code` follow current conventions.
-No migration: `tests/e2e-observability.sh` filters `kind=="step"` for its
-summary, so phase spans are invisible there. Download child spans also carry a
-top-level `url_host` field, copied from their attributes array, so LogQL can
-group by host.
+Phase-1 span schema stays as shipped: `kind="phase"` spans carry `name`, `phase`,
+`run_id`, `duration_ms`, `status` and `exit_code`; download child spans carry a
+top-level `url_host`. Phase 2 changes no persisted format.
 
 ## API contracts
 
 | Acceptance scenario | Contract |
 | --- | --- |
-| a run's total install time is visible | phase span from `install.sh`; dashboard panel "Install total by run (records)"; cookbook row "total install time per run" |
-| each phase emits a root span | `observability_phase_begin`/`observability_phase_end` in both setup scripts; one phase span per run and phase |
-| slowest steps are ranked descending | existing "Slowest steps" bar gauge keeps its styling and is sorted by descending duration with a transform chain, scoped by the `run_id` variable |
-| the dominant cost is attributed | panels "Time by call type", "Package-manager time by tool", "Download time by host", using `attributes_kind`, `attributes_name`, `attributes_url_host` |
-| queries are reproducible | cookbook rows mirroring each record-backed panel query |
-| normal setup is unaffected | helpers gated on `observability_enabled` |
+| a run's total install time is visible | phase span from `install.sh`; dashboard table "Install total by run (records)" |
+| each phase emits a root span | `observability_phase_begin`/`observability_phase_end` in both setup scripts |
+| slowest steps are ranked descending | "Slowest steps" bar gauge with the sort transform chain |
+| the dominant cost is attributed | call-type, package-manager-tool and download-host panels |
+| queries are reproducible | cookbook rows mirroring the panel queries |
+| a phase command returns when its script finishes | redirected keepalive streams in both setup scripts; regression test asserts it |
+| a failed phase still fails the run | existing `FAILED_STEPS`/`report_failed_steps` behaviour unchanged |
+| records are copied once even on failure | existing `e2e-observability.sh` copy path unchanged |
+| fresh runs are unchanged | plain `--vm` branch in `tests/test.sh` unchanged |
+| mount and transfer are compared | recorded benchmarks for tarball, `classic` and (where possible) `native` mounts |
+| resource sizes are compared | recorded benchmarks at 2 CPU / 4 G and 4 CPU / 8 G |
+| the repeat speedup is measured | before/after wall-clock numbers for the same warm-VM scenario |
 | static gate stays green | `./tests/test.sh` (no `--vm`) and the new hermetic test |
 
 ## Decisions
 
 - `docs/decisions/0013-e2e-speedup-sequencing.md` — measure before optimizing;
   extend the existing views rather than creating a second workflow.
+- `docs/decisions/0014-repeat-run-round-trips.md` — fix stream ownership of the
+  keepalive loops; reject a harness rewrite, persistent mounts, package caches
+  and unproven resource changes.
 
 ## Risks
 
 - Every timing panel must filter `attributes_kind`; otherwise phase spans double
-  count step and child spans. Verification: panel queries reviewed against the
-  recorded spans and the cookbook states the rule.
-- Replayed records share an ingest timestamp. Bounded windows and `run_id`
-  grouping keep runs separate; verification after starting the stack.
+  count step and child spans.
+- Replayed records share an ingest timestamp; bounded windows and `run_id`
+  grouping keep runs separate.
 - With `FAIL_FAST=1` a failed step exits before `observability_phase_end`, leaving
   no phase span. E2e does not set `FAIL_FAST`; documented as a known limit.
-- A `run_id` variable fed by Loki structured metadata is empty until records are
+- A `run_id` variable from Loki structured metadata is empty until records are
   replayed; `includeAll` keeps panels usable before the first replay.
-- Reverting is local: remove the two helper calls and the new panels; the span
-  format change is additive and does not invalidate existing records.
+- Redirecting the keepalive's streams does not kill the orphaned `sleep`; it only
+  stops holding the caller's pipe open. The sleep exits on its own within its
+  interval, and the loop notices its parent is gone.
+- The sizing comparison is one sample per allocation; it is recorded as a data
+  point, not a basis for changing defaults.
+- Reverting is local: restore the two stream redirections. No harness or VM
+  state change is involved.
 
 ## Assumptions
 
-- `| json` on replayed spans exposes `attributes_kind`, `attributes_run_id`,
-  `attributes_phase`, `attributes_name`, `attributes_duration_ms` and
-  `attributes_url_host`. Source: collector config, existing dashboard queries.
-  Verification: confirm the new queries return rows in Explore after replay.
-- A `kind="phase"` span is ignored by the summary filter on `kind=="step"`.
-  Source: `tests/e2e-observability.sh`. Verification: check `summary.tsv` after a
-  phase run.
+- `multipass exec` waits for EOF on its output streams. Source: the orphaned
+  sleep reproduction. Verification: before/after warm-run timings.
+- The two setup entry scripts are the only sources of an inherited background
+  stream in the phase commands. Source: the in-VM patch that removed the gap.
+  Verification: a real `--reuse` run after applying the fix in the repository.
+- Transfer and mount data movement are both sub-second. Source: the benchmark.
+  Verification: recorded numbers in the decision record.
