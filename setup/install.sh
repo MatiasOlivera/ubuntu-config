@@ -26,6 +26,7 @@ if [[ -n ${OBSERVABILITY_RECORD_DIR:-} ]]; then
 	source "$SCRIPT_DIR/helpers/observability.sh"
 	observability_init "${OBSERVABILITY_RUN_ID:-unknown}" "${OBSERVABILITY_COLLECTOR:-}" ||
 		printf 'warning: e2e observability initialization failed\n' >&2
+	observability_phase_begin install.sh
 fi
 
 source "$ESSENTIALS_DIR/make.sh"
@@ -169,4 +170,7 @@ advisory_step config_sync_credentials
 step versions bash "$SCRIPT_DIR/../reports/versions.sh"
 
 printf '[+%ds] install.sh total\n' "$((SECONDS - install_start))"
+phase_status=0
+[[ ${#FAILED_STEPS[@]} -gt 0 ]] && phase_status=1
+observability_phase_end "$phase_status"
 report_failed_steps || exit 1

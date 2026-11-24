@@ -224,3 +224,27 @@ observability_step_end() {
 	observability_span "$OBSERVABILITY_CURRENT_LABEL" step "$OBSERVABILITY_CURRENT_START" "$end" \
 		"$status" "$1" "logs/$OBSERVABILITY_CURRENT_SPAN.log" "$attrs"
 }
+
+# Phase totals: one root span per setup phase. The start is captured even before
+# observability_init so callers can place the call at their existing total timer.
+observability_phase_begin() {
+	OBSERVABILITY_PHASE_START=$(date +%s%N)
+	OBSERVABILITY_PHASE_LABEL=${1:-}
+	observability_enabled || return 0
+}
+
+observability_phase_end() {
+	observability_enabled || return 0
+	[[ -n ${OBSERVABILITY_PHASE_START:-} ]] || return 0
+	local end status code attrs
+	end=$(date +%s%N)
+	code=${1:-0}
+	if [[ $code -eq 0 ]]; then status=ok; else status=error; fi
+	printf -v attrs '[{"key":"app","value":{"stringValue":"%s"}},{"key":"phase","value":{"stringValue":"%s"}},{"key":"run_id","value":{"stringValue":"%s"}},{"key":"exit_code","value":{"intValue":%s}}]' \
+		"$(observability_json_escape "$OBSERVABILITY_PHASE_LABEL")" \
+		"$(observability_json_escape "${OBSERVABILITY_PHASE:-}")" \
+		"$(observability_json_escape "$OBSERVABILITY_RUN_ID")" "$code"
+	observability_span "$OBSERVABILITY_PHASE_LABEL" phase "$OBSERVABILITY_PHASE_START" "$end" \
+		"$status" "$code" "" "$attrs"
+	OBSERVABILITY_PHASE_START=
+}
