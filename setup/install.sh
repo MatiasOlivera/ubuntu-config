@@ -8,7 +8,7 @@ if ! sudo -n true 2>/dev/null; then
 	fi
 	sudo -v || exit 1
 fi
-while true; do sudo -n true 2>/dev/null; sleep 50; kill -0 "$$" || exit; done 2>/dev/null &
+while true; do sudo -n true 2>/dev/null; sleep 50; kill -0 "$$" || exit; done >/dev/null 2>&1 &
 SUDO_KEEPALIVE=$!
 trap 'kill "$SUDO_KEEPALIVE" 2>/dev/null' EXIT
 
