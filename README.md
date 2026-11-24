@@ -207,7 +207,9 @@ records in Loki, so they are available even when the stack starts after a run;
 the trace-metric panels fill in when it runs during the run. Alerts are for
 local definition and evaluation only — no notification channel is configured.
 The chosen feature scope is recorded in
-[decision 0012](docs/decisions/0012-local-grafana-feature-scope.md).
+[decision 0012](docs/decisions/0012-local-grafana-feature-scope.md). Ready-made
+Explore queries and the trace-to-logs walkthrough are in the
+[Grafana query cookbook](docs/runbooks/grafana-query-cookbook.md).
 
 Live forwarding from the VM is best effort; an unreachable collector warns once
 and the durable records remain complete.
