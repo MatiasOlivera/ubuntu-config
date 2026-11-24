@@ -5,6 +5,8 @@ description: Use when running or iterating on this repo's checks while changing 
 
 # Run and iterate on tests
 
+> [Architecture] Uses Facade
+
 ## Observability for long runs
 
 Every `./tests/test.sh --vm ...` phase already records its own transcript,

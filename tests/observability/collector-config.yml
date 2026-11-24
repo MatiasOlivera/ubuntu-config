@@ -1,3 +1,4 @@
+# [Architecture] Uses Pipes and Filters
 receivers:
   otlp:
     protocols:

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# [Architecture] Uses Facade
 #
 # test.sh — static + source-only by default, Multipass e2e with --vm.
 # Fail-closed: any failure exits 1.
