@@ -1,6 +1,6 @@
 # ubuntu-config
 
-Fresh-Ubuntu setup: bash scripts (`setup/`) + chezmoi dotfiles (`dotfiles/`). Scripts assume Ubuntu with `apt` + `sudo`. Humans: see `README.md` (commands, reports, project structure).
+Infrastructure-as-code setup for a fresh Ubuntu workstation: versioned bash scripts in `setup/` install `apt` packages, Flatpak/Snap apps and dev tools; declarative chezmoi dotfiles in `dotfiles/` own the configuration. Scripts assume Ubuntu with `apt` + `sudo`. Humans: see `README.md` (commands, reports, project structure).
 
 ## Skills (load the one matching your task)
 
@@ -35,6 +35,8 @@ and durable records stay complete. Stop with
 `docker compose -f tests/observability/compose.yml down`.
 
 ## Rules
+
+Declarative-vs-imperative placement follows infrastructure-as-code principles.
 
 - Declarative files → chezmoi in `dotfiles/` (`dot_*` → `$HOME`, `*.tmpl` rendered with `~/.config/chezmoi/chezmoi.toml` data); imperative commands (`chsh`, `gsettings`, clones) → stay in bash.
 - Public repo: never commit secrets. Root `.gitignore` (commit deny-list) and `dotfiles/.chezmoiignore` (deploy deny-list) must stay in sync when adding dotfiles.
