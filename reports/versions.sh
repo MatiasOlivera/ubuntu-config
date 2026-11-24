@@ -25,9 +25,9 @@ printf '| Package | Version |\n'
 printf '|---|---|\n'
 
 # Version checks live in the package scripts (single source of truth, also
-# used by the install guards). Sourcing is side-effect-free: library scripts
-# only define functions. `|| true` keeps this report-only on a bad file
-# (missing fns degrade to MISSING rows via chk).
+# used by the install guards). The source-only gate rejects top-level commands,
+# so sourcing a library script has no side effects. `|| true` keeps this
+# report-only on a bad file (missing fns degrade to MISSING rows via chk).
 VERIFY_DIR="$(cd "$(dirname "$0")" && pwd)"
 SETUP_DIR="$VERIFY_DIR/../setup"
 src() { source "$SETUP_DIR/$1" || true; }

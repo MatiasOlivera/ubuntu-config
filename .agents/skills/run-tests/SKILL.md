@@ -34,13 +34,13 @@ Iterate with the check that covers the change. The full gate below runs before t
 - Changed `tests/python/test_<name>.py` → `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/python -p 'test_<name>.py' -v`.
 - Any changed `.sh` → `bash -n <path>` and `shellcheck -e SC1091 <path>` (skip shellcheck when not installed; `-e SC1091` matches `tests/test.sh`).
 
-## Static (host-safe, zero-dep)
+## Static (zero-dep, no script execution)
 
 ```sh
 ./tests/test.sh
 ```
 
-Covers `bash -n` syntax, every library script sourced by `install.sh`/`post-install.sh` (fail: "not sourced"), source-only `install_*`/`config_*` functions, the standalone `BASH_SOURCE` guard on every `*config*.sh`, and shellcheck only if installed. Fail-closed: any failure exits 1. The source-only check executes library scripts, so run this on a trusted checkout; for untrusted changes use the Docker-isolated check below.
+Covers `bash -n` syntax, every library script sourced by `install.sh`/`post-install.sh` (fail: "not sourced"), source-only `install_*`/`config_*` functions, the standalone `BASH_SOURCE` guard on every `*config*.sh`, and shellcheck only if installed. Fail-closed: any failure exits 1. The source-only check parses declarations rather than sourcing scripts, so it does not execute library code. The functional tests still run test scripts, so use a trusted checkout — or the Docker-isolated check below for untrusted changes.
 
 ## Isolated static (no host deps)
 
