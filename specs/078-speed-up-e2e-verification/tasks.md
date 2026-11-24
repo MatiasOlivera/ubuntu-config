@@ -19,3 +19,7 @@
 | 13  | [x]  | Redirect the keepalive streams in `install.sh` and `post-install.sh` | 12 | Automated | regression test passes; `./tests/test.sh` static checks |
 | 14  | [x]  | Run the static gate and a warm `--reuse` run, and record before/after timings | 13 | Manual | `./tests/test.sh` exits 0; 105 s before, new timing recorded |
 | 15  | [x]  | Update agent-facing docs only if the repeat-run workflow description changes | 14 | Manual | documented `--reuse` command still matches the harness |
+| 16  | [ ]  | Write tests that fail while opencode/openusage version checks miss their per-user install paths (red) | 15 | Automated | targeted tests fail before the version fix |
+| 17  | [ ]  | Make both version checks find their installed binaries | 16 | Automated | targeted tests pass; full static gate green |
+| 18  | [ ]  | Add a hermetic dev-iteration helper that re-runs only changed setup scripts in a kept VM, with a stubbed Multipass test | 17 | Automated | new helper test passes; `./tests/test.sh` static checks |
+| 19  | [ ]  | Document the dev-only loop and run one real iteration plus a full --reuse check | 18 | Manual | README/skill describe it; changed-script loop and full verification both pass |

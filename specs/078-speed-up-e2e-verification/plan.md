@@ -39,8 +39,14 @@ Two phases, in sequencing order.
 5. Add a hermetic regression test that fails if either keepalive loop regains an
    inherited output stream, using a small reproduced pipe scenario and a
    contract check on both entry scripts.
-6. Record the before/after warm-run timing and update agent-facing docs only if
-   the documented workflow changes.
+6. Phase 3: make the version checks for `opencode` and `openusage` look in their
+   per-user install directories, with tests asserting the skip guard and the
+   versions report. This also corrects two false MISSING entries.
+7. Phase 3: add a dev-only helper under `tests/` that takes the current checkout
+   state against a recorded seed, re-copies the repo into the kept VM, runs
+   `apt update`, and executes only the changed setup scripts' dispatchers. It
+   accepts a stubbed Multipass command for hermetic testing and never changes
+   what `./tests/test.sh --vm` verifies.
 
 ## Data models
 

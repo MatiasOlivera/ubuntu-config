@@ -47,8 +47,17 @@ mount. A clean install at 4 CPUs / 8 G took 520 s versus 564 s at 2 CPUs / 4 G
 in a single sample — a possible ~8 % win, but not enough evidence to change the
 VM defaults.
 
-This spec covers both phases. The decision and its measurements are recorded in
-ADR `0014-repeat-run-round-trips.md`.
+**Phase 3 — development feedback loop.** A warm run is now 27–29 s, of which
+~21 s is the install script. Two steps still re-install on every run because
+their version checks rely on PATH entries that a non-interactive exec does not
+have: `install_opencode` (~5 s) and `install_openusage` (~3 s). The versions
+report also shows both as MISSING although both binaries exist in the VM. Below
+that floor, a single-app edit still pays for every step, so a dev-only helper
+should re-run just the changed setup scripts in the kept VM; the full
+`--vm --reuse` run remains the check before a PR.
+
+This spec covers all three phases. The decision and its measurements are
+recorded in ADR `0014-repeat-run-round-trips.md`.
 
 ## User stories
 
@@ -70,6 +79,10 @@ ADR `0014-repeat-run-round-trips.md`.
   one.
 - As the maintainer, I want before/after timings for the repeat path, so the
   optimization is proven rather than assumed.
+- As the maintainer, I want installed tools detected on a rerun, so unchanged
+  tools are not downloaded again and the versions report is accurate.
+- As the maintainer, I want to re-run only the scripts I changed in the kept VM,
+  so a one-app edit gives feedback in seconds instead of a full loop.
 - As the maintainer, I want the transfer-versus-mount comparison recorded, so a
   later reader does not re-litigate a measured choice.
 - As the maintainer, I want the resource-sizing comparison recorded, so any
@@ -154,6 +167,19 @@ Scenario: resource sizes are compared on the same install
   Then the install duration and total wall-clock time are recorded for each size
   And the VM defaults stay unchanged until more samples justify a change
 
+Scenario: an installed tool is detected on a rerun
+  Given opencode and openusage installed in their usual per-user directories
+  When the install phase runs again in the same VM
+  Then both steps skip without downloading
+  And the versions report shows their versions instead of MISSING
+
+Scenario: a single changed app can be re-run alone
+  Given a kept VM seeded from an earlier checkout state
+  When I change one setup script and invoke the dev iteration helper
+  Then only that script's installer runs in the VM, preceded by a fresh apt update
+  And the repo copy in the VM contains the changed file
+  And the full --reuse verification still works unchanged
+
 Scenario: the repeat speedup is measured
   Given a before timing from a warm --reuse run
   When the stream fix is applied and the same scenario is run again
@@ -186,6 +212,8 @@ Scenario: static gate stays green
       justifies a change.
 - [ ] A before/after timing for a warm --reuse run must be recorded, along with
       the mount/transfer and resource-size comparison data.
+- [ ] The dev-only iteration helper changes no full-verification behaviour;
+      it operates on a kept VM and is documented as a development shortcut.
 - [ ] Out of scope: package/artifact caches, a local registry, snapshot-based
       warm starts, parallel apt installs, CI runners, and changes to the
       observability stack.
