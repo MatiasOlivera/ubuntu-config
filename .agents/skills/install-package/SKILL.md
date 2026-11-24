@@ -5,6 +5,8 @@ description: Use when installing a new package/tool in this repo (adding a setup
 
 # Install a package
 
+> [Architecture] Uses Template Method
+
 End-to-end workflow for adding a package/tool to this repo so `tests/test.sh` stays green. The contract below is enforced fail-closed by `tests/test.sh`; AGENTS.md summarizes it, this skill has the steps.
 
 ## 1. Pick phase and location

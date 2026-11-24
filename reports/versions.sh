@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# [Architecture] Uses Template Method
 #
 # versions.sh — report-only version table for everything install.sh /
 # post-install.sh set up.

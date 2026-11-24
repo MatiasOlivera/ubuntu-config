@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# [Architecture] Uses Template Method
 
 # Ask for sudo once up front and keep the timestamp alive for the whole run.
 if ! sudo -n true 2>/dev/null; then
