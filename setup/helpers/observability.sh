@@ -98,8 +98,12 @@ observability_restore() {
 }
 
 observability_emit_child() {
-	# kind name start end status exit_code attributes_json
-	observability_span "$2" "$1" "$3" "$4" "$5" "$6" "" "$7" "${OBSERVABILITY_E2E_PARENT_SPAN:-}"
+	# kind name start end status exit_code attributes_json url_host
+	local extra=
+	if [[ -n ${8:-} ]]; then
+		printf -v extra ',"url_host":"%s"' "$(observability_json_escape "$8")"
+	fi
+	observability_span "$2" "$1" "$3" "$4" "$5" "$6" "" "$7" "${OBSERVABILITY_E2E_PARENT_SPAN:-}" "$extra"
 }
 
 observability_check_manifest() {
@@ -183,9 +187,9 @@ observability_forward() {
 }
 
 observability_span() {
-	# name kind start_ns end_ns status exit_code log_ref attributes_json [parent]
+	# name kind start_ns end_ns status exit_code log_ref attributes_json [parent] [extra_top_level_json]
 	observability_enabled || return 0
-	local name=$1 kind=$2 start=$3 end=$4 status=$5 exit_code=$6 log_ref=$7 attrs=$8 parent=${9:-}
+	local name=$1 kind=$2 start=$3 end=$4 status=$5 exit_code=$6 log_ref=$7 attrs=$8 parent=${9:-} extra=${10:-}
 	local span_id duration_ms escaped_name otlp_status
 	if [[ -n $OBSERVABILITY_NEXT_SPAN_ID ]]; then
 		span_id=$OBSERVABILITY_NEXT_SPAN_ID
@@ -195,11 +199,11 @@ observability_span() {
 	fi
 	duration_ms=$(((end - start) / 1000000))
 	escaped_name="$(observability_json_escape "$name")"
-	printf '{"trace_id":"%s","span_id":"%s","parent_span_id":"%s","name":"%s","kind":"%s","phase":"%s","start_ns":%s,"end_ns":%s,"duration_ms":%s,"status":"%s","exit_code":%s,"log_ref":"%s","run_id":"%s","attributes":%s}\n' \
+	printf '{"trace_id":"%s","span_id":"%s","parent_span_id":"%s","name":"%s","kind":"%s","phase":"%s","start_ns":%s,"end_ns":%s,"duration_ms":%s,"status":"%s","exit_code":%s,"log_ref":"%s","run_id":"%s","attributes":%s%s}\n' \
 		"$OBSERVABILITY_TRACE_ID" "$span_id" "$parent" "$escaped_name" "$kind" \
 		"$(observability_json_escape "${OBSERVABILITY_PHASE:-}")" "$start" "$end" "$duration_ms" \
 		"$(observability_json_escape "$status")" "$exit_code" "$(observability_json_escape "$log_ref")" \
-		"$(observability_json_escape "$OBSERVABILITY_RUN_ID")" "$attrs" >> "$OBSERVABILITY_RECORD_DIR/spans.jsonl"
+		"$(observability_json_escape "$OBSERVABILITY_RUN_ID")" "$attrs" "$extra" >> "$OBSERVABILITY_RECORD_DIR/spans.jsonl"
 	otlp_status=1
 	[[ $status == ok ]] || otlp_status=2
 	observability_forward "$OBSERVABILITY_TRACE_ID" "$span_id" "$name" "$start" "$end" "$otlp_status" "$attrs"

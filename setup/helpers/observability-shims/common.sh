@@ -27,6 +27,6 @@ observability_shim_run() {
 	if [[ $st -eq 0 ]]; then status=ok; else status=error; fi
 	printf -v attrs '[{"key":"url_host","value":{"stringValue":"%s"}},{"key":"bytes_net_approx","value":{"intValue":%s}},{"key":"download_and_install","value":{"stringValue":"%s"}}]' \
 		"$(observability_json_escape "$host")" "$((net_after - net_before))" "$bundled"
-	observability_emit_child "$kind" "$name" "$start" "$end" "$status" "$st" "$attrs"
+	observability_emit_child "$kind" "$name" "$start" "$end" "$status" "$st" "$attrs" "$host"
 	return $st
 }
