@@ -18,10 +18,11 @@ Four touch points, sequenced so the measurement exists before any optimization:
    `report_failed_steps`, with status derived from `FAILED_STEPS`. Non-e2e runs
    emit nothing because the helpers no-op when observability is disabled.
 3. `tests/observability/dashboards/e2e-runs.json` — add a `run_id` template
-   variable; add panels for per-run phase total, time by call type,
-   package-manager time by tool and download time by host; keep the existing
-   slowest-steps bar-gauge styling and sort it by descending duration with a
-   reduce → sort-by-value → rows-to-fields transform chain, scoped by run.
+   variable; show the per-run phase total as a sortable table (long run ids make
+   a single stretched bar unreadable); add panels for time by call type and
+   package-manager time by tool; keep the existing slowest-steps and
+   download-by-host bar-gauge styling and sort both by descending duration with
+   a reduce → sort-by-value → rows-to-fields transform chain, scoped by run.
    Update in place under the existing uid, keeping live and alert panels
    unchanged.
 4. `docs/runbooks/grafana-query-cookbook.md` — add the record-backed queries
@@ -36,7 +37,9 @@ New span kind `phase` in `spans.jsonl`, using the existing span shape: `name` is
 `install.sh` or `post-install.sh`, `kind` is `phase`, `phase` is the e2e phase,
 `run_id`, `duration_ms`, `status` and `exit_code` follow current conventions.
 No migration: `tests/e2e-observability.sh` filters `kind=="step"` for its
-summary, so phase spans are invisible there. Child-span attributes are unchanged.
+summary, so phase spans are invisible there. Download child spans also carry a
+top-level `url_host` field, copied from their attributes array, so LogQL can
+group by host.
 
 ## API contracts
 

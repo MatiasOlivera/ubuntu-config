@@ -17,12 +17,14 @@ Start the local stack first (`docker compose -f tests/observability/compose.yml 
 | Which download host is slowest? | Loki | `sum by (attributes_url_host) (sum_over_time({exporter="OTLP"} \| json \| attributes_log_file_name="spans.jsonl" \| attributes_kind="download" \| unwrap attributes_duration_ms [5m]))` | [E2E runs](http://localhost:3000/d/e2e-runs/e2e-runs) |
 
 The four new queries are the all-runs form. The matching dashboard panels are
-scoped by the **Run** variable, and the slowest-steps panel is the usual bar
-gauge limited to the top fifteen in descending order. Its sort comes from a
-reduce → sort by value → rows-to-fields transform chain, which keeps the
-gauge's styling and labels while ordering the bars. Always filter on
-`attributes_kind`: phase spans cover whole phases and step spans include their
-child calls, so summing all kinds together double-counts time.
+scoped by the **Run** variable. The per-run total is a sortable table; the
+slowest-steps and download-host panels are bar gauges limited to the top
+fifteen in descending order. Their sort comes from a reduce → sort by value →
+rows-to-fields transform chain, which keeps the gauge styling and labels while
+ordering the bars. Download spans carry `url_host` as a top-level field, which
+is why the host query can group by it. Always filter on `attributes_kind`:
+phase spans cover whole phases and step spans include their child calls, so
+summing all kinds together double-counts time.
 
 The [E2E runs dashboard](http://localhost:3000/d/e2e-runs/e2e-runs) links into these queries from its app and run panels: click a series in a legend or tooltip to open Explore with that label pre-filled.
 
