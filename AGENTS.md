@@ -2,6 +2,15 @@
 
 Infrastructure-as-code setup for a fresh Ubuntu workstation: versioned bash scripts in `setup/` install `apt` packages, Flatpak/Snap apps and dev tools; declarative chezmoi dotfiles in `dotfiles/` own the configuration. Scripts assume Ubuntu with `apt` + `sudo`. Humans: see `README.md` (commands, reports, project structure).
 
+## Shared conventions
+
+Follow the shared
+[workflow](https://github.com/MatiasOlivera/standards/blob/main/docs/workflows/README.md).
+Apply it alongside the project-specific rules in this file. This file defines
+local architecture, commands, and approval requirements.
+
+Shared conventions: MatiasOlivera/standards — repo conventions defer to it; file cross-project issues there, project issues here. Read its content from the local checkout at ~/Documents/Projects/standards first; use the github.com/MatiasOlivera/standards remote only for filing and verification.
+
 ## Skills (load the one matching your task)
 
 Skills live in `.agents/skills/` (cross-agent: opencode, Cursor, VS Code, Codex, ...).
