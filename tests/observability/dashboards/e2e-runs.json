@@ -666,7 +666,7 @@
         "type": "loki",
         "uid": "loki"
       },
-      "description": "Top five slowest step labels by average recorded duration.",
+      "description": "Top fifteen slowest step labels by recorded duration, descending, scoped to the selected run.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -708,7 +708,9 @@
         "namePlacement": "auto",
         "orientation": "horizontal",
         "reduceOptions": {
-          "calcs": ["lastNotNull"],
+          "calcs": [
+            "lastNotNull"
+          ],
           "fields": "",
           "values": false
         },
@@ -724,21 +726,371 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "topk(5, avg by (attributes_name) (avg_over_time({exporter=\"OTLP\"} | json | attributes_log_file_name=\"spans.jsonl\" | unwrap attributes_duration_ms [5m])))",
+          "expr": "topk(15, avg by (attributes_name) (avg_over_time({exporter=\"OTLP\"} | json | attributes_log_file_name=\"spans.jsonl\" | attributes_kind=\"step\" | attributes_run_id=~\"$run_id\" | unwrap attributes_duration_ms [5m])))",
+          "legendFormat": "{{attributes_name}}",
+          "refId": "A",
+          "queryType": "range"
+        }
+      ],
+      "title": "Slowest steps (records)",
+      "type": "bargauge",
+      "transformations": [
+        {
+          "id": "reduce",
+          "options": {
+            "reducers": [
+              "mean"
+            ],
+            "labelsToFields": true
+          }
+        },
+        {
+          "id": "sortBy",
+          "options": {
+            "sort": [
+              {
+                "field": "Mean",
+                "desc": true
+              }
+            ]
+          }
+        },
+        {
+          "id": "rowsToFields",
+          "options": {
+            "nameField": "attributes_name",
+            "valueField": "Mean",
+            "mappings": []
+          }
+        }
+      ]
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "description": "One span per e2e install phase, so a run's total does not depend on its step count.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "fieldMinMax": false,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 41
+      },
+      "id": 9,
+      "options": {
+        "displayMode": "lcd",
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "maxVizHeight": 300,
+        "minVizHeight": 75,
+        "minVizWidth": 8,
+        "namePlacement": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true,
+        "showValue": "always",
+        "sizing": "auto",
+        "valueMode": "color"
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "sum by (attributes_run_id) (sum_over_time({exporter=\"OTLP\"} | json | attributes_log_file_name=\"spans.jsonl\" | attributes_kind=\"phase\" | attributes_phase=\"install\" | attributes_run_id=~\"$run_id\" | unwrap attributes_duration_ms [5m]))",
+          "legendFormat": "{{attributes_run_id}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Install total by run (records)",
+      "type": "bargauge"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "description": "Recorded download and package-manager child spans; step spans are excluded to avoid double counting.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "fieldMinMax": false,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 41
+      },
+      "id": 10,
+      "options": {
+        "displayMode": "lcd",
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "maxVizHeight": 300,
+        "minVizHeight": 75,
+        "minVizWidth": 8,
+        "namePlacement": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true,
+        "showValue": "always",
+        "sizing": "auto",
+        "valueMode": "color"
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "sum by (attributes_kind) (sum_over_time({exporter=\"OTLP\"} | json | attributes_log_file_name=\"spans.jsonl\" | attributes_kind=~\"download|package-manager\" | attributes_run_id=~\"$run_id\" | unwrap attributes_duration_ms [5m]))",
+          "legendFormat": "{{attributes_kind}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Time by call type (records)",
+      "type": "bargauge"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "description": "Which package manager (apt, apt-get, flatpak, snap) consumed the most recorded time.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "fieldMinMax": false,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 49
+      },
+      "id": 11,
+      "options": {
+        "displayMode": "lcd",
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "maxVizHeight": 300,
+        "minVizHeight": 75,
+        "minVizWidth": 8,
+        "namePlacement": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true,
+        "showValue": "always",
+        "sizing": "auto",
+        "valueMode": "color"
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "sum by (attributes_name) (sum_over_time({exporter=\"OTLP\"} | json | attributes_log_file_name=\"spans.jsonl\" | attributes_kind=\"package-manager\" | attributes_run_id=~\"$run_id\" | unwrap attributes_duration_ms [5m]))",
           "legendFormat": "{{attributes_name}}",
           "refId": "A"
         }
       ],
-      "title": "Slowest steps (records)",
+      "title": "Package-manager time by tool (records)",
+      "type": "bargauge"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "description": "Which release or repository host dominated recorded download time.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "fieldMinMax": false,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 49
+      },
+      "id": 12,
+      "options": {
+        "displayMode": "lcd",
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "maxVizHeight": 300,
+        "minVizHeight": 75,
+        "minVizWidth": 8,
+        "namePlacement": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true,
+        "showValue": "always",
+        "sizing": "auto",
+        "valueMode": "color"
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "sum by (attributes_url_host) (sum_over_time({exporter=\"OTLP\"} | json | attributes_log_file_name=\"spans.jsonl\" | attributes_kind=\"download\" | attributes_run_id=~\"$run_id\" | unwrap attributes_duration_ms [5m]))",
+          "legendFormat": "{{attributes_url_host}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Download time by host (records)",
       "type": "bargauge"
     }
   ],
   "preload": false,
   "refresh": "1m",
   "schemaVersion": 40,
-  "tags": ["e2e", "ubuntu-config"],
+  "tags": [
+    "e2e",
+    "ubuntu-config"
+  ],
   "templating": {
-    "list": []
+    "list": [
+      {
+        "name": "run_id",
+        "label": "Run",
+        "type": "query",
+        "datasource": {
+          "type": "loki",
+          "uid": "loki"
+        },
+        "query": "label_values(attributes_run_id)",
+        "definition": "label_values(attributes_run_id)",
+        "refresh": 1,
+        "includeAll": true,
+        "allValue": ".*",
+        "multi": false,
+        "sort": 2,
+        "options": [],
+        "skipUrlSync": false,
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        }
+      }
+    ]
   },
   "time": {
     "from": "now-24h",
