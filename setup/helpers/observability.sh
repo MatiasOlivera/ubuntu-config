@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# [Architecture] Uses Dependency Injection
 # Source-only observability emitter for the Multipass e2e run.
 # No-op until observability_init is called; normal setup runs keep their exact behavior.
 

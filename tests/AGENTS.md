@@ -2,6 +2,10 @@
 
 Tests cover this repository's Bash setup scripts. `tests/test.sh` automatically runs every `*-test.sh` file under `tests/`.
 
+## Architecture
+
+> [Architecture] Uses Facade
+
 ## Conventions
 
 - Keep `*-test.sh` checks self-contained and deterministic. Stub external commands and network clients; do not depend on live package, release, or download servers. Unexpected external requests should fail.

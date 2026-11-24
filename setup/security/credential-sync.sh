@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# [Architecture] Uses Adapter (partial)
 #
 # credential-sync.sh — copy secrets from the Bitwarden vault (durable copy)
 # into GNOME Keyring (runtime copy). See docs/decisions/0002-credential-storage.md.

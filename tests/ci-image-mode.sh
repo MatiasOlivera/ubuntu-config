@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# [Architecture] Uses Strategy (partial)
 # Choose how CI obtains the test image. "build" when the image definition
 # changed in the PR, "pull" (the published image) otherwise.
 
