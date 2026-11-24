@@ -66,7 +66,9 @@ rm -f "$tarball"
 
 remote='set -e;'
 for rel in "${changed[@]}"; do
-	remote+=" bash /home/ubuntu/ubuntu-config/$rel repository || true;"
+	if grep -qE 'install_.*_repository\(\)' "$ROOT/$rel"; then
+		remote+=" bash /home/ubuntu/ubuntu-config/$rel repository;"
+	fi
 done
 remote+=' sudo apt update >/dev/null;'
 for rel in "${changed[@]}"; do

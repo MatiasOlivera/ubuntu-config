@@ -69,7 +69,8 @@ The VM name is `ubuntu-config-test-<checkout-dir>-<base62>` (checkout directory 
 ## Iteration loop (fast re-runs)
 
 - Seed once with the full install: `./tests/test.sh --vm --keep` (VM kept alive).
-- Then iterate: `./tests/test.sh --vm --reuse` — idempotency guards skip already-installed packages (~seconds).
+- Then iterate: `./tests/test.sh --vm --reuse` — idempotency guards skip already-installed packages (~seconds). This is the check to run before a pull request.
+- For a single-app edit, use `bash tests/dev-iter.sh seed` once after seeding the VM, then `bash tests/dev-iter.sh` to run `apt update` and only the changed setup scripts. It is a development shortcut, not verification; the stored baseline advances after each successful run.
 - `--reuse` without a `--keep` seeding run: the VM is deleted on exit and the next run rebuilds fresh.
 - Reset a dirty VM to its clean base with `multipass restore <vm-name>.base` (`<vm-name>` is the worktree-scoped name printed by each `--vm` run).
 
