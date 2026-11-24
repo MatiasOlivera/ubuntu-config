@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# [Architecture] Uses Decorator
 # Shared step runner for setup/install.sh and setup/post-install.sh.
 # Times each step, remembers failed ones, and reports them at the end of the
 # run. FAIL_FAST=1 exits on the first failed step instead of collecting them.

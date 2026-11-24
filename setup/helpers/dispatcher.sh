@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# [Architecture] Uses Command (partial)
 
 dispatch_command() {
 	local component=main command

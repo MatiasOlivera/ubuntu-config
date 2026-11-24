@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# [Architecture] Uses Proxy
 # shellcheck disable=SC1091 # common.sh lives beside the installed shim
 source "$(dirname "$0")/common.sh"
 case ${1:-} in
