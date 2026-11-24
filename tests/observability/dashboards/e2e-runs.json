@@ -1,230 +1,753 @@
 {
-  "uid": "e2e-runs",
-  "title": "E2E runs",
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
   "description": "Per-app step spans and timing from an end-to-end verification run.",
-  "tags": ["e2e", "ubuntu-config"],
-  "timezone": "browser",
-  "schemaVersion": 39,
-  "version": 2,
-  "refresh": "1m",
-  "time": { "from": "now-24h", "to": "now" },
-  "templating": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 2,
+  "links": [],
   "panels": [
     {
-      "id": 1,
-      "type": "logs",
-      "title": "Step spans (replayed records)",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
       "description": "One row per step span, replayed from spans.jsonl into Loki. Available even when the stack starts after the run.",
-      "gridPos": { "h": 9, "w": 24, "x": 0, "y": 0 },
-      "datasource": { "type": "loki", "uid": "loki" },
-      "targets": [
-        {
-          "refId": "A",
-          "queryType": "range",
-          "expr": "{exporter=\"OTLP\"} | json | attributes_log_file_name=\"spans.jsonl\" | line_format \"{{.attributes_name}} | {{.attributes_phase}} | {{.attributes_status}} | {{.attributes_duration_ms}}ms | {{.attributes_run_id}}\"",
-          "datasource": { "type": "loki", "uid": "loki" }
-        }
-      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
       "options": {
-        "showTime": true,
+        "dedupStrategy": "none",
+        "enableLogDetails": true,
+        "prettifyLogMessage": false,
+        "showCommonLabels": false,
         "showLabels": false,
+        "showTime": true,
         "sortOrder": "Descending",
         "wrapLogMessage": true
-      }
+      },
+      "pluginVersion": "11.4.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "{exporter=\"OTLP\"} | json | attributes_log_file_name=\"spans.jsonl\" | line_format \"{{.attributes_name}} | {{.attributes_phase}} | {{.attributes_status}} | {{.attributes_duration_ms}}ms | {{.attributes_run_id}}\"",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "title": "Step spans (replayed records)",
+      "type": "logs"
     },
     {
-      "id": 2,
-      "type": "timeseries",
-      "title": "Step duration by app (records)",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
       "description": "Average recorded step duration in milliseconds, grouped by step label.",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 9 },
-      "datasource": { "type": "loki", "uid": "loki" },
       "fieldConfig": {
         "defaults": {
-          "unit": "ms",
-          "custom": { "drawStyle": "line", "fillOpacity": 10, "showPoints": "never" },
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
           "links": [
             {
-              "title": "Explore this app's spans",
               "targetBlank": true,
+              "title": "Explore this app's spans",
               "url": "/explore?schemaVersion=1&panes={\"map\":{\"datasource\":\"loki\",\"queries\":[{\"refId\":\"A\",\"datasource\":{\"type\":\"loki\",\"uid\":\"loki\"},\"expr\":\"{exporter=\\\"OTLP\\\"} | json | attributes_log_file_name=\\\"spans.jsonl\\\" | attributes_name=\\\"${__field.labels.attributes_name}\\\"\"}],\"range\":{\"from\":\"${__from}\",\"to\":\"${__to}\"}}}&orgId=1"
             }
-          ]
+          ],
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "ms"
         },
         "overrides": []
       },
-      "options": { "legend": { "displayMode": "table", "placement": "bottom" } },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 9
+      },
+      "id": 2,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.4.0",
       "targets": [
         {
-          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
           "expr": "sum by (attributes_name) (avg_over_time({exporter=\"OTLP\"} | json | attributes_log_file_name=\"spans.jsonl\" | unwrap attributes_duration_ms [5m]))",
           "legendFormat": "{{attributes_name}}",
-          "datasource": { "type": "loki", "uid": "loki" }
+          "refId": "A"
         }
-      ]
+      ],
+      "title": "Step duration by app (records)",
+      "type": "timeseries"
     },
     {
-      "id": 3,
-      "type": "timeseries",
-      "title": "Steps by app (live)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "description": "Step spans counted from trace-derived metrics; populated when the stack runs during the e2e run.",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 9 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": {
         "defaults": {
-          "unit": "short",
-          "custom": { "drawStyle": "line", "fillOpacity": 10, "showPoints": "never" }
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
         },
         "overrides": []
       },
-      "options": { "legend": { "displayMode": "table", "placement": "bottom" } },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 9
+      },
+      "id": 3,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.4.0",
       "targets": [
         {
-          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "expr": "sum by (app) (increase(traces_spanmetrics_calls_total[5m]))",
           "legendFormat": "{{app}}",
-          "datasource": { "type": "prometheus", "uid": "prometheus" }
+          "refId": "A"
         }
-      ]
+      ],
+      "title": "Steps by app (live)",
+      "type": "timeseries"
     },
     {
-      "id": 4,
-      "type": "timeseries",
-      "title": "p95 step latency by app (live)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "description": "95th percentile step duration in seconds from trace-derived metrics.",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 17 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": {
         "defaults": {
-          "unit": "s",
-          "custom": { "drawStyle": "line", "fillOpacity": 10, "showPoints": "never" }
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "s"
         },
         "overrides": []
       },
-      "options": { "legend": { "displayMode": "table", "placement": "bottom" } },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 17
+      },
+      "id": 4,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.4.0",
       "targets": [
         {
-          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "expr": "histogram_quantile(0.95, sum by (le, app) (rate(traces_spanmetrics_latency_bucket[5m])))",
           "legendFormat": "{{app}}",
-          "datasource": { "type": "prometheus", "uid": "prometheus" }
+          "refId": "A"
         }
-      ]
+      ],
+      "title": "p95 step latency by app (live)",
+      "type": "timeseries"
     },
     {
-      "id": 5,
-      "type": "timeseries",
-      "title": "Failed steps by app (live)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
       "description": "Steps with an error status in trace-derived metrics; populated when the stack runs during the run.",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 17 },
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": {
         "defaults": {
-          "unit": "short",
-          "custom": { "drawStyle": "line", "fillOpacity": 10, "showPoints": "never" }
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
         },
         "overrides": []
       },
-      "options": { "legend": { "displayMode": "table", "placement": "bottom" } },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 17
+      },
+      "id": 5,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.4.0",
       "targets": [
         {
-          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "expr": "sum by (app) (increase(traces_spanmetrics_calls_total{status_code=\"STATUS_CODE_ERROR\"}[5m]))",
           "legendFormat": "{{app}}",
-          "datasource": { "type": "prometheus", "uid": "prometheus" }
+          "refId": "A"
         }
-      ]
+      ],
+      "title": "Failed steps by app (live)",
+      "type": "timeseries"
     },
     {
-      "id": 6,
-      "type": "timeseries",
-      "title": "Failed steps by app (records)",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
       "description": "Failed steps from replayed records; available even when the stack starts after the run.",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 25 },
-      "datasource": { "type": "loki", "uid": "loki" },
       "fieldConfig": {
         "defaults": {
-          "unit": "short",
-          "custom": { "drawStyle": "line", "fillOpacity": 10, "showPoints": "never" },
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
           "links": [
             {
-              "title": "Explore this app's failures",
               "targetBlank": true,
+              "title": "Explore this app's failures",
               "url": "/explore?schemaVersion=1&panes={\"map\":{\"datasource\":\"loki\",\"queries\":[{\"refId\":\"A\",\"datasource\":{\"type\":\"loki\",\"uid\":\"loki\"},\"expr\":\"{exporter=\\\"OTLP\\\"} | json | attributes_log_file_name=\\\"spans.jsonl\\\" | attributes_status=\\\"error\\\" | attributes_name=\\\"${__field.labels.attributes_name}\\\"\"}],\"range\":{\"from\":\"${__from}\",\"to\":\"${__to}\"}}}&orgId=1"
             }
-          ]
+          ],
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
         },
         "overrides": []
       },
-      "options": { "legend": { "displayMode": "table", "placement": "bottom" } },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 25
+      },
+      "id": 6,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.4.0",
       "targets": [
         {
-          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
           "expr": "sum by (attributes_name) (count_over_time({exporter=\"OTLP\"} | json | attributes_log_file_name=\"spans.jsonl\" | attributes_status=\"error\" [5m]))",
           "legendFormat": "{{attributes_name}}",
-          "datasource": { "type": "loki", "uid": "loki" }
+          "refId": "A"
         }
-      ]
+      ],
+      "title": "Failed steps by app (records)",
+      "type": "timeseries"
     },
     {
-      "id": 7,
-      "type": "timeseries",
-      "title": "Step duration by run (records)",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
       "description": "Average step duration per run id, from replayed records, for comparing runs over time.",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 25 },
-      "datasource": { "type": "loki", "uid": "loki" },
       "fieldConfig": {
         "defaults": {
-          "unit": "ms",
-          "custom": { "drawStyle": "line", "fillOpacity": 10, "showPoints": "never" },
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
           "links": [
             {
-              "title": "Explore this run's spans",
               "targetBlank": true,
+              "title": "Explore this run's spans",
               "url": "/explore?schemaVersion=1&panes={\"map\":{\"datasource\":\"loki\",\"queries\":[{\"refId\":\"A\",\"datasource\":{\"type\":\"loki\",\"uid\":\"loki\"},\"expr\":\"{exporter=\\\"OTLP\\\"} | json | attributes_log_file_name=\\\"spans.jsonl\\\" | attributes_run_id=\\\"${__field.labels.attributes_run_id}\\\"\"}],\"range\":{\"from\":\"${__from}\",\"to\":\"${__to}\"}}}&orgId=1"
             }
-          ]
+          ],
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "ms"
         },
         "overrides": []
       },
-      "options": { "legend": { "displayMode": "table", "placement": "bottom" } },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 25
+      },
+      "id": 7,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.4.0",
       "targets": [
         {
-          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
           "expr": "avg by (attributes_run_id) (avg_over_time({exporter=\"OTLP\"} | json | attributes_log_file_name=\"spans.jsonl\" | unwrap attributes_duration_ms [5m]))",
           "legendFormat": "{{attributes_run_id}}",
-          "datasource": { "type": "loki", "uid": "loki" }
+          "refId": "A"
         }
-      ]
+      ],
+      "title": "Step duration by run (records)",
+      "type": "timeseries"
     },
     {
-      "id": 8,
-      "type": "bargauge",
-      "title": "Slowest steps (records)",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
       "description": "Top five slowest step labels by average recorded duration.",
-      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 33 },
-      "datasource": { "type": "loki", "uid": "loki" },
       "fieldConfig": {
         "defaults": {
-          "unit": "ms",
-          "custom": { "displayMode": "gradient", "orientation": "horizontal", "showValue": "always" }
+          "color": {
+            "mode": "palette-classic"
+          },
+          "fieldMinMax": false,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "ms"
         },
         "overrides": []
       },
-      "options": {
-        "displayMode": "gradient",
-        "orientation": "horizontal",
-        "showValue": "always",
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 33
       },
+      "id": 8,
+      "options": {
+        "displayMode": "lcd",
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "maxVizHeight": 300,
+        "minVizHeight": 75,
+        "minVizWidth": 8,
+        "namePlacement": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true,
+        "showValue": "always",
+        "sizing": "auto",
+        "valueMode": "color"
+      },
+      "pluginVersion": "11.4.0",
       "targets": [
         {
-          "refId": "A",
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
           "expr": "topk(5, avg by (attributes_name) (avg_over_time({exporter=\"OTLP\"} | json | attributes_log_file_name=\"spans.jsonl\" | unwrap attributes_duration_ms [5m])))",
           "legendFormat": "{{attributes_name}}",
-          "datasource": { "type": "loki", "uid": "loki" }
+          "refId": "A"
         }
-      ]
+      ],
+      "title": "Slowest steps (records)",
+      "type": "bargauge"
     }
-  ]
+  ],
+  "preload": false,
+  "refresh": "1m",
+  "schemaVersion": 40,
+  "tags": ["e2e", "ubuntu-config"],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "E2E runs",
+  "uid": "e2e-runs",
+  "version": 1,
+  "weekStart": ""
 }
