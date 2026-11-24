@@ -116,19 +116,18 @@ for f in "${ALL_SCRIPTS[@]}"; do
 	fi
 done
 
-# 3. source-only: each library script defines >=1 install_*/config_*
-# function when sourced. Functions are never called. install.sh and
-# post-install.sh are never sourced (post-install.sh runs apt upgrade).
+# 3. source-only: each library script defines >=1 install_*/config_* function
+# at top level and has no top-level commands. Parsed as text — scripts are
+# never sourced here, so the check cannot execute untrusted repo code.
 for f in "${ALL_SCRIPTS[@]}"; do
 	case "$f" in
 	"$SETUP_DIR/install.sh" | "$SETUP_DIR/post-install.sh") continue ;;
 	"$SETUP_DIR/helpers/"*) continue ;;
 	esac
-	if funcs="$(bash -c 'source "$1" && declare -F' _ "$f" 2>/dev/null)" &&
-		printf '%s\n' "$funcs" | grep -qE 'declare -f (install_|config_)'; then
+	if reason="$(bash "$ROOT/tests/source-only-check.sh" "$f" 2>&1)"; then
 		pass "source-only $f"
 	else
-		fail "source-only $f (no install_*/config_* function found)"
+		fail "source-only $f: ${reason:-check failed}"
 	fi
 done
 
