@@ -153,7 +153,7 @@ When the repo moves to a newer Ubuntu release:
 
 ## Testing
 
-Static checks are host-safe and zero-dependency (shellcheck runs only if installed):
+Static checks are zero-dependency (shellcheck runs only if installed). The source-only check parses declarations without executing scripts:
 
 ```sh
 ./tests/test.sh
