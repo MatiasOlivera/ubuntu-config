@@ -94,6 +94,7 @@ check_has() {
 check_has "download span" '"kind":"download"'
 check_has "download name is the command" '"name":"curl"'
 check_has "download host attribute" '"key":"url_host","value":{"stringValue":"example.invalid"}'
+check_has "download host is queryable" '"url_host":"example.invalid"'
 check_has "package-manager span" '"kind":"package-manager"'
 check_has "package-manager name is apt" '"name":"apt"'
 check_has "network byte delta" '"key":"bytes_net_approx","value":{"intValue":[1-9][0-9]*}'

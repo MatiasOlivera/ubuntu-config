@@ -190,6 +190,22 @@ Full e2e on a fresh Multipass VM (requires Multipass on host):
 ./tests/test.sh --vm --reuse      # reuse existing VM for fast iterations
 ```
 
+For a faster development loop, seed a kept VM once, then re-run only the setup
+scripts you changed:
+
+```sh
+./tests/test.sh --vm --keep            # one full install, keep the VM
+bash tests/dev-iter.sh seed            # remember the current setup scripts
+# edit one or more scripts under setup/
+bash tests/dev-iter.sh                 # apt update + changed installers only
+./tests/test.sh --vm --reuse      # full check before a pull request
+```
+
+`dev-iter.sh` is a shortcut, not verification: it skips unchanged apps and does
+not replace the full `--reuse` run. Its baseline is stored per VM under
+`${XDG_STATE_HOME:-$HOME/.local/state}/ubuntu-config/` and advances after each
+successful iteration.
+
 Each `--vm` phase writes per-app spans, logs and a summary under
 `E2E_OBSERVABILITY_DIR` (default
 `${XDG_DATA_HOME:-$HOME/.local/share}/ubuntu-config/observability/<run-id>/`) and

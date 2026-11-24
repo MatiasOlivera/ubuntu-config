@@ -120,7 +120,7 @@ opencode_install_verified() {
 }
 
 opencode_version() {
-    opencode --version 2>/dev/null | head -n 1 | grep .
+    ( PATH="$HOME/.opencode/bin:$PATH"; opencode --version 2>/dev/null | head -n 1 | grep . )
 }
 
 if [[ ${BASH_SOURCE[0]} == "$0" ]]; then
