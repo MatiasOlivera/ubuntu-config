@@ -770,13 +770,9 @@
         "type": "loki",
         "uid": "loki"
       },
-      "description": "One span per e2e install phase, so a run's total does not depend on its step count.",
+      "description": "One row per e2e run with its recorded install phase total, sortable by duration.",
       "fieldConfig": {
         "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "fieldMinMax": false,
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -799,29 +795,21 @@
       },
       "id": 9,
       "options": {
-        "displayMode": "lcd",
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": false
+        "cellHeight": "sm",
+        "footer": {
+          "show": false,
+          "countRows": false,
+          "reducer": []
         },
-        "maxVizHeight": 300,
-        "minVizHeight": 75,
-        "minVizWidth": 8,
-        "namePlacement": "auto",
-        "orientation": "horizontal",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showUnfilled": true,
-        "showValue": "always",
-        "sizing": "auto",
-        "valueMode": "color"
+        "frameIndex": 0,
+        "showHeader": true,
+        "showTypeIcons": false,
+        "sortBy": [
+          {
+            "displayName": "Install time",
+            "desc": true
+          }
+        ]
       },
       "pluginVersion": "11.4.0",
       "targets": [
@@ -832,11 +820,36 @@
           },
           "expr": "sum by (attributes_run_id) (sum_over_time({exporter=\"OTLP\"} | json | attributes_log_file_name=\"spans.jsonl\" | attributes_kind=\"phase\" | attributes_phase=\"install\" | attributes_run_id=~\"$run_id\" | unwrap attributes_duration_ms [5m]))",
           "legendFormat": "{{attributes_run_id}}",
-          "refId": "A"
+          "refId": "A",
+          "queryType": "range"
         }
       ],
       "title": "Install total by run (records)",
-      "type": "bargauge"
+      "type": "table",
+      "transformations": [
+        {
+          "id": "reduce",
+          "options": {
+            "reducers": [
+              "mean"
+            ],
+            "labelsToFields": true
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Field": true
+            },
+            "indexByName": {},
+            "renameByName": {
+              "attributes_run_id": "Run",
+              "Mean": "Install time"
+            }
+          }
+        }
+      ]
     },
     {
       "datasource": {
@@ -989,7 +1002,7 @@
         "type": "loki",
         "uid": "loki"
       },
-      "description": "Which release or repository host dominated recorded download time.",
+      "description": "Recorded download time grouped by host, largest first, scoped to the selected run.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1051,11 +1064,42 @@
           },
           "expr": "sum by (attributes_url_host) (sum_over_time({exporter=\"OTLP\"} | json | attributes_log_file_name=\"spans.jsonl\" | attributes_kind=\"download\" | attributes_run_id=~\"$run_id\" | unwrap attributes_duration_ms [5m]))",
           "legendFormat": "{{attributes_url_host}}",
-          "refId": "A"
+          "refId": "A",
+          "queryType": "range"
         }
       ],
       "title": "Download time by host (records)",
-      "type": "bargauge"
+      "type": "bargauge",
+      "transformations": [
+        {
+          "id": "reduce",
+          "options": {
+            "reducers": [
+              "mean"
+            ],
+            "labelsToFields": true
+          }
+        },
+        {
+          "id": "sortBy",
+          "options": {
+            "sort": [
+              {
+                "field": "Mean",
+                "desc": true
+              }
+            ]
+          }
+        },
+        {
+          "id": "rowsToFields",
+          "options": {
+            "nameField": "attributes_url_host",
+            "valueField": "Mean",
+            "mappings": []
+          }
+        }
+      ]
     }
   ],
   "preload": false,
