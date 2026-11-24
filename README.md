@@ -273,6 +273,7 @@ setup/
   manual-installation.md
 dotfiles/               # chezmoi source state (dot_* → $HOME, *.tmpl rendered)
 .agents/skills/         # cross-agent skills (opencode, Cursor, VS Code, Codex, …)
+specs/                  # binding constitution + spec/plan/tasks per issue
 reports/
   versions.sh           # report-only install report
   gaps.sh               # report-only host-vs-repo gaps (apt/snap/flatpak/AppImage)
