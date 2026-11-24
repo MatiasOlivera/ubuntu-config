@@ -201,6 +201,14 @@ docker compose -f tests/observability/compose.yml up -d
 docker compose -f tests/observability/compose.yml down
 ```
 
+The stack provisions an **E2E runs** dashboard and a few alert rules under
+**E2E Observability**. The span list and record timing come from the replayed
+records in Loki, so they are available even when the stack starts after a run;
+the trace-metric panels fill in when it runs during the run. Alerts are for
+local definition and evaluation only — no notification channel is configured.
+The chosen feature scope is recorded in
+[decision 0012](docs/decisions/0012-local-grafana-feature-scope.md).
+
 Live forwarding from the VM is best effort; an unreachable collector warns once
 and the durable records remain complete.
 
