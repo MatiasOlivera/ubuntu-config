@@ -14,9 +14,9 @@ groups:
             relativeTimeRange:
               from: 300
               to: 0
-            datasourceUid: loki
+            datasourceUid: prometheus
             model:
-              expr: 'sum(count_over_time({exporter="OTLP"} | json | attributes_log_file_name="spans.jsonl" | attributes_status="error" [5m]))'
+              expr: 'sum(increase(traces_spanmetrics_calls_total{status_code="STATUS_CODE_ERROR"}[5m]))'
               instant: true
               intervalMs: 1000
               maxDataPoints: 43200
@@ -50,6 +50,8 @@ groups:
         for: 0s
         annotations:
           summary: An e2e step ended with an error status.
+          dashboardUId: e2e-runs
+          panelId: "6"
         labels:
           severity: warning
 
@@ -97,5 +99,7 @@ groups:
         for: 0s
         annotations:
           summary: p95 e2e step latency is above 60 seconds.
+          dashboardUId: e2e-runs
+          panelId: "4"
         labels:
           severity: warning
