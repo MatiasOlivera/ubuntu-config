@@ -22,7 +22,7 @@ install_openusage() {
 
 openusage_version() {
     local v
-    if ! v=$(openusage --version 2>/dev/null); then
+    if ! v=$(PATH="$HOME/.local/bin:$PATH" openusage --version 2>/dev/null); then
         return 1
     fi
     printf '%s\n' "$v" | head -n 1 | grep .
