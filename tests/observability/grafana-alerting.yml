@@ -103,3 +103,24 @@ groups:
           panelId: "4"
         labels:
           severity: warning
+
+# Local rules are for evaluation only: mute every route so no contact point is
+# ever called (Grafana's built-in default email contact point would try SMTP).
+muteTimes:
+  - orgId: 1
+    name: local-no-delivery
+    time_intervals:
+      - times:
+          - start_time: '00:00'
+            end_time: '23:59'
+
+policies:
+  - orgId: 1
+    receiver: grafana-default-email
+    group_by: ['grafana_folder', 'alertname']
+    routes:
+      - receiver: grafana-default-email
+        object_matchers:
+          - ['alertname', '=~', '.*']
+        mute_time_intervals:
+          - local-no-delivery
