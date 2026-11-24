@@ -3,6 +3,9 @@ docs/plans
 __pycache__/
 *.py[cod]
 
+# Playwright MCP scratch (browser snapshots and console logs land in the workspace root)
+.playwright-mcp/
+
 # Kilo local scratch (never commit; shared agents/skills/setup stay committable)
 .kilo/plans/
 .kilo/tui.json
