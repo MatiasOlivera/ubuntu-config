@@ -18,4 +18,4 @@
 | 12  | [x]  | Write a hermetic regression test that fails while either keepalive loop inherits an output stream (red) | 11 | Automated | new test fails before the stream fix |
 | 13  | [x]  | Redirect the keepalive streams in `install.sh` and `post-install.sh` | 12 | Automated | regression test passes; `./tests/test.sh` static checks |
 | 14  | [x]  | Run the static gate and a warm `--reuse` run, and record before/after timings | 13 | Manual | `./tests/test.sh` exits 0; 105 s before, new timing recorded |
-| 15  | [ ]  | Update agent-facing docs only if the repeat-run workflow description changes | 14 | Manual | documented `--reuse` command still matches the harness |
+| 15  | [x]  | Update agent-facing docs only if the repeat-run workflow description changes | 14 | Manual | documented `--reuse` command still matches the harness |
