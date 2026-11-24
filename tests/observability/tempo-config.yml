@@ -31,6 +31,12 @@ metrics_generator:
       - url: http://prometheus:9090/api/v1/write
         send_exemplars: true
 
+# Span metrics are off by default; the dashboard needs them in Prometheus.
+overrides:
+  defaults:
+    metrics_generator:
+      processors: [span-metrics]
+
 compactor: {}
 ingester: {}
 querier:

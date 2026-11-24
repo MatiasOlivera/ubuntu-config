@@ -46,6 +46,9 @@ services:
       GF_USERS_ALLOW_SIGN_UP: "false"
     volumes:
       - ./grafana-datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml:ro
+      - ./grafana-dashboards.yml:/etc/grafana/provisioning/dashboards/dashboards.yml:ro
+      - ./dashboards:/etc/grafana/provisioning/dashboards/definitions:ro
+      - ./grafana-alerting.yml:/etc/grafana/provisioning/alerting/alerting.yml:ro
     ports:
       - "3000:3000"
     depends_on:

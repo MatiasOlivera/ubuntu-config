@@ -1,0 +1,126 @@
+apiVersion: 1
+
+groups:
+  - orgId: 1
+    name: e2e-observability
+    folder: E2E Observability
+    interval: 1m
+    rules:
+      - uid: e2e-step-error
+        title: E2E step failed
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: 'sum(increase(traces_spanmetrics_calls_total{status_code="STATUS_CODE_ERROR"}[5m]))'
+              instant: true
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+          - refId: B
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params:
+                      - 0
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - A
+                  reducer:
+                    params: []
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: B
+              type: classic_conditions
+        noDataState: OK
+        execErrState: Error
+        for: 0s
+        annotations:
+          summary: An e2e step ended with an error status.
+          dashboardUId: e2e-runs
+          panelId: "6"
+        labels:
+          severity: warning
+
+      - uid: e2e-step-slow
+        title: E2E step slower than 60s
+        condition: B
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: 'histogram_quantile(0.95, sum by (le) (rate(traces_spanmetrics_latency_bucket[5m])))'
+              instant: true
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+          - refId: B
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params:
+                      - 60
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - A
+                  reducer:
+                    params: []
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: B
+              type: classic_conditions
+        noDataState: OK
+        execErrState: Error
+        for: 0s
+        annotations:
+          summary: p95 e2e step latency is above 60 seconds.
+          dashboardUId: e2e-runs
+          panelId: "4"
+        labels:
+          severity: warning
+
+# Local rules are for evaluation only: mute every route so no contact point is
+# ever called (Grafana's built-in default email contact point would try SMTP).
+muteTimes:
+  - orgId: 1
+    name: local-no-delivery
+    time_intervals:
+      - times:
+          - start_time: '00:00'
+            end_time: '23:59'
+
+policies:
+  - orgId: 1
+    receiver: grafana-default-email
+    group_by: ['grafana_folder', 'alertname']
+    routes:
+      - receiver: grafana-default-email
+        object_matchers:
+          - ['alertname', '=~', '.*']
+        mute_time_intervals:
+          - local-no-delivery
