@@ -5,7 +5,7 @@
   "tags": ["e2e", "ubuntu-config"],
   "timezone": "browser",
   "schemaVersion": 39,
-  "version": 1,
+  "version": 2,
   "refresh": "1m",
   "time": { "from": "now-24h", "to": "now" },
   "templating": { "list": [] },
@@ -42,7 +42,14 @@
       "fieldConfig": {
         "defaults": {
           "unit": "ms",
-          "custom": { "drawStyle": "line", "fillOpacity": 10, "showPoints": "never" }
+          "custom": { "drawStyle": "line", "fillOpacity": 10, "showPoints": "never" },
+          "links": [
+            {
+              "title": "Explore this app's spans",
+              "targetBlank": true,
+              "url": "/explore?schemaVersion=1&panes={\"map\":{\"datasource\":\"loki\",\"queries\":[{\"refId\":\"A\",\"datasource\":{\"type\":\"loki\",\"uid\":\"loki\"},\"expr\":\"{exporter=\\\"OTLP\\\"} | json | attributes_log_file_name=\\\"spans.jsonl\\\" | attributes_name=\\\"${__field.labels.attributes_name}\\\"\"}],\"range\":{\"from\":\"${__from}\",\"to\":\"${__to}\"}}}&orgId=1"
+            }
+          ]
         },
         "overrides": []
       },
@@ -108,7 +115,7 @@
       "id": 5,
       "type": "timeseries",
       "title": "Failed steps by app (live)",
-      "description": "Steps with an error status in trace-derived metrics.",
+      "description": "Steps with an error status in trace-derived metrics; populated when the stack runs during the run.",
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 17 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "fieldConfig": {
@@ -125,6 +132,97 @@
           "expr": "sum by (app) (increase(traces_spanmetrics_calls_total{status_code=\"STATUS_CODE_ERROR\"}[5m]))",
           "legendFormat": "{{app}}",
           "datasource": { "type": "prometheus", "uid": "prometheus" }
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Failed steps by app (records)",
+      "description": "Failed steps from replayed records; available even when the stack starts after the run.",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 25 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": { "drawStyle": "line", "fillOpacity": 10, "showPoints": "never" },
+          "links": [
+            {
+              "title": "Explore this app's failures",
+              "targetBlank": true,
+              "url": "/explore?schemaVersion=1&panes={\"map\":{\"datasource\":\"loki\",\"queries\":[{\"refId\":\"A\",\"datasource\":{\"type\":\"loki\",\"uid\":\"loki\"},\"expr\":\"{exporter=\\\"OTLP\\\"} | json | attributes_log_file_name=\\\"spans.jsonl\\\" | attributes_status=\\\"error\\\" | attributes_name=\\\"${__field.labels.attributes_name}\\\"\"}],\"range\":{\"from\":\"${__from}\",\"to\":\"${__to}\"}}}&orgId=1"
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom" } },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (attributes_name) (count_over_time({exporter=\"OTLP\"} | json | attributes_log_file_name=\"spans.jsonl\" | attributes_status=\"error\" [5m]))",
+          "legendFormat": "{{attributes_name}}",
+          "datasource": { "type": "loki", "uid": "loki" }
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Step duration by run (records)",
+      "description": "Average step duration per run id, from replayed records, for comparing runs over time.",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 25 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "custom": { "drawStyle": "line", "fillOpacity": 10, "showPoints": "never" },
+          "links": [
+            {
+              "title": "Explore this run's spans",
+              "targetBlank": true,
+              "url": "/explore?schemaVersion=1&panes={\"map\":{\"datasource\":\"loki\",\"queries\":[{\"refId\":\"A\",\"datasource\":{\"type\":\"loki\",\"uid\":\"loki\"},\"expr\":\"{exporter=\\\"OTLP\\\"} | json | attributes_log_file_name=\\\"spans.jsonl\\\" | attributes_run_id=\\\"${__field.labels.attributes_run_id}\\\"\"}],\"range\":{\"from\":\"${__from}\",\"to\":\"${__to}\"}}}&orgId=1"
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": { "legend": { "displayMode": "table", "placement": "bottom" } },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "avg by (attributes_run_id) (avg_over_time({exporter=\"OTLP\"} | json | attributes_log_file_name=\"spans.jsonl\" | unwrap attributes_duration_ms [5m]))",
+          "legendFormat": "{{attributes_run_id}}",
+          "datasource": { "type": "loki", "uid": "loki" }
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "type": "bargauge",
+      "title": "Slowest steps (records)",
+      "description": "Top five slowest step labels by average recorded duration.",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 33 },
+      "datasource": { "type": "loki", "uid": "loki" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "custom": { "displayMode": "gradient", "orientation": "horizontal", "showValue": "always" }
+        },
+        "overrides": []
+      },
+      "options": {
+        "displayMode": "gradient",
+        "orientation": "horizontal",
+        "showValue": "always",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "topk(5, avg by (attributes_name) (avg_over_time({exporter=\"OTLP\"} | json | attributes_log_file_name=\"spans.jsonl\" | unwrap attributes_duration_ms [5m])))",
+          "legendFormat": "{{attributes_name}}",
+          "datasource": { "type": "loki", "uid": "loki" }
         }
       ]
     }
