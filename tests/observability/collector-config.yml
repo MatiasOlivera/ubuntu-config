@@ -16,6 +16,11 @@ receivers:
 
 processors:
   batch: {}
+  resource/e2e:
+    attributes:
+      - key: service.name
+        value: ubuntu-config-e2e
+        action: insert
 
 exporters:
   otlp/tempo:
@@ -39,7 +44,7 @@ service:
       exporters: [otlp/tempo]
     logs:
       receivers: [otlp, filelog/spans, filelog/logs]
-      processors: [batch]
+      processors: [resource/e2e, batch]
       exporters: [loki]
     metrics:
       receivers: [otlp]
