@@ -2,6 +2,10 @@
 
 Infrastructure-as-code setup for a fresh Ubuntu workstation: versioned bash scripts in `setup/` install `apt` packages, Flatpak/Snap apps and dev tools; declarative chezmoi dotfiles in `dotfiles/` own the configuration. Scripts assume Ubuntu with `apt` + `sudo`. Humans: see `README.md` (commands, reports, project structure).
 
+## Architecture
+
+> [Architecture] Uses Plugin (partial)
+
 ## Shared conventions
 
 Follow the shared
