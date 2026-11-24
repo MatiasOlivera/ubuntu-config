@@ -1062,7 +1062,7 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "sum by (attributes_url_host) (sum_over_time({exporter=\"OTLP\"} | json | attributes_log_file_name=\"spans.jsonl\" | attributes_kind=\"download\" | attributes_run_id=~\"$run_id\" | unwrap attributes_duration_ms [5m]))",
+          "expr": "sum by (attributes_url_host) (sum_over_time({exporter=\"OTLP\"} | json | attributes_log_file_name=\"spans.jsonl\" | attributes_kind=\"download\" | attributes_url_host!=\"\" | attributes_run_id=~\"$run_id\" | unwrap attributes_duration_ms [5m]))",
           "legendFormat": "{{attributes_url_host}}",
           "refId": "A",
           "queryType": "range"
