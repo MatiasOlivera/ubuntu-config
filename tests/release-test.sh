@@ -44,7 +44,7 @@ setup() {
 	CASES=$((CASES + 1))
 	S="$TMP_ROOT/case$CASES"
 	mkdir -p "$S/bin" "$S/local/.github"
-	printf 'CI=success\nCI_SHA=develop\nVERSION=v0.4.0\nRELEASED=no\n' >"$S/state"
+	printf 'CI=success\nCI_SHA=develop\nCI_PENDING=0\nCI_POLLS=0\nVERSION=v0.4.0\nRELEASED=no\n' >"$S/state"
 
 	git init --bare -q "$S/origin.git"
 	git init -q -b main "$S/local"
@@ -81,8 +81,16 @@ case "$*" in
   *"run list"*)
     # An unfiltered list sees the release workflow's own in-progress run.
     case "$*" in
-      *"--workflow test"*) printf '%s %s\n' "$(get CI)" "$(get CI_SHA)" ;;
-      *) printf '  \n' ;;
+      *"--workflow test"*)
+        polls=$(( $(get CI_POLLS) + 1 )); setv CI_POLLS "$polls"
+        if [ "$polls" -le "$(get CI_PENDING)" ]; then
+          # GitHub leaves conclusion empty until the run finishes.
+          printf 'in_progress  %s\n' "$(get CI_SHA)"
+        else
+          printf 'completed %s %s\n' "$(get CI)" "$(get CI_SHA)"
+        fi
+        ;;
+      *) printf '   \n' ;;
     esac
     ;;
   *"pr create"*)
@@ -124,6 +132,10 @@ case "$*" in
 esac
 GH
 	chmod +x "$S/bin/gh"
+
+	# Polling is real in release.sh; the stub keeps the suite instant.
+	printf '#!/bin/sh\nexit 0\n' >"$S/bin/sleep"
+	chmod +x "$S/bin/sleep"
 
 	cat >"$S/bin/git-cliff" <<'CLIFF'
 #!/bin/sh
@@ -177,7 +189,9 @@ expect_failure() {
 	if output=$(run_release "${@:2}" 2>&1); then
 		fail "$name: expected non-zero exit, got success"
 		printf '%s\n' "$output" >&2
-	elif printf '%s\n' "$output" | grep -q '^release:'; then
+	fi
+	printf '%s\n' "$output" >>"$S/log"
+	if printf '%s\n' "$output" | grep -q '^release:'; then
 		ok "$name: refused"
 	else
 		fail "$name: failed without a release guard message"
@@ -243,6 +257,34 @@ test_prepare_refuses_red_ci() {
 	assert_eq 'red CI opens no PR' '' "$(state_get PR_NUMBER)"
 }
 
+test_prepare_waits_for_pending_ci() {
+	setup
+	state_set CI_PENDING 2
+	expect_success 'prepare waits for pending CI' prepare
+	assert_eq 'pending run was polled before green' 3 "$(state_get CI_POLLS)"
+	assert_eq 'promotion PR opened after CI concluded' 10 "$(state_get PR_NUMBER)"
+	assert_eq 'no tag created by prepare' 1 "$(git -C "$S/local" tag --list | wc -l)"
+}
+
+test_prepare_fails_when_ci_never_concludes() {
+	setup
+	state_set CI_PENDING 99
+	expect_failure 'prepare refuses pending CI' prepare
+	assert_eq 'guard polled up to the bound' 12 "$(state_get CI_POLLS)"
+	assert_contains 'timeout names the pending status' "$(cat "$S/log")" 'status: in_progress'
+	assert_eq 'pending CI opened no PR' '' "$(state_get PR_NUMBER)"
+	assert_eq 'pending CI left no changelog' no "$(test -f "$S/local/CHANGELOG.md" && echo yes || echo no)"
+}
+
+test_prepare_names_cancelled_ci() {
+	setup
+	state_set CI cancelled
+	expect_failure 'prepare refuses cancelled CI' prepare
+	assert_contains 'cancelled conclusion is named' "$(cat "$S/log")" 'conclusion: cancelled'
+	assert_eq 'cancelled CI is not waited on' 1 "$(state_get CI_POLLS)"
+	assert_eq 'cancelled CI opens no PR' '' "$(state_get PR_NUMBER)"
+}
+
 test_prepare_creates_release_commit_and_pr() {
 	setup
 	expect_success 'prepare on green develop' prepare
@@ -305,6 +347,16 @@ test_publish_refuses_red_ci() {
 	state_set CI failure
 	expect_failure 'publish refuses red CI' publish
 	assert_eq 'red CI leaves no tag' 1 "$(git -C "$S/local" tag --list | wc -l)"
+}
+
+test_publish_fails_when_ci_never_concludes() {
+	setup
+	promote
+	state_set CI_PENDING 99
+	expect_failure 'publish refuses pending CI' publish
+	assert_contains 'publish timeout names status' "$(cat "$S/log")" 'status: in_progress'
+	assert_eq 'pending CI leaves no tag' 1 "$(git -C "$S/local" tag --list | wc -l)"
+	assert_eq 'pending CI leaves no release' no "$(state_get RELEASED)"
 }
 
 test_publish_refuses_version_mismatch() {
@@ -396,12 +448,16 @@ test_prepare_refuses_wrong_branch
 test_prepare_refuses_dirty_tree
 test_prepare_refuses_existing_tag
 test_prepare_refuses_red_ci
+test_prepare_waits_for_pending_ci
+test_prepare_fails_when_ci_never_concludes
+test_prepare_names_cancelled_ci
 test_prepare_creates_release_commit_and_pr
 test_prepare_restamps_open_pr
 test_preview_is_read_only
 test_preview_warns_on_unpromoted_config
 test_publish_refuses_squash_merge
 test_publish_refuses_red_ci
+test_publish_fails_when_ci_never_concludes
 test_publish_refuses_version_mismatch
 test_publish_tags_merges_and_publishes
 test_publish_resumes_existing_tag

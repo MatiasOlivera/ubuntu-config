@@ -76,10 +76,24 @@ repo_slug() {
 
 develop_check() {
 	expected=${1:-$(git rev-parse HEAD)}
-	line=$(gh run list --workflow test --branch develop --limit 1 --json conclusion,headSha \
-		-q '.[0] | "\(.conclusion) \(.headSha)"' 2>/dev/null || echo 'none ')
-	conclusion=${line%% *}
-	sha=${line#* }
+	# GitHub leaves conclusion empty until the run finishes; wait for it rather
+	# than treating an unfinished run as ungreen.
+	attempt=0
+	while :; do
+		line=$(gh run list --workflow test --branch develop --limit 1 \
+			--json status,conclusion,headSha \
+			-q '.[0] | "\(.status) \(.conclusion // "") \(.headSha)"' \
+			2>/dev/null || echo 'none  ')
+		status=${line%% *}
+		rest=${line#* }
+		conclusion=${rest%% *}
+		sha=${rest#* }
+		[ -n "$conclusion" ] && break
+		attempt=$((attempt + 1))
+		[ "$attempt" -lt 12 ] ||
+			die "latest CI run on develop has not concluded (status: ${status:-unknown})"
+		sleep 10
+	done
 	[ "$conclusion" = success ] || die "latest CI run on develop is not green (conclusion: $conclusion)"
 	if [ -n "$sha" ]; then
 		case "$expected" in
