@@ -192,6 +192,8 @@ hand-edit it; regenerate it with `sh scripts/release.sh prepare`.
 - bound generated changelog to the unreleased range ([`448b549`](https://github.com/MatiasOlivera/ubuntu-config/commit/448b54921acec233be35da8377543e0fd5d917c7))
 - keep the committed changelog exhaustive ([`6fc4edb`](https://github.com/MatiasOlivera/ubuntu-config/commit/6fc4edb38053bc15432a39f52049d3acf9d51bb9))
 - label the promotion pull request automatically ([`97143e5`](https://github.com/MatiasOlivera/ubuntu-config/commit/97143e579ef3f3fcb0f4624d432759ca51af6aae))
+- exclude the release workflow from the develop CI guard ([`bf67a9b`](https://github.com/MatiasOlivera/ubuntu-config/commit/bf67a9b03d090e4bc912676b66f81ba1359302fa))
+- wait for pending develop checks before preparing ([`faff3de`](https://github.com/MatiasOlivera/ubuntu-config/commit/faff3de2c526d2a80ab16d9d8ce8ac8b0fb8a472))
 
 ### merge
 
