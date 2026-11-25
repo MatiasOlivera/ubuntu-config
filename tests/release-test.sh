@@ -9,7 +9,11 @@ TOOL_SH="$ROOT/scripts/git-cliff.sh"
 WORKFLOW="$ROOT/.github/workflows/release.yml"
 
 TMP_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/release-test.XXXXXX")"
-trap 'rm -rf "$TMP_ROOT"' EXIT
+if [ -n "${RELEASE_TEST_KEEP:-}" ]; then
+	printf 'sandbox: %s\n' "$TMP_ROOT"
+else
+	trap 'rm -rf "$TMP_ROOT"' EXIT
+fi
 
 CASES=0
 FAILED=0
@@ -73,7 +77,7 @@ get() { grep "^$1=" "$GH_STATE" 2>/dev/null | cut -d= -f2- | head -n 1 || true; 
 setv() { grep -v "^$1=" "$GH_STATE" >"$GH_STATE.next" 2>/dev/null || true; printf '%s=%s\n' "$1" "$2" >>"$GH_STATE.next"; mv "$GH_STATE.next" "$GH_STATE"; }
 case "$*" in
   *"repo view"*) printf 'MatiasOlivera/ubuntu-config\n' ;;
-  *"generate-notes"*) setv API_ARGS "$*"; printf '## What\'s Changed\n- grouped note\n' ;;
+  *"generate-notes"*) setv API_ARGS "$*"; printf '## What Changed\n- grouped note\n' ;;
   *"run list"*) printf '%s %s\n' "$(get CI)" "$(get CI_SHA)" ;;
   *"pr create"*)
     title='' body=''; prev=''
@@ -222,7 +226,7 @@ test_prepare_creates_release_commit_and_pr() {
 	setup
 	expect_success 'prepare on green develop' prepare
 	assert_eq 'promotion PR opened' 10 "$(state_get PR_NUMBER)"
-	assert_eq 'changelog committed' v0.4.0 "$(git -C "$S/local" show HEAD:CHANGELOG.md | sed -nE 's/^## \[([^]]+)\].*/\1/p')"
+	assert_eq 'changelog committed' 0.4.0 "$(git -C "$S/local" show HEAD:CHANGELOG.md | sed -nE 's/^## \[([^]]+)\].*/\1/p')"
 	assert_eq 'tag not created by prepare' 1 "$(git -C "$S/local" tag --list | wc -l)"
 	assert_eq 'release not created by prepare' no "$(state_get RELEASED)"
 }
