@@ -15,6 +15,14 @@ local architecture, commands, and approval requirements.
 
 Shared conventions: MatiasOlivera/standards — repo conventions defer to it; file cross-project issues there, project issues here. Read its content from the local checkout at ~/Documents/Projects/standards first; use the github.com/MatiasOlivera/standards remote only for filing and verification.
 
+## Constitution
+
+[`specs/constitution.md`](specs/constitution.md) is the binding charter for this
+repository: it takes precedence over this file and `.agents/skills/`, and the
+rules below are concrete operational detail that must honor its axioms.
+The shared workflow above governs cross-repo process; the constitution
+governs this repository.
+
 ## Skills (load the one matching your task)
 
 Skills live in `.agents/skills/` (cross-agent: opencode, Cursor, VS Code, Codex, ...).
