@@ -1,0 +1,16 @@
+# label<TAB>declared install paths (space separated; $HOME expanded at runtime)
+# Paths are approximate disk attribution for apps that install files directly.
+install_uv	$HOME/.local/bin/uv $HOME/.local/bin/uvx
+install_pnpm	$HOME/.local/bin/pnpm $HOME/.local/bin/pnpx
+install_bun	$HOME/.bun/bin/bun $HOME/.bun/bin/bunx
+install_opencode	$HOME/.opencode/bin/opencode
+install_antigravity_cli	$HOME/.local/bin/agy
+install_anythingllm	$HOME/Applications
+install_oh_my_zsh	$HOME/.oh-my-zsh
+install_fonts	$HOME/.local/share/fonts
+install_fnm	$HOME/.local/share/fnm
+install_flatpak	/var/lib/flatpak
+install_docker	/var/lib/docker
+install_homebrew	/home/linuxbrew/.linuxbrew
+install_ollama	/usr/local/bin/ollama /usr/local/lib/ollama
+install_copilot	/usr/local/bin/copilot

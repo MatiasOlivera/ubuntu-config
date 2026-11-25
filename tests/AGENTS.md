@@ -1,6 +1,10 @@
 # Test suite
 
-Tests cover this repository's Bash setup scripts. `tests/test.sh` automatically runs every `*-test.sh` file under `tests/`.
+Tests cover this repository's Bash setup and release scripts. `tests/test.sh` automatically runs every `*-test.sh` file under `tests/`.
+
+## Architecture
+
+> [Architecture] Uses Facade
 
 ## Conventions
 
@@ -10,9 +14,6 @@ Tests cover this repository's Bash setup scripts. `tests/test.sh` automatically 
 
 ## Commands
 
-- Run one test: `bash tests/path/to/name-test.sh`.
-- Run the full suite: `./tests/test.sh`.
-- Run in Docker: `docker compose -f tests/compose.yml run --rm test`.
-- Lint test scripts when ShellCheck is available: `find tests -name '*-test.sh' -print0 | xargs -0 shellcheck`.
+Test commands — single test, full suite, Docker, ShellCheck — live in the root `run-tests` skill.
 
 See the root `AGENTS.md` for trusted-checkout restrictions and Multipass verification.

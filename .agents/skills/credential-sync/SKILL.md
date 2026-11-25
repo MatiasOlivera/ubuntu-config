@@ -5,6 +5,8 @@ description: Bridge and rotate agent credentials between Bitwarden and GNOME Key
 
 # Credential sync
 
+> [Architecture] Uses Adapter (partial)
+
 Standing rules for every credential that coding-agent tooling consumes on
 this machine. The full manual procedure lives in the runbook at
 `docs/runbooks/agent-credentials-runbook.md`; this skill states the rules

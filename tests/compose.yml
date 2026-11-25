@@ -3,5 +3,18 @@ services:
     build:
       context: ..
       dockerfile: tests/Dockerfile
+      # The published image is a cache source only, never the checked image.
+      cache_from:
+        - ghcr.io/matiasolivera/ubuntu-config-test:latest
+    # Rebuild every run so a Dockerfile change can't be tested against a stale
+    # image; the layer cache makes it cheap.
+    pull_policy: build
+    # Tier 1 executes checkout-controlled code (ADR 0006): cut off the host
+    # network and the kernel's capability/privilege surface.
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    network_mode: none
     volumes:
       - ..:/work:ro

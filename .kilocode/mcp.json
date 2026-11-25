@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "grafana": {
+      "command": "uvx",
+      "args": [
+        "mcp-grafana==2.2.0",
+        "--enabled-tools=search,datasource,prometheus,loki,alerting,dashboard,tempo"
+      ]
+    }
+  }
+}

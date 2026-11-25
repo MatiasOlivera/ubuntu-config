@@ -5,6 +5,8 @@ description: Use when working with the report scripts reports/versions.sh and re
 
 # Reports
 
+> [Architecture] Uses Template Method
+
 `reports/versions.sh` and `reports/gaps.sh` are report-only: always exit 0, install nothing. Never gate installs on them, never let them fail a run.
 
 ## versions.sh

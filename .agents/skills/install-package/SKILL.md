@@ -5,6 +5,8 @@ description: Use when installing a new package/tool in this repo (adding a setup
 
 # Install a package
 
+> [Architecture] Uses Template Method
+
 End-to-end workflow for adding a package/tool to this repo so `tests/test.sh` stays green. The contract below is enforced fail-closed by `tests/test.sh`; AGENTS.md summarizes it, this skill has the steps.
 
 ## 1. Pick phase and location
@@ -22,7 +24,36 @@ Keep package scripts flat when a directory would contain only one script.
 Use a directory only when it groups multiple related scripts for one package,
 such as installation or package components.
 
-## 2. Follow the script contract
+## 2. Pick the install method
+
+Use the highest rung that actually exists for the tool, in this order:
+
+1. **Ubuntu apt** — plain `apt install`, no extra source.
+2. **Vendor apt repository** — GPG key + `.sources`, overwrite, never append;
+   the repo function does not run `apt update`.
+3. **Checksum-verified release artifact** — publisher checksum or signature
+   covering the exact artifact.
+4. **Homebrew** — CLI tools only when the vendor ships no higher rung.
+5. **flatpak / flathub** — desktop apps only.
+6. **snap** — only when the vendor ships nothing else.
+7. **Raw vendor `.deb` via curl** — last resort; explain in the PR why no
+   higher rung exists.
+
+Integrity is a constraint on every rung, not a rung of its own: never execute
+unverifiable remote code. `curl … | sh` is not an option; a tool that only has
+such an installer needs an entry in the integrity exception register
+(`docs/integrity-exceptions.md`) first.
+
+Install verified release artifacts, never execute a remote install script. If
+no usable integrity material exists, fail closed and record an exception
+decision first.
+
+Break ties by, in order: idempotent and non-interactive installs; a verifiable
+source; updates through a path this repo actually runs; least privilege.
+State the chosen rung in the PR Verification section when adding an
+application.
+
+## 3. Follow the script contract
 
 - **Artifact integrity**: before adding or updating a setup artifact, inspect
   the maintainer's official distribution channels for checksums or signatures
@@ -32,7 +63,7 @@ such as installation or package components.
   record an explicit exception decision; never accept unverified bytes or use
   a self-authored hash pin. Record the artifact/version, sources checked,
   material found, and the reason for any GitHub fallback in the issue or PR.
-  See [`0007-artifact-integrity-source-priority.md`](../../../docs/decisions/0007-artifact-integrity-source-priority.md).
+  See `0007-artifact-integrity-source-priority.md` in `docs/decisions/`.
 
 - Single-purpose script defining one `install_<pkg>()` or `config_<pkg>()`.
 - **Adding an apt source**: define `install_<pkg>_repository()` separately — sources/keys only, **no** `apt update`, no installs. Wired into the repositories phase so the single `apt update` in `install.sh` covers it. Overwrite the `.sources` file (never append) for rerun-safety (see `development/docker.sh`).
@@ -58,17 +89,17 @@ such as installation or package components.
   ```
 - Match the surrounding file's indentation (tabs vs spaces varies by file).
 
-## 3. Wire it up — all three places
+## 4. Wire it up — all three places
 
 1. **`setup/install.sh`**: add `source "<dir>/<pkg>.sh"` next to its neighbors, then `step install_<pkg>` / `step config_<pkg>` in the correct phase. `install_<pkg>_repository` calls go in the repositories phase, **before** `step apt_update`. Post-install-category scripts go in `setup/post-install.sh` instead.
 2. **`reports/versions.sh`**: add a `src <path>` line **and** a `chk "<label>" <pkg>_version` row. Missing either breaks the versions table.
 3. **`README.md` structure tree**: only when a new category/script needs listing.
 
-## 4. Verify
+## 5. Verify
 
 - `./tests/test.sh` — static, zero-dep (bash -n, sourced-by-basename, source-only fn, standalone guard, shellcheck if installed).
 - For install-path changes, iterate with the VM loop: seed once `./tests/test.sh --vm --keep`, then `./tests/test.sh --vm --reuse` (idempotency guards skip installed packages).
 
-## 5. Commit
+## 6. Commit
 
 Single atomic commit, conventional type (`feat:`, `docs:`, `refactor:`, …). Never commit secrets; keep `.gitignore` ⇄ `dotfiles/.chezmoiignore` in sync if dotfiles are involved.

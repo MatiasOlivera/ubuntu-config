@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# [Architecture] Uses Template Method
 
 # Ask for sudo once up front and keep the timestamp alive for the whole run.
 if ! sudo -n true 2>/dev/null; then
@@ -8,7 +9,7 @@ if ! sudo -n true 2>/dev/null; then
 	fi
 	sudo -v || exit 1
 fi
-while true; do sudo -n true 2>/dev/null; sleep 50; kill -0 "$$" || exit; done 2>/dev/null &
+while true; do sudo -n true 2>/dev/null; sleep 50; kill -0 "$$" || exit; done >/dev/null 2>&1 &
 SUDO_KEEPALIVE=$!
 trap 'kill "$SUDO_KEEPALIVE" 2>/dev/null' EXIT
 
@@ -21,15 +22,13 @@ DOTFILES_DIR="$SCRIPT_DIR/../dotfiles"
 
 # ponytail: SECONDS wall-clock per step, no external profiler.
 install_start=$SECONDS
-step() {
-	local label=$1
-	local t0=$SECONDS
-	if [[ $# -gt 1 ]]; then shift; fi
-	"$@"
-	local st=$?
-	printf '[+%ds] %s\n' "$((SECONDS - t0))" "$label"
-	return $st
-}
+source "$SCRIPT_DIR/helpers/steps.sh"
+if [[ -n ${OBSERVABILITY_RECORD_DIR:-} ]]; then
+	source "$SCRIPT_DIR/helpers/observability.sh"
+	observability_init "${OBSERVABILITY_RUN_ID:-unknown}" "${OBSERVABILITY_COLLECTOR:-}" ||
+		printf 'warning: e2e observability initialization failed\n' >&2
+	observability_phase_begin install.sh
+fi
 
 source "$ESSENTIALS_DIR/make.sh"
 source "$ESSENTIALS_DIR/curl.sh"
@@ -70,6 +69,8 @@ source "$DEVELOPMENT_DIR/zsh/zsh.sh"
 source "$DEVELOPMENT_DIR/zsh/zsh-config.sh"
 source "$DEVELOPMENT_DIR/zoxide.sh"
 source "$DEVELOPMENT_DIR/uv.sh"
+source "$DEVELOPMENT_DIR/pnpm.sh"
+source "$DEVELOPMENT_DIR/bun.sh"
 source "$DEVELOPMENT_DIR/opencode.sh"
 source "$DEVELOPMENT_DIR/openusage.sh"
 source "$DEVELOPMENT_DIR/ghostty/ghostty.sh"
@@ -136,6 +137,8 @@ step install_zsh
 step config_zsh
 step install_zoxide
 step install_uv
+step install_pnpm
+step install_bun
 step install_opencode
 step install_openusage
 step install_ghostty
@@ -159,12 +162,16 @@ if [[ ! -f $CHEZMOI_CONFIG ]]; then
 		"${name//\"/\\\"}" "${email//\"/\\\"}" >"$CHEZMOI_CONFIG"
 fi
 
-step chezmoi chezmoi apply --source "$DOTFILES_DIR"
+step chezmoi chezmoi apply --force --source "$DOTFILES_DIR"
 
 # Interactive when secrets are missing, silent skip otherwise; never fails
 # a non-interactive run (reports pending and exits 0).
-step config_sync_credentials
+advisory_step config_sync_credentials
 
 step versions bash "$SCRIPT_DIR/../reports/versions.sh"
 
 printf '[+%ds] install.sh total\n' "$((SECONDS - install_start))"
+phase_status=0
+[[ ${#FAILED_STEPS[@]} -gt 0 ]] && phase_status=1
+observability_phase_end "$phase_status"
+report_failed_steps || exit 1

@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
+# [Architecture] Uses Facade
 #
 # test.sh — static + source-only by default, Multipass e2e with --vm.
 # Fail-closed: any failure exits 1.
 
 UBUNTU_IMAGE="26.04"
-VM_NAME="ubuntu-config-test"
 SNAPSHOT="base"
 
 RUN_VM=0
@@ -40,6 +40,19 @@ fi
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 SETUP_DIR="$ROOT/setup"
 FAILURES=0
+
+# shellcheck source=tests/vm-lock.sh
+source "$ROOT/tests/vm-lock.sh"
+
+VM_NAME=
+if [[ $RUN_VM -eq 1 ]]; then
+	VM_NAME="$(bash "$ROOT/tests/vm-name.sh" "$ROOT")"
+	# Reject a contender before any VM work or static check runs.
+	if ! vm_lock_acquire "$VM_NAME"; then
+		exit 1
+	fi
+	printf 'e2e VM for this worktree: %s\n' "$VM_NAME"
+fi
 
 printf 'versions: bash=%s shellcheck=%s multipass=%s\n' \
 	"$BASH_VERSION" \
@@ -104,19 +117,18 @@ for f in "${ALL_SCRIPTS[@]}"; do
 	fi
 done
 
-# 3. source-only: each library script defines >=1 install_*/config_*
-# function when sourced. Functions are never called. install.sh and
-# post-install.sh are never sourced (post-install.sh runs apt upgrade).
+# 3. source-only: each library script defines >=1 install_*/config_* function
+# at top level and has no top-level commands. Parsed as text — scripts are
+# never sourced here, so the check cannot execute untrusted repo code.
 for f in "${ALL_SCRIPTS[@]}"; do
 	case "$f" in
 	"$SETUP_DIR/install.sh" | "$SETUP_DIR/post-install.sh") continue ;;
 	"$SETUP_DIR/helpers/"*) continue ;;
 	esac
-	if funcs="$(bash -c 'source "$1" && declare -F' _ "$f" 2>/dev/null)" &&
-		printf '%s\n' "$funcs" | grep -qE 'declare -f (install_|config_)'; then
+	if reason="$(bash "$ROOT/tests/source-only-check.sh" "$f" 2>&1)"; then
 		pass "source-only $f"
 	else
-		fail "source-only $f (no install_*/config_* function found)"
+		fail "source-only $f: ${reason:-check failed}"
 	fi
 done
 
@@ -160,6 +172,16 @@ if [[ $RUN_VM -eq 1 && $FAILURES -eq 0 ]]; then
 		trap '[[ $KEEP -eq 0 ]] && multipass delete -p "$VM_NAME" >/dev/null 2>&1 || true' EXIT
 		vm_start=$SECONDS
 
+		# Observability records are written inside the VM, then copied to the
+		# host by the phase wrapper before the cleanup trap can delete the VM.
+		OBSERVABILITY_VM_NAME=$VM_NAME
+		OBSERVABILITY_VM_RECORD_DIR=/home/ubuntu/.ubuntu-config-observability
+		OBSERVABILITY_RUN_ID="$(date -u +%Y%m%dT%H%M%SZ)-$(git -C "$ROOT" rev-parse --short HEAD 2>/dev/null || echo unknown)"
+		OBSERVABILITY_GIT_SHA="$(git -C "$ROOT" rev-parse HEAD 2>/dev/null || true)"
+		OBSERVABILITY_GIT_BRANCH="$(git -C "$ROOT" rev-parse --abbrev-ref HEAD 2>/dev/null || true)"
+		OBSERVABILITY_IMAGE=$UBUNTU_IMAGE
+		export OBSERVABILITY_VM_NAME OBSERVABILITY_VM_RECORD_DIR OBSERVABILITY_RUN_ID OBSERVABILITY_GIT_SHA OBSERVABILITY_GIT_BRANCH OBSERVABILITY_IMAGE
+
 		if [[ $REUSE -eq 1 ]] && multipass list 2>/dev/null | grep -qw "$VM_NAME"; then
 			phase_begin
 			multipass start "$VM_NAME" >/dev/null 2>&1 || true
@@ -171,7 +193,7 @@ if [[ $RUN_VM -eq 1 && $FAILURES -eq 0 ]]; then
 			fi
 
 			phase_begin
-			if multipass launch "$UBUNTU_IMAGE" --name "$VM_NAME" --cpus 2 --memory 4G --disk 20G; then
+			if multipass launch "$UBUNTU_IMAGE" --name "$VM_NAME" --cpus 2 --memory 4G --disk 50G; then
 				pass "multipass launch $UBUNTU_IMAGE"
 			else
 				fail "multipass launch $UBUNTU_IMAGE"
@@ -182,6 +204,21 @@ if [[ $RUN_VM -eq 1 && $FAILURES -eq 0 ]]; then
 			ensure_snapshot
 			phase_end "base snapshot"
 		fi
+
+		# A Multipass VM reaches the host through its NAT gateway, not the
+		# host's own default route. Ask the VM once it exists.
+		OBSERVABILITY_COLLECTOR=
+		vm_host_ip="$(multipass exec "$VM_NAME" -- ip -4 route show default 2>/dev/null | awk '{ print $3; exit }')"
+		if [[ -n $vm_host_ip ]] && command -v curl >/dev/null 2>&1; then
+			if curl -sS --max-time 2 -o /dev/null -X POST \
+				-H 'Content-Type: application/json' -d '{"resourceSpans":[]}' \
+				http://localhost:4318/v1/traces 2>/dev/null; then
+				OBSERVABILITY_COLLECTOR="http://$vm_host_ip:4318"
+			else
+				printf 'warning: live observability collector unreachable; continuing with durable records only\n' >&2
+			fi
+		fi
+		export OBSERVABILITY_COLLECTOR
 
 		phase_begin
 		tarball="$(mktemp "$HOME/ubuntu-config-test.XXXXXX.tar.gz")"
@@ -197,7 +234,15 @@ if [[ $RUN_VM -eq 1 && $FAILURES -eq 0 ]]; then
 		phase_end "transfer repo to VM"
 
 		phase_begin
-		if multipass exec "$VM_NAME" -- env CHEZMOI_NAME="Test" CHEZMOI_EMAIL="test@example.com" bash /home/ubuntu/ubuntu-config/setup/install.sh; then
+		if bash "$ROOT/tests/e2e-observability.sh" install \
+			multipass exec "$VM_NAME" -- env \
+			CHEZMOI_NAME="Test" CHEZMOI_EMAIL="test@example.com" \
+			OBSERVABILITY_RECORD_DIR="$OBSERVABILITY_VM_RECORD_DIR/install" \
+			OBSERVABILITY_E2E_APP_PATHS=/home/ubuntu/ubuntu-config/tests/observability/app-paths.tsv \
+			OBSERVABILITY_RUN_ID="$OBSERVABILITY_RUN_ID" OBSERVABILITY_PHASE=install \
+			OBSERVABILITY_COLLECTOR="$OBSERVABILITY_COLLECTOR" OBSERVABILITY_GIT_SHA="$OBSERVABILITY_GIT_SHA" \
+			OBSERVABILITY_GIT_BRANCH="$OBSERVABILITY_GIT_BRANCH" OBSERVABILITY_VM_NAME="$VM_NAME" OBSERVABILITY_IMAGE="$OBSERVABILITY_IMAGE" \
+			bash /home/ubuntu/ubuntu-config/setup/install.sh; then
 			pass "install.sh in VM"
 		else
 			fail "install.sh in VM"
@@ -205,7 +250,15 @@ if [[ $RUN_VM -eq 1 && $FAILURES -eq 0 ]]; then
 		phase_end "install.sh in VM"
 
 		phase_begin
-		if multipass exec "$VM_NAME" -- env SKIP_UPGRADE=1 bash /home/ubuntu/ubuntu-config/setup/post-install.sh; then
+		if bash "$ROOT/tests/e2e-observability.sh" post-install \
+			multipass exec "$VM_NAME" -- env \
+			SKIP_UPGRADE=1 \
+			OBSERVABILITY_RECORD_DIR="$OBSERVABILITY_VM_RECORD_DIR/post-install" \
+			OBSERVABILITY_E2E_APP_PATHS=/home/ubuntu/ubuntu-config/tests/observability/app-paths.tsv \
+			OBSERVABILITY_RUN_ID="$OBSERVABILITY_RUN_ID" OBSERVABILITY_PHASE=post-install \
+			OBSERVABILITY_COLLECTOR="$OBSERVABILITY_COLLECTOR" OBSERVABILITY_GIT_SHA="$OBSERVABILITY_GIT_SHA" \
+			OBSERVABILITY_GIT_BRANCH="$OBSERVABILITY_GIT_BRANCH" OBSERVABILITY_VM_NAME="$VM_NAME" OBSERVABILITY_IMAGE="$OBSERVABILITY_IMAGE" \
+			bash /home/ubuntu/ubuntu-config/setup/post-install.sh; then
 			pass "post-install.sh in VM"
 		else
 			fail "post-install.sh in VM"

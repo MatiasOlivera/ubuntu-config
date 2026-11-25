@@ -6,32 +6,19 @@ labels: dotfiles
 ---
 
 <!-- Title: free text, imperative, no prefix. -->
+<!-- Intent only, not implementation details. -->
 
 ## Application
 
 <!-- Name and upstream project URL. -->
 
-## Dotfile
+## Intent
 
-<!-- Source path (dot_* / dot_config/<app>/…) → destination ($HOME/…). -->
+<!-- What outcome do you want, and why now? Only what a human knows. -->
 
-## Rendered values
+## Done when
 
-<!-- Needs .tmpl? Which values vary (name/email from chezmoi.toml [data])? Static otherwise. -->
-
-## Declarative vs imperative
-
-<!-- File content → dotfiles/. Actions (chsh, gsettings, clones, git config writes) → setup/ bash. -->
-
-## Secrets
-
-<!-- Matches a deny pattern? A new secret-equivalent pattern goes in BOTH .gitignore and dotfiles/.chezmoiignore. Public repo — never commit secrets. -->
-
-## Verification
-
-- [ ] `chezmoi apply --source dotfiles/` applies cleanly
-- [ ] `./tests/test.sh` passes
-- [ ] `reports/versions.sh` row renders (if the dotfile feeds a script's config)
+<!-- Observable conditions that mean the work is complete. -->
 
 ## Out of scope
 

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 source "$(dirname "${BASH_SOURCE[0]}")/../helpers/dispatcher.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/../helpers/apt-source.sh"
 
 install_vscode() {
 	local installed_ver
@@ -13,7 +14,7 @@ install_vscode() {
 
 install_vscode_repository() {
 	curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | sudo gpg --dearmor -o /usr/share/keyrings/microsoft.gpg
-	sudo tee /etc/apt/sources.list.d/vscode.sources >/dev/null <<EOF
+	apt_source_write vscode.sources <<EOF
 Types: deb
 URIs: https://packages.microsoft.com/repos/code
 Suites: stable

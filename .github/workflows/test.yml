@@ -26,4 +26,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5
-      - run: docker compose -f tests/compose.yml run --rm test
+      # Every trigger builds from the checkout so the checked environment is
+      # always the one under test; the published image is only a build cache.
+      - name: Run suite in image built from checkout
+        run: docker compose -f tests/compose.yml run --rm test
