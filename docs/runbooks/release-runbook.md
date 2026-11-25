@@ -30,7 +30,9 @@ The merge is the approval gate. `release.yml` then tags the merge commit,
 publishes a release whose notes are generated at `main`, and merges `main` back
 into `develop` so released work is not listed twice. Publication applies the
 same pending-check wait before tagging. A failed publish is resumable by
-rerunning the workflow.
+rerunning the workflow. The workflow supplies the `github-actions[bot]` identity
+to the publish step at execution time, so no git identity is configured by hand;
+publication fails before creating a tag or push if that identity is missing.
 
 ## Tooling
 
