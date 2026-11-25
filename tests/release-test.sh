@@ -78,7 +78,13 @@ setv() { grep -v "^$1=" "$GH_STATE" >"$GH_STATE.next" 2>/dev/null || true; print
 case "$*" in
   *"repo view"*) printf 'MatiasOlivera/ubuntu-config\n' ;;
   *"generate-notes"*) setv API_ARGS "$*"; printf '## What Changed\n- grouped note\n' ;;
-  *"run list"*) printf '%s %s\n' "$(get CI)" "$(get CI_SHA)" ;;
+  *"run list"*)
+    # An unfiltered list sees the release workflow's own in-progress run.
+    case "$*" in
+      *"--workflow test"*) printf '%s %s\n' "$(get CI)" "$(get CI_SHA)" ;;
+      *) printf '  \n' ;;
+    esac
+    ;;
   *"pr create"*)
     title='' body='' labels=''; prev=''
     for arg in "$@"; do

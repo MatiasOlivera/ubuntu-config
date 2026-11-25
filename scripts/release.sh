@@ -76,7 +76,7 @@ repo_slug() {
 
 develop_check() {
 	expected=${1:-$(git rev-parse HEAD)}
-	line=$(gh run list --branch develop --limit 1 --json conclusion,headSha \
+	line=$(gh run list --workflow test --branch develop --limit 1 --json conclusion,headSha \
 		-q '.[0] | "\(.conclusion) \(.headSha)"' 2>/dev/null || echo 'none ')
 	conclusion=${line%% *}
 	sha=${line#* }
