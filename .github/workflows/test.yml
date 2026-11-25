@@ -35,7 +35,7 @@ jobs:
       - name: Choose image mode
         id: mode
         env:
-          BASE_REF: ${{ github.base_ref }}
+          BASE_REF: ${{ github.base_ref || 'develop' }}
         run: |
           mode="$(bash tests/ci-image-mode.sh "$BASE_REF")"
           [[ $mode == build || $mode == pull ]] || { echo "invalid mode: $mode" >&2; exit 1; }
