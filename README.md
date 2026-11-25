@@ -100,6 +100,7 @@ Mapping:
 | `dot_p10k.zsh`          | `~/.p10k.zsh`                                                 |
 | `dot_config/ghostty/*`  | `~/.config/ghostty/*`                                         |
 | `dot_config/opencode/*` | `~/.config/opencode/*`                                        |
+| `dot_copilot/mcp-config.json` | `~/.copilot/mcp-config.json`                          |
 
 > [!WARNING]
 > This repo is public. Never commit secrets. Root `.gitignore` (commit deny-list) and `dotfiles/.chezmoiignore` (deploy deny-list) already block SSH/GPG keys, cloud credentials, tokens, and shell history - keep them in sync when adding new dotfiles.
@@ -108,6 +109,17 @@ Rule of thumb:
 
 - Declarative files → chezmoi in `dotfiles/`
 - Imperative actions (`chsh`, `gsettings`, clones) → bash in `setup/`
+
+The opencode and Copilot CLI configs include Context7 as a remote MCP server
+(`https://mcp.context7.com/mcp/oauth`) alongside the GitHub and Stack Overflow
+entries. No API key is needed: sign in once in the browser with
+`opencode mcp auth context7` in opencode, or by reloading Copilot CLI and
+approving its sign-in prompt. Each agent stores its own credentials outside
+this repository.
+
+Chezmoi replaces a managed file with its source contents on apply. If you add
+an entry locally to either config, copy it into the matching `dotfiles/` source
+before the next apply or it will be removed.
 
 ## Language package managers
 
@@ -214,6 +226,9 @@ Full e2e on a fresh Multipass VM (requires Multipass on host):
 ./tests/test.sh --vm --keep       # leave VM running on failure for inspection
 ./tests/test.sh --vm --reuse      # reuse existing VM for fast iterations
 ```
+
+MCP OAuth sign-in is interactive, so the headless e2e VM verifies that the
+Context7 entries are deployed but does not authenticate them.
 
 For a faster development loop, seed a kept VM once, then re-run only the setup
 scripts you changed:
