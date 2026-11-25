@@ -32,12 +32,15 @@ check 'compose drops ALL' tests/compose.yml '^[[:space:]]*-[[:space:]]+ALL[[:spa
 check 'compose forbids new privileges' tests/compose.yml 'no-new-privileges'
 check 'compose has no network' tests/compose.yml '^[[:space:]]*network_mode:[[:space:]]*none[[:space:]]*$'
 check 'compose mounts checkout read-only' tests/compose.yml '/work:ro'
+check 'compose declares a build cache source' tests/compose.yml '^[[:space:]]*cache_from:'
+check 'compose cache source is the published image' tests/compose.yml ghcr.io/matiasolivera/ubuntu-config-test:latest
 
 workflow=.github/workflows/test-image.yml
 check "$workflow drops capabilities" "$workflow" --cap-drop=ALL
 check "$workflow forbids new privileges" "$workflow" --security-opt=no-new-privileges
 check "$workflow has no network" "$workflow" --network=none
 check "$workflow mounts checkout read-only" "$workflow" /work:ro
+check 'publishing exports an importable cache' "$workflow" 'type=inline'
 
 gate=.github/workflows/test.yml
 check_absent 'gate has no image-mode selection' "$gate" ci-image-mode

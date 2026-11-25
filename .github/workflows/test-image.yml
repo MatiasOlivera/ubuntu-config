@@ -39,7 +39,10 @@ jobs:
           push: true
           tags: ${{ env.IMAGE }}
           cache-from: type=gha
-          cache-to: type=gha,mode=max
+          # The gate imports this image as a build cache; see ADR 0017.
+          cache-to: |
+            type=gha,mode=max
+            type=inline
 
       # Nightly must really hit apt mirrors, or a broken repository or a
       # changed upstream package would be masked by a warm layer cache.
@@ -52,6 +55,7 @@ jobs:
           push: true
           tags: ${{ env.IMAGE }}
           no-cache: true
+          cache-to: type=inline
 
       - name: Validate the published image
         run: docker run --rm --network=none --cap-drop=ALL --security-opt=no-new-privileges -v "$PWD:/work:ro" "$IMAGE" ./tests/test.sh
