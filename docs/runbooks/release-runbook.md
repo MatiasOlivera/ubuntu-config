@@ -12,7 +12,8 @@ and `.github/workflows/release.yml`.
    without changing anything.
 2. Run `sh scripts/release.sh prepare`. It regenerates `CHANGELOG.md` with the
    full history from the unreleased Conventional Commits, commits it, and opens
-   (or re-stamps) the `develop → main` promotion pull request.
+   (or re-stamps) the `develop → main` promotion pull request with the `release`
+   label, so the promotion stays out of its own generated notes.
 3. Review that pull request: the new changelog section, the labels its pull
    requests carry, and that `.github/release.yml` is already on `main` if
    grouping must change. Merge it **with a merge commit**.
