@@ -38,6 +38,10 @@ previous_tag() {
 }
 
 write_changelog() {
+	cliff --tag "$1" -o "$2"
+}
+
+write_excerpt() {
 	version=$1
 	out=$2
 	previous=$(previous_tag HEAD)
@@ -121,12 +125,12 @@ prepare() {
 	body=$(cat <<EOF
 ## What & why
 
-Promote \`develop\` to \`main\` for release $version. The version and exhaustive
-changelog were generated from the unreleased Conventional Commits.
+Promote \`develop\` to \`main\` for release $version. The version was computed
+from the unreleased Conventional Commits.
 
 ## Changes
 
-- \`CHANGELOG.md\`: stamped \`$version\`
+- \`CHANGELOG.md\`: regenerated with the full history, stamped \`$version\`
 
 ## Verification
 
@@ -175,7 +179,7 @@ preview() {
 
 	notes=$(mktemp "${TMPDIR:-/tmp}/release-notes.XXXXXX") || die "cannot create temp file"
 	trap 'rm -f "$notes"' EXIT
-	write_changelog "$version" "$notes"
+	write_excerpt "$version" "$notes"
 
 	repo=$(repo_slug)
 	body=$(notes_at "$version" develop "$previous") ||
