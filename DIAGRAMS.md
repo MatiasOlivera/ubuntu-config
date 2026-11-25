@@ -28,6 +28,7 @@ interactive shell setup afterward.
 | ---------------------- | --------- | --------- | ----------------------------------------- |
 | `.`                    | System    | Context   | this file                                 |
 | `tests/`               | Component | Flowchart | `tests/README.md#test-strategy`           |
+| `tests/observability/` | Container | Flowchart | `tests/observability/README.md#data-flow` |
 
 ## Levels not diagrammed
 
