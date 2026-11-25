@@ -7,6 +7,11 @@
       "headers": {
         "Authorization": "Bearer ${GITHUB_PAT_FOR_CODING_AGENTS}"
       }
+    },
+    "context7": {
+      "tools": ["query-docs", "resolve-library-id"],
+      "type": "http",
+      "url": "https://mcp.context7.com/mcp/oauth"
     }
   }
 }
