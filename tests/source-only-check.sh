@@ -57,8 +57,8 @@ while IFS= read -r line || [[ -n $line ]]; do
 
 	[[ $line =~ ^[[:space:]]*$ || $line =~ ^[[:space:]]*# ]] && continue
 
-	# The dispatcher source only defines a function.
-	if [[ $line == source*dispatcher.sh* || $line == .\ *dispatcher.sh* ]]; then
+	# Sourcing a helper only defines functions; helpers are source-only by design.
+	if [[ $line == source*helpers/* || $line == .\ *helpers/* ]]; then
 		continue
 	fi
 
