@@ -116,6 +116,38 @@ EOF
 	fi
 }
 
+preview() {
+	branch=$(git branch --show-current)
+	[ "$branch" = develop ] || die "preview must run on develop (on $branch)"
+
+	git fetch origin --quiet --tags
+	version=$(cliff --bumped-version)
+	previous=$(git describe --tags --abbrev=0 HEAD 2>/dev/null || echo '')
+	[ -n "$previous" ] || die "no previous tag found; cannot preview a range"
+
+	dev_config=$(git show HEAD:.github/release.yml 2>/dev/null || echo '')
+	main_config=$(git show origin/main:.github/release.yml 2>/dev/null || echo '')
+	if [ "$dev_config" != "$main_config" ]; then
+		echo "warning: notes configuration differs on develop and main; the release target main would use its own grouping"
+	fi
+
+	notes=$(mktemp "${TMPDIR:-/tmp}/release-notes.XXXXXX") || die "cannot create temp file"
+	trap 'rm -f "$notes"' EXIT
+	cliff --tag "$version" -o "$notes"
+
+	repo=$(repo_slug)
+	body=$(gh api "repos/$repo/releases/generate-notes" \
+		-f tag_name="$version" -f previous_tag_name="$previous" \
+		-f target_commitish=develop --jq .body 2>/dev/null) ||
+		die "generated-notes request failed"
+
+	printf 'version: %s\n' "$version"
+	printf 'changelog section:\n'
+	sed -n '/^## /,/^### /p' "$notes"
+	printf 'generated notes (projected against develop; publication regenerates at main):\n'
+	printf '%s\n' "$body"
+}
+
 usage() {
 	printf 'usage: %s <prepare|preview|publish>\n' "$0" >&2
 	exit 1
@@ -124,5 +156,6 @@ usage() {
 [ $# -eq 1 ] || usage
 case "$1" in
 prepare) prepare ;;
+preview) preview ;;
 *) usage ;;
 esac
