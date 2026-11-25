@@ -173,25 +173,8 @@ When the repo moves to a newer Ubuntu release:
 
 ## Releasing
 
-Releases are automated; do not create tags or GitHub releases by hand.
-
-1. On a clean `develop` synced with origin and with green checks, run
-   `sh scripts/release.sh preview`. It prints the computed version, the
-   changelog section and the generated release notes without changing anything.
-2. Run `sh scripts/release.sh prepare`. It regenerates `CHANGELOG.md` from
-   unreleased Conventional Commits, commits it, and opens (or re-stamps) the
-   `develop → main` promotion pull request.
-3. Review that pull request: the changelog section, the labels its pull requests
-   carry, and that `.github/release.yml` is already on `main` if grouping must
-   change. Merge it **with a merge commit**.
-
-The merge is the approval gate. `release.yml` then tags the merge commit,
-publishes a release whose notes are generated at `main`, and merges `main` back
-into `develop` so released work is not listed twice. A failed publish is
-resumable by rerunning the workflow. The pinned git-cliff is downloaded and
-checksum-verified on first use; `GIT_CLIFF` can point at an existing binary.
-See [ADR 0016](docs/decisions/0016-release-automation.md) and
-[ADR 0004](docs/decisions/0004-release-notes-grouping.md).
+Releases are automated; do not create tags or GitHub releases by hand. See the
+[release runbook](docs/runbooks/release-runbook.md) for the procedure.
 
 ## Testing
 

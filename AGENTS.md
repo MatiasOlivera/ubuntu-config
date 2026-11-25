@@ -40,7 +40,7 @@ Anything beyond verify (adding apps, reports, baselines): `README.md` ("Testing"
 
 Releases: `scripts/release.sh` owns prepare and preview; the promotion merge into
 `main` triggers `release.yml` to tag, publish and merge back. Do not cut tags or
-releases by hand — see `README.md` ("Releasing").
+releases by hand — see `docs/runbooks/release-runbook.md`.
 
 ## End-to-end observability
 
