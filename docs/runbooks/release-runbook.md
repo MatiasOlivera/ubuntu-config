@@ -13,7 +13,9 @@ and `.github/workflows/release.yml`.
 2. Run `sh scripts/release.sh prepare`. It regenerates `CHANGELOG.md` with the
    full history from the unreleased Conventional Commits, commits it, and opens
    (or re-stamps) the `develop → main` promotion pull request with the `release`
-   label, so the promotion stays out of its own generated notes.
+   label, so the promotion stays out of its own generated notes. Preparation
+   waits up to two minutes for the `test` run on `develop` to conclude; if it is
+   still pending, the command fails and names its status.
 3. Review that pull request: the new changelog section, the labels its pull
    requests carry, and that `.github/release.yml` is already on `main` if
    grouping must change. Merge it **with a merge commit**.
@@ -26,8 +28,9 @@ releases, regenerated from the full history each time.
 
 The merge is the approval gate. `release.yml` then tags the merge commit,
 publishes a release whose notes are generated at `main`, and merges `main` back
-into `develop` so released work is not listed twice. A failed publish is
-resumable by rerunning the workflow.
+into `develop` so released work is not listed twice. Publication applies the
+same pending-check wait before tagging. A failed publish is resumable by
+rerunning the workflow.
 
 ## Tooling
 
