@@ -102,7 +102,7 @@ case "$*" in
     prev=''
     for arg in "$@"; do
       if [ "$prev" = "--notes-file" ] && [ -f "$arg" ]; then
-        setv PUBLISHED_BODY "$(cat "$arg")"
+        setv PUBLISHED_BODY "$(tr '\n' '|' <"$arg")"
       fi
       prev=$arg
     done
@@ -142,13 +142,21 @@ run_release() {
 	)
 }
 
-# Promote develop to main with a merge commit and record the merge SHA.
+# Stage the prepared release commit, then promote develop with a merge commit.
 promote() {
+	git -C "$S/local" checkout -q develop
+	if [ ! -f "$S/local/CHANGELOG.md" ]; then
+		printf '# Changelog\n\n## [0.4.0] - 2026-11-25\n' >"$S/local/CHANGELOG.md"
+		git -C "$S/local" add .
+		git -C "$S/local" commit -q -m 'chore(release): v0.4.0'
+		git -C "$S/local" push -q origin develop
+		state_set CI_SHA "$(git -C "$S/local" rev-parse --short HEAD)"
+	fi
+	state_set PR_NUMBER 10
 	git -C "$S/local" checkout -q main
 	git -C "$S/local" merge -q --no-ff -m 'Merge pull request #10 from develop' develop
 	git -C "$S/local" push -q origin main
 	state_set MERGE "$(git -C "$S/local" rev-parse --short HEAD)"
-	git -C "$S/local" checkout -q develop
 }
 
 expect_failure() {
@@ -270,6 +278,7 @@ test_publish_refuses_squash_merge() {
 	git -C "$S/local" add . && git -C "$S/local" commit -q -m 'chore(release): v0.4.0'
 	git -C "$S/local" push -q origin main
 	state_set MERGE "$(git -C "$S/local" rev-parse --short HEAD)"
+	state_set PR_NUMBER 10
 	git -C "$S/local" checkout -q develop
 	expect_failure 'publish refuses squash merge' publish
 	assert_eq 'squash merge leaves no release' no "$(state_get RELEASED)"
@@ -285,14 +294,8 @@ test_publish_refuses_red_ci() {
 
 test_publish_refuses_version_mismatch() {
 	setup
-	promote
-	git -C "$S/local" checkout -q main
 	state_set VERSION v0.5.0
-	printf '# Changelog\n\n## [0.4.0] - 2026-11-25\n' >"$S/local/CHANGELOG.md"
-	git -C "$S/local" add . && git -C "$S/local" commit -q -m 'chore(release): v0.4.0'
-	git -C "$S/local" push -q origin main
-	state_set MERGE "$(git -C "$S/local" rev-parse --short HEAD)"
-	git -C "$S/local" checkout -q develop
+	promote
 	expect_failure 'publish refuses version mismatch' publish
 	assert_eq 'mismatch leaves no release' no "$(state_get RELEASED)"
 }
