@@ -2,7 +2,7 @@
 
 | ID  | Done | Task | Depends on | Type      | Verification |
 | --- | ---- | ---- | ---------- | --------- | ------------ |
-| 1   | [ ]  | Record the release automation decision as `docs/decisions/0016-release-automation.md`, narrowing ADR 0004 | - | Manual | MADR sections filled, option-neutral title, "supersedes `0004-release-notes-grouping`" in prose; no stale mechanics |
+| 1   | [x]  | Record the release automation decision as `docs/decisions/0016-release-automation.md`, narrowing ADR 0004 | - | Manual | MADR sections filled, option-neutral title, "supersedes `0004-release-notes-grouping`" in prose; no stale mechanics |
 | 2   | [ ]  | Write the failing hermetic release test `tests/release-test.sh` covering wrong branch, dirty tree, existing tag, read-only preview, merge/target guards, ungreen checks, tag+release body, merge-back, resume and checksum failure (red) | - | Automated | `bash tests/release-test.sh` exits 1 while scripts are absent; no network, credentials or real repository writes |
 | 3   | [ ]  | Add `cliff.toml` and `scripts/git-cliff.sh` with pinned v2.14.2 archive, publisher `.sha512` verification, cache path and `GIT_CLIFF` override | 2 | Automated | `bash tests/release-test.sh` checksum cases pass; `bash -n scripts/git-cliff.sh`; `shellcheck -e SC1091 scripts/git-cliff.sh` |
 | 4   | [ ]  | Implement `scripts/release.sh prepare`: verify develop state and green checks, regenerate `CHANGELOG.md`, release commit, push, open or re-stamp promotion PR | 3 | Automated | Test cases for branch/dirty/tag/green checks and PR creation pass; `bash -n` and shellcheck clean |
