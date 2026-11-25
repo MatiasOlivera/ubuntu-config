@@ -80,15 +80,22 @@ case "$*" in
   *"generate-notes"*) setv API_ARGS "$*"; printf '## What Changed\n- grouped note\n' ;;
   *"run list"*) printf '%s %s\n' "$(get CI)" "$(get CI_SHA)" ;;
   *"pr create"*)
-    title='' body=''; prev=''
+    title='' body='' labels=''; prev=''
     for arg in "$@"; do
       [ "$prev" = "--title" ] && title=$arg
       [ "$prev" = "--body" ] && body=$arg
+      [ "$prev" = "--label" ] && labels=$arg
       prev=$arg
     done
-    setv PR_NUMBER 10; setv PR_TITLE "$title"; setv PR_BODY "$body"
+    setv PR_NUMBER 10; setv PR_TITLE "$title"; setv PR_BODY "$body"; setv PR_LABELS "$labels"
     printf 'https://github.com/MatiasOlivera/ubuntu-config/pull/10\n' ;;
-  *"pr edit"*) setv RESTAMP yes ;;
+  *"pr edit"*)
+    prev=''
+    for arg in "$@"; do
+      [ "$prev" = "--add-label" ] && setv RESTAMP_LABEL "$arg"
+      prev=$arg
+    done
+    setv RESTAMP yes ;;
   *"pr list"*)
     [ -n "$(get PR_NUMBER)" ] && printf '%s\n' "$(get PR_NUMBER)" ;;
   *"pr view"*)
@@ -234,6 +241,7 @@ test_prepare_creates_release_commit_and_pr() {
 	setup
 	expect_success 'prepare on green develop' prepare
 	assert_eq 'promotion PR opened' 10 "$(state_get PR_NUMBER)"
+	assert_eq 'created promotion PR carries release label' release "$(state_get PR_LABELS)"
 	assert_eq 'changelog committed' 0.4.0 "$(git -C "$S/local" show HEAD:CHANGELOG.md | sed -nE 's/^## \[([^]]+)\].*/\1/p')"
 	assert_eq 'tag not created by prepare' 1 "$(git -C "$S/local" tag --list | wc -l)"
 	assert_eq 'release not created by prepare' no "$(state_get RELEASED)"
@@ -244,6 +252,7 @@ test_prepare_restamps_open_pr() {
 	state_set PR_NUMBER 10
 	expect_success 'prepare re-stamps open PR' prepare
 	assert_eq 'open PR edited, not recreated' yes "$(state_get RESTAMP)"
+	assert_eq 're-stamped PR keeps release label' release "$(state_get RESTAMP_LABEL)"
 }
 
 # --- preview ----------------------------------------------------------------
@@ -368,6 +377,15 @@ test_workflow_contract() {
 	assert_contains 'workflow invokes publish' "$wf" 'publish'
 }
 
+test_notes_exclude_release_label() {
+	setup
+	if grep -qE '^[[:space:]]*- release$' "$ROOT/.github/release.yml"; then
+		ok 'release label stays excluded from generated notes'
+	else
+		fail 'release label no longer excluded from generated notes'
+	fi
+}
+
 test_prepare_refuses_wrong_branch
 test_prepare_refuses_dirty_tree
 test_prepare_refuses_existing_tag
@@ -384,6 +402,7 @@ test_publish_resumes_existing_tag
 test_publish_refuses_foreign_tag
 test_tool_checksum_guard
 test_workflow_contract
+test_notes_exclude_release_label
 
 printf '%d case(s), %d failure(s), %d skipped\n' "$CASES" "$FAILED" "$SKIPPED"
 [ "$FAILED" -eq 0 ]

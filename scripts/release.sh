@@ -154,11 +154,11 @@ EOF
 	open_pr=$(gh pr list --base main --head develop --state open --json number \
 		-q '.[0].number // empty' 2>/dev/null || echo '')
 	if [ -n "$open_pr" ]; then
-		gh pr edit "$open_pr" --body "$body" >/dev/null
+		gh pr edit "$open_pr" --body "$body" --add-label release >/dev/null
 		echo "release: $version re-stamped in promotion PR #$open_pr"
 	else
 		gh pr create --base main --head develop --title "chore(release): $version" \
-			--body "$body" >/dev/null
+			--body "$body" --label release >/dev/null
 		echo "release: $version prepared; merge the promotion PR to publish"
 	fi
 }
