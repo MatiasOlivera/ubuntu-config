@@ -38,6 +38,10 @@ Test commands — scoped checks, full gate, Docker and Multipass — live in the
 
 Anything beyond verify (adding apps, reports, baselines): `README.md` ("Testing", "Reports").
 
+Releases: `scripts/release.sh` owns prepare and preview; the promotion merge into
+`main` triggers `release.yml` to tag, publish and merge back. Do not cut tags or
+releases by hand — see `README.md` ("Releasing").
+
 ## End-to-end observability
 
 Each `./tests/test.sh --vm` phase records per-app spans, logs and a summary under
