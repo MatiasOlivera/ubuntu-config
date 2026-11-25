@@ -27,6 +27,7 @@ interactive shell setup afterward.
 | Scope                  | Level     | Type      | Where                                     |
 | ---------------------- | --------- | --------- | ----------------------------------------- |
 | `.`                    | System    | Context   | this file                                 |
+| `tests/`               | Component | Flowchart | `tests/README.md#test-strategy`           |
 
 ## Levels not diagrammed
 
