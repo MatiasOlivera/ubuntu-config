@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 source "$(dirname "${BASH_SOURCE[0]}")/../helpers/dispatcher.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/../helpers/apt-source.sh"
 
 install_spotify() {
 	local installed_ver
@@ -13,7 +14,7 @@ install_spotify() {
 
 install_spotify_repository() {
 	curl -sS https://download.spotify.com/debian/pubkey_5384CE82BA52C83A.asc | sudo gpg --dearmor --yes -o /etc/apt/trusted.gpg.d/spotify.gpg
-	echo "deb https://repository.spotify.com stable non-free" | sudo tee /etc/apt/sources.list.d/spotify.list
+	echo "deb https://repository.spotify.com stable non-free" | apt_source_write spotify.list
 }
 
 spotify_version() {

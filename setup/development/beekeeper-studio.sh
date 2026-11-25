@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 source "$(dirname "${BASH_SOURCE[0]}")/../helpers/dispatcher.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/../helpers/apt-source.sh"
 
 install_beekeeper_studio() {
     local installed_ver
@@ -15,7 +16,7 @@ install_beekeeper_studio_repository() {
     curl -fsSL https://deb.beekeeperstudio.io/beekeeper.key | sudo gpg --dearmor --yes --output /usr/share/keyrings/beekeeper.gpg &&
         sudo chmod go+r /usr/share/keyrings/beekeeper.gpg &&
         echo "deb [signed-by=/usr/share/keyrings/beekeeper.gpg] https://deb.beekeeperstudio.io stable main" |
-        sudo tee /etc/apt/sources.list.d/beekeeper-studio-app.list >/dev/null
+        apt_source_write beekeeper-studio-app.list
 }
 
 beekeeper_studio_version() {

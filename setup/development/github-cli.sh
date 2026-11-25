@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 source "$(dirname "${BASH_SOURCE[0]}")/../helpers/dispatcher.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/../helpers/apt-source.sh"
 
 install_github_cli_repository() {
 	sudo install -m 0755 -d /etc/apt/keyrings
@@ -8,7 +9,7 @@ install_github_cli_repository() {
 		https://cli.github.com/packages/githubcli-archive-keyring.gpg \
 		-o /etc/apt/keyrings/githubcli-archive-keyring.gpg
 	sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg
-	sudo tee /etc/apt/sources.list.d/github-cli.sources >/dev/null <<EOF
+	apt_source_write github-cli.sources <<EOF
 Types: deb
 URIs: https://cli.github.com/packages
 Suites: stable

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 source "$(dirname "${BASH_SOURCE[0]}")/../helpers/dispatcher.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/../helpers/apt-source.sh"
 
 install_fsearch() {
 	local installed_ver
@@ -16,7 +17,7 @@ install_fsearch_repository() {
 	# stalls ~2 min per run here. Key fingerprint per
 	# https://launchpad.net/~christian-boxdoerfer/+archive/ubuntu/fsearch-stable
 	curl -fsSL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x75555AFF5215AD9DBFD8CDB952B2FFB2DC496F40" | sudo gpg --dearmor -o /usr/share/keyrings/fsearch.gpg
-	sudo tee /etc/apt/sources.list.d/fsearch.sources >/dev/null <<EOF
+	apt_source_write fsearch.sources <<EOF
 Types: deb
 URIs: https://ppa.launchpadcontent.net/christian-boxdoerfer/fsearch-stable/ubuntu
 Suites: $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}")
