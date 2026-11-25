@@ -1,6 +1,6 @@
 # Test suite
 
-Tests cover this repository's Bash setup scripts. `tests/test.sh` automatically runs every `*-test.sh` file under `tests/`.
+Tests cover this repository's Bash setup and release scripts. `tests/test.sh` automatically runs every `*-test.sh` file under `tests/`.
 
 ## Architecture
 

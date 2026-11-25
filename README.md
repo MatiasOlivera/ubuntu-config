@@ -171,6 +171,11 @@ When the repo moves to a newer Ubuntu release:
 3. Update the baseline filename referenced in `reports/gaps.sh`.
 4. Re-run `./tests/test.sh` and `./reports/gaps.sh` (expect near-empty on a fresh VM).
 
+## Releasing
+
+Releases are automated; do not create tags or GitHub releases by hand. See the
+[release runbook](docs/runbooks/release-runbook.md) for the procedure.
+
 ## Testing
 
 Static checks are zero-dependency (shellcheck runs only if installed). The source-only check parses declarations without executing scripts:
