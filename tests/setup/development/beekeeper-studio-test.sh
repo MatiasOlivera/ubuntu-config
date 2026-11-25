@@ -70,6 +70,11 @@ cat > "$T/bin/tee" <<'EOF'
 printf '%s\n' "$*" >> "$STUB_DIR/tee-calls"
 cat > "$STUB_DIR/sources.list"
 EOF
+# rm only logs the stale path the shared writer prunes; no host file is touched.
+cat > "$T/bin/rm" <<'EOF'
+#!/usr/bin/env bash
+printf '%s\n' "$*" >> "$STUB_DIR/rm-calls"
+EOF
 chmod +x "$T/bin/"*
 
 call() {
@@ -105,6 +110,13 @@ if [[ $(wc -l < "$STUB_DIR/sources.list") -eq 1 && $(wc -l < "$STUB_DIR/tee-call
 	pass "rerun rewrites source without appending"
 else
 	fail "rerun rewrites source without appending (lines=$(wc -l < "$STUB_DIR/sources.list"))"
+fi
+
+# The shared writer prunes the stale same-stem DEB822 variant.
+if grep -Fxq -- '-f /etc/apt/sources.list.d/beekeeper-studio-app.sources' "$STUB_DIR/rm-calls"; then
+	pass "stale source variant is pruned"
+else
+	fail "stale source variant is pruned"
 fi
 
 if [[ $FAILURES -gt 0 ]]; then
