@@ -28,7 +28,38 @@ publish_cleanup() {
 }
 
 cliff() {
-	sh "$TOOL" "$@"
+	sh "$TOOL" --config "$SELF_DIR/../cliff.toml" "$@"
+}
+
+previous_tag() {
+	tag=$(git describe --tags --abbrev=0 "$1" 2>/dev/null || true)
+	[ -n "$tag" ] || tag=$(git tag --list 'v[0-9]*' --sort=-v:refname 2>/dev/null | head -n 1)
+	printf '%s\n' "$tag"
+}
+
+write_changelog() {
+	version=$1
+	out=$2
+	previous=$(previous_tag HEAD)
+	if [ -n "$previous" ]; then
+		cliff "$previous..HEAD" --tag "$version" -o "$out"
+	else
+		cliff --tag "$version" -o "$out"
+	fi
+}
+
+notes_at() {
+	version=$1
+	target=$2
+	previous=$3
+	if [ -n "$previous" ]; then
+		gh api "repos/$repo/releases/generate-notes" \
+			-f tag_name="$version" -f previous_tag_name="$previous" \
+			-f target_commitish="$target" --jq .body 2>/dev/null
+	else
+		gh api "repos/$repo/releases/generate-notes" \
+			-f tag_name="$version" -f target_commitish="$target" --jq .body 2>/dev/null
+	fi
 }
 
 repo_slug() {
@@ -84,7 +115,7 @@ prepare() {
 	esac
 	refuse_existing_tag "$version"
 
-	cliff --tag "$version" -o CHANGELOG.md
+	write_changelog "$version" CHANGELOG.md
 	[ -s CHANGELOG.md ] || die "changelog generation produced an empty file"
 
 	body=$(cat <<EOF
@@ -134,8 +165,7 @@ preview() {
 
 	git fetch origin --quiet --tags
 	version=$(cliff --bumped-version)
-	previous=$(git describe --tags --abbrev=0 HEAD 2>/dev/null || echo '')
-	[ -n "$previous" ] || die "no previous tag found; cannot preview a range"
+	previous=$(previous_tag HEAD)
 
 	dev_config=$(git show HEAD:.github/release.yml 2>/dev/null || echo '')
 	main_config=$(git show origin/main:.github/release.yml 2>/dev/null || echo '')
@@ -145,17 +175,15 @@ preview() {
 
 	notes=$(mktemp "${TMPDIR:-/tmp}/release-notes.XXXXXX") || die "cannot create temp file"
 	trap 'rm -f "$notes"' EXIT
-	cliff --tag "$version" -o "$notes"
+	write_changelog "$version" "$notes"
 
 	repo=$(repo_slug)
-	body=$(gh api "repos/$repo/releases/generate-notes" \
-		-f tag_name="$version" -f previous_tag_name="$previous" \
-		-f target_commitish=develop --jq .body 2>/dev/null) ||
+	body=$(notes_at "$version" develop "$previous") ||
 		die "generated-notes request failed"
 
 	printf 'version: %s\n' "$version"
 	printf 'changelog section:\n'
-	sed -n '/^## /,/^### /p' "$notes"
+	awk '/^## / { if (shown) exit; shown = 1 } shown { print }' "$notes"
 	printf 'generated notes (projected against develop; publication regenerates at main):\n'
 	printf '%s\n' "$body"
 }
@@ -186,7 +214,7 @@ publish() {
 		sed -nE 's/^## \[([^]]+)\].*/\1/p' | head -n 1)
 	[ "v$cl_version" = "$version" ] ||
 		die "changelog version ($cl_version) does not match computed version ($version)"
-	previous=$(git describe --tags --abbrev=0 "$merge_commit" 2>/dev/null || echo '')
+	previous=$(previous_tag "$merge_commit")
 	develop_check "$release_commit"
 
 	if git rev-parse -q --verify "refs/tags/$version" >/dev/null; then
@@ -203,9 +231,7 @@ publish() {
 	trap 'exit 130' INT HUP
 	repo=$(repo_slug)
 	NOTES=$(mktemp "${TMPDIR:-/tmp}/release-notes.XXXXXX") || die "cannot create temp file"
-	body=$(gh api "repos/$repo/releases/generate-notes" \
-		-f tag_name="$version" -f previous_tag_name="$previous" \
-		-f target_commitish="$merge_commit" --jq .body 2>/dev/null) ||
+	body=$(notes_at "$version" "$merge_commit" "$previous") ||
 		die "generated-notes request failed"
 	printf '%s\n' "$body" >"$NOTES"
 	printf 'release notes for %s at %s:\n%s\n' "$version" "$merge" "$body"
