@@ -271,6 +271,8 @@ and the durable records remain complete.
 
 The e2e VM is `ubuntu-config-test-<checkout-dir>-<base62>` (see [`tests/vm-name.sh`](tests/vm-name.sh)): the slug is the checkout directory name and the suffix is a base62 digest of its full path. Every checkout — including the original repository rather than a worktree — gets its own stable VM, so concurrent agents cannot overwrite each other. Each `--vm` run prints the name, and `--reuse`/`--keep` affect only that VM. Only one e2e run may use a given VM at a time: a second run against the same checkout exits immediately with an error naming the VM, without waiting or touching the VM. Runs against other worktrees remain independent.
 
+Removing an Orca worktree with repository hooks enabled (`orca worktree rm --worktree <selector> --run-hooks`, or the equivalent in the app) runs the archive hook in [`orca.yaml`](orca.yaml), which deletes only that checkout's VM. Other workspaces' VMs keep running. Cleanup is best effort: a failed `multipass delete` never blocks workspace deletion — it raises a desktop notification and appends the leftover VM to `${XDG_STATE_HOME:-$HOME/.local/state}/ubuntu-config/vm-cleanup-failures.log` for manual cleanup (`multipass delete -p <vm>`). Deletions that skip hooks still leave the VM behind; run [`scripts/cleanup-worktree-vm.sh`](scripts/cleanup-worktree-vm.sh) by hand from the checkout in that case.
+
 `tests/test.sh` enforces the script contract: `bash -n` syntax, every library script sourced by `install.sh`/`post-install.sh`, source-only `install_*`/`config_*` functions, standalone `BASH_SOURCE` guard on every `*config*.sh`, plus shellcheck when available.
 
 The e2e run sets `SKIP_UPGRADE=1` when calling `post-install.sh` inside the VM, skipping `apt upgrade` for speed. Run `post-install.sh` without it on a real machine for the full update.
@@ -297,6 +299,9 @@ reports/
   versions.sh           # report-only install report
   gaps.sh               # report-only host-vs-repo gaps (apt/snap/flatpak/AppImage)
   baselines/            # vendored Ubuntu desktop manifest baseline
+orca.yaml               # Orca worktree hook: archive → e2e VM cleanup
+scripts/
+  cleanup-worktree-vm.sh  # purge the removed workspace's e2e VM
 tests/
   test.sh               # static + optional Multipass e2e
   compose.yml / Dockerfile

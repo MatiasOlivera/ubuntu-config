@@ -68,6 +68,8 @@ cache, so keep that workflow green when changing the toolchain.
 
 The VM name is `ubuntu-config-test-<checkout-dir>-<base62>` (checkout directory slug + base62 digest of its path), so each checkout has its own VM; each `--vm` run prints the name. Only one e2e run may use a given VM at a time: starting a second `--vm` run against the same checkout exits immediately with an error naming the VM. It does not queue, and runs against other worktrees are unaffected. Wait for the active run to finish before retrying.
 
+Deleting an Orca worktree with hooks enabled (`orca worktree rm --worktree <selector> --run-hooks`) runs the `scripts.archive` hook from `orca.yaml`, which purges only that checkout's VM. A failed purge never blocks deletion: it notifies on the desktop and appends the VM name to `${XDG_STATE_HOME:-$HOME/.local/state}/ubuntu-config/vm-cleanup-failures.log`.
+
 ## Iteration loop (fast re-runs)
 
 - Seed once with the full install: `./tests/test.sh --vm --keep` (VM kept alive).
