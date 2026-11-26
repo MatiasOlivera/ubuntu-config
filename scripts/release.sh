@@ -235,6 +235,12 @@ publish() {
 	previous=$(previous_tag "$merge_commit")
 	develop_check "$release_commit"
 
+	# Runners have no default git identity; fail before the tag or any push.
+	if ! git var GIT_AUTHOR_IDENT >/dev/null 2>&1 ||
+		! git var GIT_COMMITTER_IDENT >/dev/null 2>&1; then
+		die "git identity is missing; the release workflow must supply it"
+	fi
+
 	if git rev-parse -q --verify "refs/tags/$version" >/dev/null; then
 		[ "$(git rev-parse "$version^{commit}")" = "$merge_commit" ] ||
 			die "tag $version points at another commit; refusing to overwrite it"
