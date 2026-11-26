@@ -1,0 +1,4 @@
+# Orca worktree hook: reap this checkout's e2e VM when the worktree is removed.
+# Orca skips archive hooks unless the removal runs with --run-hooks.
+scripts:
+  archive: bash scripts/cleanup-worktree-vm.sh
