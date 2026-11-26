@@ -13,9 +13,8 @@ section() {
 	printf '\n%s\n| candidate | version |\n' "$1"
 }
 
-# Managed apt packages: tokens after `apt install`/`apt-get install`, package
-# names from `dpkg -s` in *_version fns, plus direct-.deb names whose version
-# fn uses `command -v` instead (chrome). Keep in sync with setup/*.sh.
+# Managed apt packages: tokens after `apt install`/`apt-get install` and
+# package names from `dpkg -s` in *_version fns. Keep in sync with setup/*.sh.
 managed_apt() {
 	grep -rhoE 'apt(-get)? +install +[^#]*' "$SETUP_DIR" 2>/dev/null |
 		sed -E 's/.*install +//' |
@@ -26,7 +25,6 @@ managed_apt() {
 	grep -rhoE 'dpkg +-s +[A-Za-z0-9][A-Za-z0-9+.-]*' "$SETUP_DIR" 2>/dev/null |
 		sed -E 's/.*dpkg +-s +//' |
 		sort -u
-	printf 'google-chrome-stable\n'
 }
 
 # Snap names after `snap install` in setup/*.sh (e.g. postman).
