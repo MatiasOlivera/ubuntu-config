@@ -96,6 +96,7 @@ step install_keyring
 # Repositories (apt sources only, no installs, no apt update)
 step install_fsearch_repository
 step install_spotify_repository
+step install_chrome_repository
 step install_cursor_repository
 step install_vscode_repository
 step install_docker_repository
