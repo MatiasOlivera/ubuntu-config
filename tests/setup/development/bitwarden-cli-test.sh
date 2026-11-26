@@ -176,7 +176,7 @@ else
 fi
 
 if [[ $(wc -l < "$STUB_DIR/curl-calls" 2>/dev/null || printf '0\n') -eq 2 ]] &&
-	! grep -qvE '(api\.github\.com/repos/bitwarden/clients/releases|releases/download/cli-v2026\.11\.1/bw-bit-linux-2026\.11\.1\.zip)$' "$STUB_DIR/curl-calls"; then
+	! grep -qvE '(api\.github\.com/repos/bitwarden/clients/releases(\?per_page=100)?|releases/download/cli-v2026\.11\.1/bw-bit-linux-2026\.11\.1\.zip)$' "$STUB_DIR/curl-calls"; then
 	pass 'install downloads only release metadata and the verified artifact'
 else
 	fail "download discipline (calls=[$(cat "$STUB_DIR/curl-calls" 2>/dev/null)])"
@@ -273,7 +273,7 @@ fresh_release
 printf 'riscv64\n' >"$STUB_DIR/arch"
 run install
 if [[ $RC -ne 0 && $ERR == *"unsupported architecture: riscv64"* ]] &&
-	no_install && tmp_empty && ! -s "$STUB_DIR/curl-calls"; then
+	no_install && tmp_empty && [[ ! -s "$STUB_DIR/curl-calls" ]]; then
 	pass 'unsupported architecture fails before any download'
 else
 	fail "unsupported arch (rc=$RC out=[$OUT] err=[$ERR])"
