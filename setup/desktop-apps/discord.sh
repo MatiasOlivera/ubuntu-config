@@ -8,13 +8,11 @@ install_discord() {
 		printf 'skip: discord already installed (%s)\n' "$installed_ver"
 		return 0
 	fi
-	curl -fsSL -o discord.deb "https://discord.com/api/download?platform=linux&format=deb"
-	sudo apt install -y ./discord.deb
-	rm -f discord.deb
+	sudo flatpak install flathub -y com.discordapp.Discord
 }
 
 discord_version() {
-	dpkg -s discord 2>/dev/null | grep "^Version:"
+	flatpak info com.discordapp.Discord 2>/dev/null | grep -i "Version:" | head -n 1 | grep .
 }
 
 if [[ ${BASH_SOURCE[0]} == "$0" ]]; then
