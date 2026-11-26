@@ -43,7 +43,7 @@ state_set() {
 setup() {
 	CASES=$((CASES + 1))
 	S="$TMP_ROOT/case$CASES"
-	mkdir -p "$S/bin" "$S/local/.github"
+	mkdir -p "$S/bin" "$S/home" "$S/local/.github"
 	printf 'CI=success\nCI_SHA=develop\nCI_PENDING=0\nCI_POLLS=0\nVERSION=v0.4.0\nRELEASED=no\n' >"$S/state"
 
 	git init --bare -q "$S/origin.git"
@@ -159,10 +159,12 @@ CLIFF
 }
 
 run_release() {
+	release_home=${RELEASE_HOME:-$HOME}
 	(
 		cd "$S/local" || exit 1
 		PATH="$S/bin:$PATH" GH_STATE="$S/state" CLIFF_STATE="$S/state" \
 			GIT_CLIFF="$S/bin/git-cliff" GH_TOKEN=stub \
+			HOME="$release_home" XDG_CONFIG_HOME="$release_home/.config" \
 			bash "$RELEASE_SH" "$@"
 	)
 }
@@ -404,6 +406,48 @@ test_publish_refuses_foreign_tag() {
 	assert_eq 'foreign tag leaves no release' no "$(state_get RELEASED)"
 }
 
+test_publish_refuses_missing_git_identity() {
+	setup
+	promote
+	git -C "$S/local" config user.name ''
+	git -C "$S/local" config user.email ''
+	RELEASE_HOME="$S/home"
+	expect_failure 'publish without git identity' publish
+	assert_contains 'missing identity is named' "$(cat "$S/log")" 'git identity'
+	assert_eq 'no identity leaves no local tag' 1 "$(git -C "$S/local" tag --list | wc -l)"
+	assert_eq 'no identity pushes no tag' 0 "$(git -C "$S/local" ls-remote --tags origin | wc -l)"
+	assert_eq 'no identity leaves no release' no "$(state_get RELEASED)"
+	RELEASE_HOME=''
+}
+
+test_publish_with_workflow_supplied_identity() {
+	setup
+	promote
+	# Move develop past the promotion so the merge-back creates a commit.
+	git -C "$S/local" checkout -q develop
+	printf 'later work\n' >"$S/local/later.txt"
+	git -C "$S/local" add .
+	git -C "$S/local" commit -q -m 'feat: later work'
+	git -C "$S/local" push -q origin develop
+	git -C "$S/local" checkout -q main
+	git -C "$S/local" config --unset user.name
+	git -C "$S/local" config --unset user.email
+	RELEASE_HOME="$S/home"
+	export GIT_AUTHOR_NAME='github-actions[bot]'
+	export GIT_AUTHOR_EMAIL='41898282+github-actions[bot]@users.noreply.github.com'
+	export GIT_COMMITTER_NAME='github-actions[bot]'
+	export GIT_COMMITTER_EMAIL='41898282+github-actions[bot]@users.noreply.github.com'
+	expect_success 'publish with workflow-supplied identity' publish
+	assert_eq 'workflow identity publishes release' yes "$(state_get RELEASED)"
+	tagger=$(git -C "$S/local" for-each-ref --format='%(taggername)' refs/tags/v0.4.0)
+	assert_eq 'tag attributed to the bot' 'github-actions[bot]' "$tagger"
+	git -C "$S/local" fetch -q origin develop
+	author=$(git -C "$S/local" log -1 --format='%an' origin/develop)
+	assert_eq 'merge-back attributed to the bot' 'github-actions[bot]' "$author"
+	unset GIT_AUTHOR_NAME GIT_AUTHOR_EMAIL GIT_COMMITTER_NAME GIT_COMMITTER_EMAIL
+	RELEASE_HOME=''
+}
+
 # --- pinned tool and workflow ----------------------------------------------
 
 test_tool_checksum_guard() {
@@ -433,6 +477,10 @@ test_workflow_contract() {
 	assert_contains 'workflow limits base to main' "$wf" 'branches: [main]'
 	assert_contains 'workflow grants tag permission' "$wf" 'contents: write'
 	assert_contains 'workflow invokes publish' "$wf" 'publish'
+	assert_contains 'workflow supplies author name' "$wf" 'GIT_AUTHOR_NAME'
+	assert_contains 'workflow supplies author email' "$wf" 'GIT_AUTHOR_EMAIL'
+	assert_contains 'workflow supplies committer name' "$wf" 'GIT_COMMITTER_NAME'
+	assert_contains 'workflow supplies committer email' "$wf" 'GIT_COMMITTER_EMAIL'
 }
 
 test_notes_exclude_release_label() {
@@ -462,6 +510,8 @@ test_publish_refuses_version_mismatch
 test_publish_tags_merges_and_publishes
 test_publish_resumes_existing_tag
 test_publish_refuses_foreign_tag
+test_publish_refuses_missing_git_identity
+test_publish_with_workflow_supplied_identity
 test_tool_checksum_guard
 test_workflow_contract
 test_notes_exclude_release_label
