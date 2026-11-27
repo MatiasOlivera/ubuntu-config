@@ -15,6 +15,4 @@ Tests cover this repository's Bash setup and release scripts. `tests/test.sh` au
 
 ## Commands
 
-Test commands — single test, full suite, Docker, ShellCheck — live in the root `run-tests` skill.
-
 See the root `AGENTS.md` for trusted-checkout restrictions and Multipass verification.
