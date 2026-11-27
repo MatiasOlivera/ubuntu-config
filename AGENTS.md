@@ -1,6 +1,6 @@
 # ubuntu-config
 
-Infrastructure-as-code setup for a fresh Ubuntu workstation: versioned bash scripts in `setup/` install `apt` packages, Flatpak/Snap apps and dev tools; declarative chezmoi dotfiles in `dotfiles/` own the configuration. Scripts assume Ubuntu with `apt` + `sudo`. Humans: see `README.md` (commands, reports, project structure).
+Infrastructure-as-code setup for a fresh Ubuntu workstation: versioned bash scripts in `setup/` install `apt` packages, Flatpak/Snap apps and dev tools; declarative chezmoi dotfiles in `dotfiles/` own the configuration. Scripts assume Ubuntu with `apt` + `sudo`. Humans: see `README.md` (introduction) and `docs/` (reference and runbooks).
 
 ## Architecture
 
@@ -24,8 +24,6 @@ The shared workflow above governs cross-repo process; the constitution
 governs this repository.
 
 ## Commands
-
-Anything beyond verify (adding apps, reports, baselines): `README.md` ("Testing", "Reports").
 
 Releases: `scripts/release.sh` owns prepare and preview; the promotion merge into
 `main` triggers `release.yml` to tag, publish and merge back. Do not cut tags or

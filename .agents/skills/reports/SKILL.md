@@ -19,7 +19,7 @@ multipass exec <vm-name> -- bash ubuntu-config/reports/versions.sh  # same, insi
 
 Sources every library script and calls its `<stem>_version()` (the single source of truth also used by install guards). A missing `src <path>` or `chk "<label>" <pkg>_version` row shows up as a MISSING row in the table. When adding a package, add both rows — see the `install-package` skill for the full workflow.
 
-Excludes manually installed apps (see `setup/manual-installation.md`).
+Excludes manually installed apps (see `setup/manual-steps.md`).
 
 ## gaps.sh
 
