@@ -1,9 +1,5 @@
 # plan.md - `078-speed-up-e2e-verification`
 
-> Technical blueprint. No provisional decisions: every non-trivial choice MUST
-> create its decision record inline through the repository's decision-record
-> skill.
-
 ## Architecture
 
 Two phases, in sequencing order.

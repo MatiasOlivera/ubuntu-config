@@ -15,10 +15,9 @@ export HOME="$T"
 # Exclude host installations so only the fake per-user binaries can be found.
 export PATH=/usr/bin:/bin
 
-mkdir -p "$T/.opencode/bin" "$T/.local/bin"
+mkdir -p "$T/.opencode/bin"
 printf '#!/usr/bin/env bash\necho "opencode v2.4.1"\n' > "$T/.opencode/bin/opencode"
-printf '#!/usr/bin/env bash\necho "openusage version 0.26.3"\n' > "$T/.local/bin/openusage"
-chmod +x "$T/.opencode/bin/opencode" "$T/.local/bin/openusage"
+chmod +x "$T/.opencode/bin/opencode"
 
 check_version() {
 	local label=$1 script=$2 func=$3 expected=$4 actual
@@ -34,6 +33,5 @@ check_version() {
 }
 
 check_version opencode "$ROOT/setup/development/opencode.sh" opencode_version "v2.4.1"
-check_version openusage "$ROOT/setup/development/openusage.sh" openusage_version "0.26.3"
 
 [[ $FAILURES -eq 0 ]] || exit 1

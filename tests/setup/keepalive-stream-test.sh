@@ -13,15 +13,14 @@ pass() { printf 'ok: %s\n' "$1"; }
 T="$(mktemp -d)" || { printf 'error: mktemp failed\n' >&2; exit 1; }
 trap 'rm -rf "$T"' EXIT
 
-# A caller waits for EOF on stdout, just as a remote exec does. A loop that
-# inherits stdout keeps this wait alive until its background sleep ends.
-wait_for_eof_ms() {
-	local script=$1 start end out
-	start=$(date +%s%3N)
-	out=$(bash "$script" | cat)
-	end=$(date +%s%3N)
+# A caller waits for EOF on its output streams, just as a remote exec does.
+# The stub's loop prints a sentinel after its sleep: a loop that inherits the
+# caller's stream leaks that sentinel into the captured output.
+capture_output() {
+	local out
+	out=$(bash "$1" 2>&1 | cat) || return 1
 	[[ $out == *done* ]] || return 2
-	printf '%s' "$((end - start))"
+	printf '%s' "$out"
 }
 
 for script in "$ROOT/setup/install.sh" "$ROOT/setup/post-install.sh"; do
@@ -34,18 +33,18 @@ for script in "$ROOT/setup/install.sh" "$ROOT/setup/post-install.sh"; do
 	# Keep the loop's real redirection; stub the commands and shorten the sleep.
 	stub=$(printf '%s\n' "$line" |
 		sed -e 's/sudo -n true/:/' \
-			-e 's/sleep 50/sleep 0.4/')
+			-e 's/sleep 50/sleep 0.4; printf "LEAK\\n"; printf "LEAK\\n" >\&2/')
 	printf '#!/usr/bin/env bash\n%s\nprintf "done\\n"\n' "$stub" > "$T/$name"
 	chmod +x "$T/$name"
 
-	elapsed=$(wait_for_eof_ms "$T/$name") || {
+	out=$(capture_output "$T/$name") || {
 		fail "$name: stub produced no output"
 		continue
 	}
-	if [[ $elapsed -lt 200 ]]; then
-		pass "$name: output stream released ($elapsed ms)"
+	if [[ $out == *LEAK* ]]; then
+		fail "$name: keepalive loop leaked to the caller's output stream"
 	else
-		fail "$name: output stream held open ($elapsed ms)"
+		pass "$name: output stream released"
 	fi
 done
 

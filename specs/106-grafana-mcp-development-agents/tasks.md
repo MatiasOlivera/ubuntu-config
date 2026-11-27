@@ -1,7 +1,5 @@
 # tasks.md - `106-grafana-mcp-development-agents`
 
-> Atomic, dependency-ordered, each independently verifiable.
-
 | ID  | Done | Task | Depends on | Type      | Verification |
 | --- | ---- | ---- | ---------- | --------- | ------------ |
 | 1   | [x]  | Add `tests/agents/grafana-mcp-config-test.sh` asserting the three configs' shape, pinned version, explicit tool list, env placeholders, no token value, no setup/chezmoi wiring, and intact agy deny-list entries | - | Automated | Run `bash tests/agents/grafana-mcp-config-test.sh` — fails while configs are absent (red) |
