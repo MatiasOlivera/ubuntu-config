@@ -174,7 +174,7 @@ publisher-provided integrity material.
 
 When the repo moves to a newer Ubuntu release:
 
-1. Bump the version pins: `UBUNTU_IMAGE` in `tests/test.sh`, the cache-image reference in `tests/compose.yml`, the base image in `tests/Dockerfile`, and the tested-release note above. Both file changes trigger the `test-image` workflow to rebuild and publish the CI cache image.
+1. Bump the version pins: `UBUNTU_IMAGE` in `tests/test.sh`, the base image in `tests/Dockerfile`, and the tested-release note above. The Dockerfile change triggers the `test-image` workflow to rebuild and publish the CI cache image.
 2. Refresh the gaps baseline from the point-release desktop manifest (use the exact release, e.g. `26.04.1`):
 
    ```sh
