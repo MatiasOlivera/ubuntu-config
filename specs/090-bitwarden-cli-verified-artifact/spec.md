@@ -1,7 +1,5 @@
 # spec.md - `090-bitwarden-cli-verified-artifact`
 
-> What and why. No implementation details.
-
 ## Context
 
 Issue: [#90](https://github.com/MatiasOlivera/ubuntu-config/issues/90).

@@ -1,9 +1,5 @@
 # plan.md - `090-bitwarden-cli-verified-artifact`
 
-> Technical blueprint. No provisional decisions: every non-trivial choice MUST
-> create its decision record inline through the repository's decision-record
-> skill.
-
 ## Architecture
 
 Small, local change following the existing verified-artifact scripts (`bun.sh`,
