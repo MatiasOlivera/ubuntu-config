@@ -90,11 +90,10 @@ application.
   ```
 - Match the surrounding file's indentation (tabs vs spaces varies by file).
 
-## 4. Wire it up — all three places
+## 4. Wire it up — both places
 
 1. **`setup/install.sh`**: add `source "<dir>/<pkg>.sh"` next to its neighbors, then `step install_<pkg>` / `step config_<pkg>` in the correct phase. `install_<pkg>_repository` calls go in the repositories phase, **before** `step apt_update`. Post-install-category scripts go in `setup/post-install.sh` instead.
 2. **`reports/versions.sh`**: add a `src <path>` line **and** a `chk "<label>" <pkg>_version` row. Missing either breaks the versions table.
-3. **`README.md` structure tree**: only when a new category/script needs listing.
 
 ## 5. Verify
 

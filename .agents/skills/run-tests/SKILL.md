@@ -27,6 +27,15 @@ durable records remain complete. Never pipe a long run to `head` or `tail`:
 while `tail` buffers until EOF and returns its own status, hiding a suite
 failure. Do not pipe the runner itself either — use the printed `log:` path.
 
+The local stack provisions an **E2E runs** dashboard and alert rules under
+**E2E Observability**; alerts are for local definition and evaluation only, with
+no notification channel. Span and record timing come from replayed Loki records,
+so it is available even when the stack starts after a run; trace-metric panels
+fill in only when it runs during the run. See
+[decision 0012](../../../docs/decisions/0012-local-grafana-feature-scope.md) and the
+[Grafana query cookbook](../../../docs/runbooks/grafana-query-cookbook.md) for
+ready-made queries and the trace-to-logs walkthrough.
+
 ## Scoped iteration (default)
 
 Iterate with the check that covers the change. The full gate below runs before the first local review, and again before the pull request only when review feedback changed code.
@@ -45,6 +54,12 @@ Iterate with the check that covers the change. The full gate below runs before t
 
 Covers `bash -n` syntax, every library script sourced by `install.sh`/`post-install.sh` (fail: "not sourced"), source-only `install_*`/`config_*` functions, the standalone `BASH_SOURCE` guard on every `*config*.sh`, and shellcheck only if installed. Fail-closed: any failure exits 1. The source-only check parses declarations rather than sourcing scripts, so it does not execute library code. The functional tests still run test scripts, so use a trusted checkout — or the Docker-isolated check below for untrusted changes.
 
+Python metadata parser unit tests use only the standard library and local fixtures (no network):
+
+```sh
+PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/python -v
+```
+
 ## Isolated static (no host deps)
 
 ```sh
@@ -55,9 +70,13 @@ Image `ubuntu:26.04` + shellcheck/python3/git/curl and a pinned, checksummed
 chezmoi; repo mounted read-only. The command runs the static suite plus the
 container-only `tests/docker/chezmoi-ignore-check.sh`. This local command and
 every CI trigger build from `tests/Dockerfile`; the published GHCR image is only
-a build cache, never the image the suite runs in. A nightly cache-free rebuild
-validates apt and upstream packages and refreshes that cache, so keep that
-workflow green when changing the toolchain.
+a build cache, never the image the suite runs in — an unreachable cache degrades
+to a cold build, not a stale image. A nightly cache-free rebuild validates apt
+and upstream packages and refreshes that cache, so keep that workflow green
+when changing the toolchain ([ADR 0010](../../../docs/decisions/0010-ci-test-image-provisioning.md),
+[ADR 0017](../../../docs/decisions/0017-ci-test-image-freshness.md)). One-time
+setup: make the `ubuntu-config-test` GHCR package public so fork PRs can use the
+cache without credentials.
 
 ## Full e2e (needs Multipass on host)
 
@@ -68,6 +87,9 @@ workflow green when changing the toolchain.
 ```
 
 `--keep`/`--reuse` are only valid with `--vm`.
+
+MCP OAuth sign-in is interactive, so the headless e2e VM verifies that the
+Context7 entries are deployed but does not authenticate them.
 
 The VM name is `ubuntu-config-test-<checkout-dir>-<base62>` (checkout directory slug + base62 digest of its path), so each checkout has its own VM; each `--vm` run prints the name. Only one e2e run may use a given VM at a time: starting a second `--vm` run against the same checkout exits immediately with an error naming the VM. It does not queue, and runs against other worktrees are unaffected. Wait for the active run to finish before retrying.
 
