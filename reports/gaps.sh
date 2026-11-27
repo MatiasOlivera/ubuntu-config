@@ -2,8 +2,8 @@
 #
 # gaps.sh — report-only list of host-installed apps (apt/snap/flatpak/AppImage)
 # not tracked by this repo. Never installs anything, never exits non-zero.
-# Baseline: vendored official Ubuntu desktop manifest (see README
-# "Updating to a new Ubuntu version" for the refresh procedure).
+# Baseline: vendored official Ubuntu desktop manifest (see the reports skill
+# for the refresh procedure: .agents/skills/reports/SKILL.md).
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 SETUP_DIR="$ROOT/setup"
