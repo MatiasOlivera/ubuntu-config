@@ -23,18 +23,7 @@ rules below are concrete operational detail that must honor its axioms.
 The shared workflow above governs cross-repo process; the constitution
 governs this repository.
 
-## Skills (load the one matching your task)
-
-Skills live in `.agents/skills/` (cross-agent: opencode, Cursor, VS Code, Codex, ...).
-
-- Adding or extending a setup script (`install_*`/`config_*`, apt repos, version guards, wiring) → `install-package`.
-- Adding or changing a chezmoi dotfile (`dotfiles/`, `dot_*` → `$HOME`, `.tmpl` data, deny-list sync) → `add-dotfile`.
-- Running or iterating on tests (scoped checks, full gate, Docker, Multipass) → `run-tests`.
-- Working with reports (`versions.sh`, `gaps.sh`, `chk`/`src` rows, baseline refresh) → `reports`.
-
 ## Commands
-
-Test commands — scoped checks, full gate, Docker and Multipass — live in the `run-tests` skill. Load it before running or iterating on tests.
 
 Anything beyond verify (adding apps, reports, baselines): `README.md` ("Testing", "Reports").
 
@@ -77,7 +66,7 @@ The root `opencode.json` adds command denials for setup scripts and selected hos
 ## For changes
 
 - Run focused checks on the changed files while implementing.
-- Run the full gate (see `run-tests`) before the first local review, stopping at the first failure.
+- Run the full gate before the first local review, stopping at the first failure.
 - Rerun the full gate before the pull request only when review feedback changed code.
 - When a change invalidates agent-facing docs (`AGENTS.md`, `.agents/skills/`), update them in the same PR.
 
@@ -103,7 +92,7 @@ README.md and docs are for humans; AGENTS.md and skills are for coding agents
 
 Non-trivial choices (stack, protocol, workflow) MUST be recorded as MADR records
 in `docs/decisions/` (`NNNN-slug.md`); overturns note "supersedes `NNNN-…`" in
-prose. Load the `adr` skill for the template and numbering when available.
+prose.
 Policy-type decisions that must stay current — notably language package-manager
 picks — live in `docs/language-package-managers.md` instead; that file is the
 authoritative source for those choices.
