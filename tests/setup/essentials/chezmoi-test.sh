@@ -26,7 +26,7 @@ export STUB_DIR STUB_RELEASE SANDBOX_ROOT
 
 # Closed set of real tools; anything touching network/system is stubbed in $T/bin.
 for b in awk bash basename cat chmod cp cut dirname env find grep head \
-	install mkdir mktemp mv python3 rm sed sh sha256sum sort tar tr wc; do
+	gzip install mkdir mktemp mv python3 rm sed sh sha256sum sort tar tr wc; do
 	src_bin="$(command -v "$b")" || { printf 'error: missing tool %s\n' "$b" >&2; exit 1; }
 	ln -s "$src_bin" "$T/sysbin/$b"
 done
@@ -92,7 +92,7 @@ fresh_release() {
 	mkdir -p "$T/release" "$T/payload" "$T/root/usr/local/bin" "$T/tmp"
 	"$REAL_RM" -f "$STUB_DIR/curl-calls" "$STUB_DIR/sudo-calls" \
 		"$STUB_DIR/fail-metadata" "$STUB_DIR/fail-asset" "$STUB_DIR/arch"
-	python3 - "$T/release" "$T/payload" <<'PY'
+	python3 - "$T/release" "$T/payload/chezmoi" <<'PY'
 import hashlib
 import json
 import pathlib
