@@ -2,6 +2,7 @@
 
 source "$(dirname "${BASH_SOURCE[0]}")/../helpers/dispatcher.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/../helpers/apt-source.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/../helpers/remote-installer.sh"
 
 install_cursor_cli() {
 	local installed_ver
@@ -9,7 +10,7 @@ install_cursor_cli() {
 		printf 'skip: cursor-cli already installed (%s)\n' "$installed_ver"
 		return 0
 	fi
-	curl https://cursor.com/install -fsS | bash
+	remote_install https://cursor.com/install bash
 }
 
 install_cursor() {
