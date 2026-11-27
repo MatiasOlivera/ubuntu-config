@@ -35,4 +35,5 @@ repository is public, so it must never contain secrets.
 3. **No unverifiable execution.** The setup path never runs code it cannot
    hold to a publisher's integrity material.
 4. **Decisions are durable artifacts.** Non-trivial trade-offs become decision
-   records; issue work becomes a spec before it becomes code.
+   records; issue work becomes a spec before it becomes code when SDD triage
+   requires it.
