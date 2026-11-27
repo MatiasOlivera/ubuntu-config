@@ -188,6 +188,28 @@ else
 	fail "args: command argument was not forwarded"
 fi
 
+# Observability mode: steps must run in the caller's shell, not a pipeline
+# subshell, so the e2e gate exercises the same path a user runs.
+reset_markers
+# shellcheck disable=SC2016 # literals are written into the generated runner
+runner observability \
+	'export OBSERVABILITY_INITIALIZED=1' \
+	'OBSERVABILITY_CURRENT_LOG=$STUB_DIR/step.log' \
+	'observability_step_begin() { :; }' \
+	'observability_step_end() { :; }' \
+	'set_state() { MARKER=set; printf "step output\n"; }' \
+	'step set_state' \
+	'[[ $MARKER == set ]] || exit 1' \
+	'report_failed_steps || exit 1'
+bash "$T/observability.sh" >"$T/observability.out" 2>"$T/observability.err"
+check_status "observability" 0 $?
+check_has "observability" "$T/observability.out" 'step output'
+if grep -q 'step output' "$STUB_DIR/step.log" 2>/dev/null; then
+	pass "observability: step log captured"
+else
+	fail "observability: step log not captured"
+fi
+
 if [[ $FAILURES -gt 0 ]]; then
 	printf '%d check(s) failed\n' "$FAILURES" >&2
 	exit 1
