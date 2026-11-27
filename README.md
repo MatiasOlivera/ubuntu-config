@@ -2,10 +2,10 @@
 
 ## Description
 
-This is my Ubuntu workstation as code: a clone and two commands set up a new machine
-with the applications and configuration I use. Everything lives in git, so a change
-can be reviewed and reverted before it reaches a machine, and a re-run leaves an
-already-set-up machine alone.
+I used to install and configure each application by hand on a new machine. This is
+my Ubuntu workstation as code: a clone and two commands rebuild it, and a re-run
+leaves an already-set-up machine alone. Everything lives in git, so a change can be
+reviewed and reverted before it reaches a machine.
 
 Under the hood, `setup/` is rerun-safe bash scripts for packages and tools;
 `dotfiles/` is chezmoi source state for my shell, Git, editor and coding-agent
