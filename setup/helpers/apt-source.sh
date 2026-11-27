@@ -13,7 +13,7 @@ apt_source_write() {
 		*.list) sibling="$stem.sources" ;;
 	esac
 
-	sudo tee "/etc/apt/sources.list.d/$file" >/dev/null
+	sudo tee "/etc/apt/sources.list.d/$file" >/dev/null || return $?
 	if [[ -n $sibling ]]; then
 		sudo rm -f "/etc/apt/sources.list.d/$sibling"
 	fi

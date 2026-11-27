@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 source "$(dirname "${BASH_SOURCE[0]}")/../helpers/dispatcher.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/../helpers/remote-installer.sh"
 
 homebrew_dependencies() {
     sudo apt install -y build-essential procps curl file git
@@ -13,7 +14,7 @@ install_homebrew() {
         return 0
     fi
     homebrew_dependencies
-    NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    NONINTERACTIVE=1 remote_install https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh bash
 }
 
 brew_version() {
