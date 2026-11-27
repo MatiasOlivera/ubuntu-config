@@ -14,6 +14,8 @@ SUDO_KEEPALIVE=$!
 trap 'kill "$SUDO_KEEPALIVE" 2>/dev/null' EXIT
 
 SCRIPT_DIR=$(dirname "$0")
+source "$SCRIPT_DIR/helpers/steps.sh"
+
 if [[ -n ${OBSERVABILITY_RECORD_DIR:-} ]]; then
 	source "$SCRIPT_DIR/helpers/observability.sh"
 	observability_init "${OBSERVABILITY_RUN_ID:-unknown}" "${OBSERVABILITY_COLLECTOR:-}" ||
@@ -21,20 +23,14 @@ if [[ -n ${OBSERVABILITY_RECORD_DIR:-} ]]; then
 	observability_phase_begin post-install.sh
 fi
 
-# SKIP_UPGRADE=1 skips apt upgrade (fast path for test.sh --vm).
-upgrade_start=$SECONDS
+# SKIP_UPGRADE=1 skips apt update and upgrade (fast path for test.sh --vm).
 if [[ ${SKIP_UPGRADE:-0} != 1 ]]; then
-  # check for updates
-  sudo apt update
-
-  # apply updates
-  sudo apt upgrade -y
-  printf '[+%ds] apt upgrade\n' "$((SECONDS - upgrade_start))"
+  step apt_update sudo apt update
+  step apt_upgrade sudo apt upgrade -y
 fi
 
 # ponytail: SECONDS wall-clock per step, no external profiler.
 post_start=$SECONDS
-source "$SCRIPT_DIR/helpers/steps.sh"
 
 DEVELOPMENT_DIR="$SCRIPT_DIR/development"
 
