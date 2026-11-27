@@ -72,7 +72,6 @@ source "$DEVELOPMENT_DIR/uv.sh"
 source "$DEVELOPMENT_DIR/pnpm.sh"
 source "$DEVELOPMENT_DIR/bun.sh"
 source "$DEVELOPMENT_DIR/opencode.sh"
-source "$DEVELOPMENT_DIR/openusage.sh"
 source "$DEVELOPMENT_DIR/ghostty/ghostty.sh"
 source "$DEVELOPMENT_DIR/ghostty/ghostty-config.sh"
 source "$DEVELOPMENT_DIR/ollama.sh"
@@ -141,7 +140,6 @@ step install_uv
 step install_pnpm
 step install_bun
 step install_opencode
-step install_openusage
 step install_ghostty
 step config_ghostty
 step install_ollama

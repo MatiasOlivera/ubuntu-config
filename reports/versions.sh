@@ -70,7 +70,6 @@ src development/uv.sh
 src development/pnpm.sh
 src development/bun.sh
 src development/opencode.sh
-src development/openusage.sh
 src development/ghostty/ghostty.sh
 src development/oh-my-zsh/oh-my-zsh.sh
 src development/oh-my-zsh/plugins.sh
@@ -124,7 +123,6 @@ chk "uv" uv_version
 chk "pnpm" pnpm_version
 chk "bun" bun_version
 chk "opencode" opencode_version
-chk "openusage" openusage_version
 chk "ghostty" ghostty_version
 chk "oh-my-zsh" oh_my_zsh_version
 chk "zsh-plugins" oh_my_zsh_plugins_version
