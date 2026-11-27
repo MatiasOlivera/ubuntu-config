@@ -35,6 +35,7 @@ Iterate with the check that covers the change. The full gate below runs before t
 - Changed `reports/gaps.sh` → `bash tests/reports/gaps-test.sh`.
 - Changed `tests/python/test_<name>.py` → `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/python -p 'test_<name>.py' -v`.
 - Any changed `.sh` → `bash -n <path>` and `shellcheck -e SC1091 <path>` (skip shellcheck when not installed; `-e SC1091` matches `tests/test.sh`).
+- Changed `dotfiles/.chezmoiignore` → `bash tests/docker/chezmoi-ignore-check.sh`. This check is container-only and needs the `chezmoi` binary; without it, use the Docker command below.
 
 ## Static (zero-dep, no script execution)
 
@@ -50,11 +51,13 @@ Covers `bash -n` syntax, every library script sourced by `install.sh`/`post-inst
 docker compose -f tests/compose.yml run --rm test
 ```
 
-Image `ubuntu:26.04` + shellcheck/python3, repo mounted read-only. This local
-command and every CI trigger build from `tests/Dockerfile`; the published GHCR
-image is only a build cache, never the image the suite runs in. A nightly
-cache-free rebuild validates apt and upstream packages and refreshes that
-cache, so keep that workflow green when changing the toolchain.
+Image `ubuntu:26.04` + shellcheck/python3/git/curl and a pinned, checksummed
+chezmoi; repo mounted read-only. The command runs the static suite plus the
+container-only `tests/docker/chezmoi-ignore-check.sh`. This local command and
+every CI trigger build from `tests/Dockerfile`; the published GHCR image is only
+a build cache, never the image the suite runs in. A nightly cache-free rebuild
+validates apt and upstream packages and refreshes that cache, so keep that
+workflow green when changing the toolchain.
 
 ## Full e2e (needs Multipass on host)
 
