@@ -28,7 +28,7 @@ curl -sL https://releases.ubuntu.com/<release>/ubuntu-<release>-desktop-amd64.ma
   | awk '{print $1}' | sort -u > reports/baselines/ubuntu-<release>-desktop-manifest.txt
 ```
 
-Full bump procedure (plus `UBUNTU_IMAGE` in `tests/test.sh`, compose/Dockerfile images) lives in `README.md` under `Updating to a new Ubuntu version`.
+Full bump procedure (plus `UBUNTU_IMAGE` in `tests/test.sh` and the Dockerfile base image) lives in `README.md` under `Updating to a new Ubuntu version`.
 
 ## New report scripts
 
