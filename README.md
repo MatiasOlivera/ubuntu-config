@@ -2,11 +2,14 @@
 
 ## Description
 
-This is my environment setup: one clone and a couple of commands rebuild my Ubuntu
-workstation. `setup/` holds versioned, rerun-safe bash scripts for the applications
-I use; `dotfiles/` holds declarative chezmoi source state for my shell, Git, editor
-and coding-agent configuration. Changes are reviewable and reversible before they
-reach a machine.
+This is my Ubuntu workstation as code: a clone and two commands set up a new machine
+with the applications and configuration I use. Everything lives in git, so a change
+can be reviewed and reverted before it reaches a machine, and a re-run leaves an
+already-set-up machine alone.
+
+Under the hood, `setup/` is rerun-safe bash scripts for packages and tools;
+`dotfiles/` is chezmoi source state for my shell, Git, editor and coding-agent
+configuration.
 
 The four principles behind that design — versioned source of truth, declarative
 configuration, rerun-safe setup and reproducibility from a fresh clone — are
