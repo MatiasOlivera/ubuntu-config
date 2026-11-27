@@ -138,3 +138,32 @@ changing a policy. Choices settled with the issue owner and recorded in
   hermetic test stubs nothing here because it uses the host's python3.
 - The load-bearing policy claims (no Ubuntu/vendor apt rung, no exception
   needed) are cited in `spec.md` with their sources and verification steps.
+
+## PR Verification (draft)
+
+**Install rung:** 3 — checksum-verified release artifact (ADR 0008). Ubuntu's
+stable suites do not carry chezmoi and the publisher documents no apt
+repository, so the two distribution rungs are unavailable. The remote
+installer is gone; the exception register is untouched.
+
+**Integrity source:** maintainer-published `chezmoi_<version>_checksums.txt`
+(ADR 0007 preferred source), verified with `sha256sum --check` before any
+extraction. Sources checked: chezmoi's install page ("Verify your download"),
+the `v2.74.2` release asset list and checksum file, and packages.ubuntu.com,
+all read 2026-11-26. No GitHub digest fallback, no self-authored hash pin and
+no cosign dependency.
+
+**Verification:** `./tests/test.sh` and
+`docker compose -f tests/compose.yml run --rm test` both exited 0.
+`./tests/test.sh --vm --keep` installed chezmoi 2.74.2 from the verified
+artifact and the versions report listed it; `./tests/test.sh --vm --reuse`
+skipped the install before any download and both runs ended with all checks
+passed. Hermetic tests cover missing/mismatched material, unreachable
+metadata, rerun skip, both architectures, unsupported architecture,
+non-interactive invocation and one-line version output.
+
+**Acceptance self-review:** every scenario in `spec.md` maps to a passing
+hermetic assertion or a VM observation; the seven scenarios are covered by
+`tests/setup/essentials/chezmoi-test.sh` and the versions report in the seed
+run. The only uncovered case is migration of a binary left by the old remote
+installer, recorded as an out-of-scope risk in `plan.md`.

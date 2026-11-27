@@ -11,4 +11,4 @@
 | 7   | [x]  | Run the full local gate on this trusted checkout. | 6 | Automated | `./tests/test.sh` exits 0. |
 | 8   | [x]  | Run the isolated Docker gate. | 7 | Automated | `docker compose -f tests/compose.yml run --rm test` exits 0. |
 | 9   | [x]  | Run the e2e seed and reuse loop; confirm chezmoi is installed from the verified artifact, the versions report lists it, and the rerun skips it. | 8 | Automated | `./tests/test.sh --vm --keep` then `./tests/test.sh --vm --reuse` both exit 0. |
-| 10  | [ ]  | Self-review against the acceptance scenarios and write the PR Verification section naming rung 3, the maintainer-checksum source and the sources checked. | 9 | Manual | Every scenario in `spec.md` maps to a passing test or VM observation; PR body answers "which rung?" without reading the diff. |
+| 10  | [x]  | Self-review against the acceptance scenarios and write the PR Verification section naming rung 3, the maintainer-checksum source and the sources checked. | 9 | Manual | Every scenario in `spec.md` maps to a passing test or VM observation; PR body answers "which rung?" without reading the diff. |
