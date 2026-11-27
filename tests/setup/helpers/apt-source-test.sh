@@ -48,6 +48,7 @@ for arg in "$@"; do
 	[[ $arg == /* ]] && path=$arg
 done
 [[ -n $path ]] || exit 2
+[[ ${TEE_FAIL:-0} != 1 ]] || exit 3
 target="$FAKE_ROOT$path"
 mkdir -p "$(dirname "$target")"
 cat > "$target"
@@ -90,6 +91,7 @@ run_write() {
 	RC=0
 	if printf '%s\n' "$CONTENT" | env PATH="$T/bin:$T/sysbin" \
 		STUB_DIR="$STUB_DIR" FAKE_ROOT="$FAKE_ROOT" REAL_RM="$REAL_RM" \
+		TEE_FAIL="${TEE_FAIL:-0}" \
 		bash -c 'source "$1"; shift; apt_source_write "$@"' bash "$SRC" "${args[@]}" \
 		>"$T/stdout" 2>"$T/stderr"; then
 		RC=0
@@ -198,6 +200,21 @@ if [[ $RC -eq 0 ]] && grep -Fxq 'sentinel' "$FAKE_ROOT/etc/apt/sources.list.d/ot
 	pass 'other apt sources stay unchanged'
 else
 	fail "other sources (rc=$RC err=[$ERR])"
+fi
+
+# 6. A failed write fails the step and never prunes an existing source.
+reset_case
+mkdir -p "$(dirname "$CANON")" "$(dirname "$SIBLING")"
+printf 'keep me\n' > "$SIBLING"
+CONTENT=$DEB822
+TEE_FAIL=1
+run_write vendor.sources
+TEE_FAIL=0
+if [[ $RC -eq 3 && ! -e $CANON ]] && grep -Fxq 'keep me' "$SIBLING" &&
+	[[ ! -s $STUB_DIR/rm-calls ]]; then
+	pass 'failed write fails the step and leaves existing sources intact'
+else
+	fail "failed write (rc=$RC err=[$ERR])"
 fi
 
 if [[ $FAILURES -gt 0 ]]; then
