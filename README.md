@@ -39,6 +39,7 @@ No other dependencies. `install.sh` bootstraps `chezmoi`, `curl`, `make`, etc. i
 git clone https://github.com/MatiasOlivera/ubuntu-config ubuntu-config
 cd ubuntu-config
 ./setup/install.sh
+# restart here so the new login shell and group memberships take effect
 ./setup/post-install.sh
 
 # installing one app

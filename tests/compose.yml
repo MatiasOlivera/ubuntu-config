@@ -18,3 +18,5 @@ services:
     network_mode: none
     volumes:
       - ..:/work:ro
+    # The chezmoi check is container-only and is not auto-discovered by test.sh.
+    command: bash -c './tests/test.sh && bash tests/docker/chezmoi-ignore-check.sh'
