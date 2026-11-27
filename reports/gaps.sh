@@ -27,7 +27,7 @@ managed_apt() {
 		sort -u
 }
 
-# Snap names after `snap install` in setup/*.sh (e.g. postman).
+# Snap names after `snap install` in setup/*.sh (e.g. bw, gitkraken).
 managed_snap() {
 	grep -rhoE 'snap install +[A-Za-z0-9][A-Za-z0-9.-]*' "$SETUP_DIR" 2>/dev/null |
 		sed -E 's/.*install +//' |
