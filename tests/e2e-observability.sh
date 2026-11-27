@@ -37,17 +37,27 @@ rc=$?
 copy_records() {
 	local archive="/tmp/ubuntu-config-observability-$$.tgz"
 	local staging="$HOME/ubuntu-config-observability-$$-$phase.tgz"
-	[[ -n ${OBSERVABILITY_VM_NAME:-} && -n ${OBSERVABILITY_VM_RECORD_DIR:-} ]] || return 0
+	[[ -n ${OBSERVABILITY_VM_NAME:-} && -n ${OBSERVABILITY_VM_RECORD_DIR:-} ]] || {
+		printf 'error: e2e record collection is not configured\n' >&2
+		return 1
+	}
 	# multipass is snap-confined: it cannot write into hidden directories such
 	# as ~/.local/share, so transfer to a plain home path and move afterwards.
 	if multipass exec "$OBSERVABILITY_VM_NAME" -- tar -czf "$archive" -C "$OBSERVABILITY_VM_RECORD_DIR" . >/dev/null 2>&1 &&
 		multipass transfer "$OBSERVABILITY_VM_NAME:$archive" "$staging" >/dev/null 2>&1; then
-		mv "$staging" "$run_dir/records.tgz" || return 0
-		tar -xzf "$run_dir/records.tgz" -C "$run_dir" 2>/dev/null || true
+		if ! mv "$staging" "$run_dir/records.tgz"; then
+			printf 'error: could not move e2e records into %s\n' "$run_dir" >&2
+			return 1
+		fi
+		if ! tar -xzf "$run_dir/records.tgz" -C "$run_dir" 2>/dev/null; then
+			printf 'error: could not extract e2e records\n' >&2
+			return 1
+		fi
 		rm -f "$run_dir/records.tgz"
 	else
-		printf 'warning: could not copy e2e records from the VM\n' >&2
+		printf 'error: could not copy e2e records from the VM\n' >&2
 		rm -f "$staging"
+		return 1
 	fi
 }
 
@@ -74,8 +84,16 @@ write_summary() {
 	done
 }
 
-copy_records
+collection_rc=0
+copy_records || collection_rc=1
 write_summary
+if [[ ! -f "$run_dir/summary.tsv" ]] || [[ $(wc -l < "$run_dir/summary.tsv") -le 1 ]]; then
+	printf 'error: no step spans in e2e records\n' >&2
+	collection_rc=1
+fi
+if [[ $rc -eq 0 && $collection_rc -ne 0 ]]; then
+	rc=1
+fi
 
 printf 'exit: %d\n' "$rc"
 printf '%s\n' '--- tail ---'
