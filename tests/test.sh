@@ -110,10 +110,10 @@ for f in "${ALL_SCRIPTS[@]}"; do
 	"$SETUP_DIR/install.sh" | "$SETUP_DIR/post-install.sh") continue ;;
 	"$SETUP_DIR/helpers/"*) continue ;;
 	esac
-	if grep -qF "$(basename "$f")" "$SETUP_DIR/install.sh" "$SETUP_DIR/post-install.sh"; then
+	if reason="$(bash "$ROOT/tests/contract-check.sh" sourced "$SETUP_DIR/install.sh" "$SETUP_DIR/post-install.sh" "$f" 2>&1)"; then
 		pass "sourced $f"
 	else
-		fail "not sourced: $f"
+		fail "${reason:-not sourced: $f}"
 	fi
 done
 
@@ -134,10 +134,10 @@ done
 
 # 4. every *config*.sh works standalone (BASH_SOURCE guard per AGENTS.md)
 while IFS= read -r f; do
-	if grep -q 'BASH_SOURCE' "$f"; then
+	if reason="$(bash "$ROOT/tests/contract-check.sh" guard "$f" 2>&1)"; then
 		pass "standalone guard $f"
 	else
-		fail "standalone guard missing in $f"
+		fail "${reason:-standalone guard missing in $f}"
 	fi
 done < <(find "$SETUP_DIR" -name '*config*.sh' -not -path "$ROOT/.git/*" | sort)
 
