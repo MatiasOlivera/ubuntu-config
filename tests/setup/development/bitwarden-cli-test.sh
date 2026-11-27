@@ -26,7 +26,7 @@ export STUB_DIR STUB_RELEASE SANDBOX_ROOT
 
 # Closed set of real tools; anything touching network/system is stubbed in $T/bin.
 for b in awk bash basename cat chmod cp cut diff dirname env find grep head \
-	mkdir mktemp mv python3 rm sha256sum sort tail tr unzip; do
+	mkdir mktemp mv python3 rm sha256sum sort tail tr; do
 	src_bin="$(command -v "$b")" || { printf 'error: missing tool %s\n' "$b" >&2; exit 1; }
 	ln -s "$src_bin" "$T/sysbin/$b"
 done
@@ -103,6 +103,26 @@ printf '%s\n' "$*" >>"$STUB_DIR/snap-calls"
 exit 0
 EOF
 
+# Minimal unzip: the fixture zip is opaque here; the payload file models its
+# bw entry. Keeps this test independent of a host unzip binary.
+cat >"$T/bin/unzip" <<'EOF'
+#!/usr/bin/env bash
+case $1 in
+-tqq)
+	[[ -f $STUB_DIR/invalid_zip ]] && exit 1
+	[[ -s $2 ]] || exit 1
+	exit 0
+	;;
+-p)
+	[[ $3 == bw ]] || exit 1
+	[[ -f $STUB_DIR/no_bw ]] && exit 1
+	cat "$STUB_RELEASE/bw-payload"
+	exit $?
+	;;
+*) exit 1 ;;
+esac
+EOF
+
 chmod +x "$T/bin/"*
 
 cat >"$T/source-only.sh" <<'EOF'
@@ -116,9 +136,10 @@ fresh_release() {
 	mkdir -p "$T/release" "$T/payload" "$T/home" "$T/tmp" "$T/root/usr/local/bin"
 	"$REAL_RM" -f "$STUB_DIR/curl-calls" "$STUB_DIR/sudo-calls" \
 		"$STUB_DIR/apt-calls" "$STUB_DIR/ln-calls" "$STUB_DIR/fail-metadata" \
-		"$STUB_DIR/fail-asset" "$STUB_DIR/bad-zip" "$STUB_DIR/no-bw" \
+		"$STUB_DIR/fail-asset" "$STUB_DIR/invalid_zip" "$STUB_DIR/no_bw" \
 		"$STUB_DIR/snap-calls" "$STUB_DIR/arch"
 	printf '#!/usr/bin/env bash\nprintf "verified-bw 2026.11.1\\n"\n' >"$T/payload/bw"
+	cp "$T/payload/bw" "$STUB_RELEASE/bw-payload"
 	chmod +x "$T/payload/bw"
 	python3 - "$T/release" "$T/payload/bw" <<'PY'
 import hashlib
@@ -253,26 +274,22 @@ fi
 
 # 7. Invalid zip: a checksum-valid artifact still cannot install a bad archive.
 fresh_release
-printf 'not a zip\n' >"$T/release/bw-bit-linux-2026.11.1.zip"
-python3 - "$T/release" "$T/release/bw-bit-linux-2026.11.1.zip" <<'PY'
-import hashlib
-import json
-import pathlib
-import sys
-
-release = pathlib.Path(sys.argv[1])
-archive = pathlib.Path(sys.argv[2])
-data = json.loads((release / "releases.json").read_text(encoding="utf-8"))
-data[1]["assets"][0]["digest"] = "sha256:" + hashlib.sha256(
-    archive.read_bytes()
-).hexdigest()
-(release / "releases.json").write_text(json.dumps(data), encoding="utf-8")
-PY
+: >"$STUB_DIR/invalid_zip"
 run install
 if [[ $RC -ne 0 && $ERR == *"invalid ZIP archive"* ]] && no_install && tmp_empty; then
 	pass 'invalid archive fails closed despite a matching digest'
 else
 	fail "invalid archive (rc=$RC out=[$OUT] err=[$ERR])"
+fi
+
+# 7b. Archive without the bw entry cannot report success.
+fresh_release
+: >"$STUB_DIR/no_bw"
+run install
+if [[ $RC -ne 0 && $ERR == *"archive has no bw binary"* ]] && no_install && tmp_empty; then
+	pass 'archive missing bw fails closed'
+else
+	fail "archive missing bw (rc=$RC out=[$OUT] err=[$ERR])"
 fi
 
 # 8. Unsupported architecture is named before any artifact is downloaded.
