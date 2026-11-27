@@ -97,6 +97,12 @@ cat >"$T/bin/bw" <<'EOF'
 printf 'snap-bw 1.2.3\n'
 EOF
 
+cat >"$T/bin/snap" <<'EOF'
+#!/usr/bin/env bash
+printf '%s\n' "$*" >>"$STUB_DIR/snap-calls"
+exit 0
+EOF
+
 chmod +x "$T/bin/"*
 
 cat >"$T/source-only.sh" <<'EOF'
@@ -111,7 +117,7 @@ fresh_release() {
 	"$REAL_RM" -f "$STUB_DIR/curl-calls" "$STUB_DIR/sudo-calls" \
 		"$STUB_DIR/apt-calls" "$STUB_DIR/ln-calls" "$STUB_DIR/fail-metadata" \
 		"$STUB_DIR/fail-asset" "$STUB_DIR/bad-zip" "$STUB_DIR/no-bw" \
-		"$STUB_DIR/arch"
+		"$STUB_DIR/snap-calls" "$STUB_DIR/arch"
 	printf '#!/usr/bin/env bash\nprintf "verified-bw 2026.11.1\\n"\n' >"$T/payload/bw"
 	chmod +x "$T/payload/bw"
 	python3 - "$T/release" "$T/payload/bw" <<'PY'
@@ -168,6 +174,7 @@ if [[ $RC -eq 0 && $OUT == *"installed: bitwarden-cli"* &&
 	-x $T/home/.local/bin/bw &&
 	-x $T/root/usr/local/bin/bw ]] &&
 	[[ "$("$T/home/.local/bin/bw" --version)" == "verified-bw 2026.11.1" ]] &&
+	[[ "$(env PATH="$T/root/usr/local/bin:$T/sysbin" bw --version 2>/dev/null)" == "verified-bw 2026.11.1" ]] &&
 	grep -qF -- "-sf $T/home/.local/bin/bw /usr/local/bin/bw" "$STUB_DIR/ln-calls" &&
 	grep -qF 'install -y unzip' "$STUB_DIR/apt-calls" && tmp_empty; then
 	pass 'fresh amd64 installs the verified binary and links it into /usr/local/bin'
@@ -294,7 +301,8 @@ fi
 fresh_release
 run install
 if [[ $RC -eq 0 && $OUT == *"verified-bw 2026.11.1"* &&
-	"$("$T/home/.local/bin/bw" --version)" == "verified-bw 2026.11.1" ]]; then
+	"$("$T/home/.local/bin/bw" --version)" == "verified-bw 2026.11.1" ]] &&
+	[[ ! -e "$STUB_DIR/snap-calls" ]]; then
 	pass 'snap-installed bw on PATH does not satisfy the verified-install guard'
 else
 	fail "existing snap (rc=$RC out=[$OUT] err=[$ERR])"

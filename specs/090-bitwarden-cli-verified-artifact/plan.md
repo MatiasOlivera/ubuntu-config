@@ -136,3 +136,24 @@ recorded in `spec.md`:
 - The remaining load-bearing claims (asset names, archive layout, version
   output, absence of a separate checksum file) are listed with their sources
   and verification steps in `spec.md`.
+
+## PR Verification (draft)
+
+**Install rung:** 3 — checksum-verified release artifact (ADR 0008). The CLI has
+no Ubuntu or vendor apt package; the `bw-bit-linux[-arm64]` zip is the highest
+available rung. The commercial `bit` build is the exact binary the existing snap
+wraps, so behavior (including device approval) is preserved.
+
+**Integrity source:** Bitwarden publishes no separate checksum asset for CLI
+releases (expanded assets of `cli-v2026.11.0` and `cli-v2026.11.1`, checked
+2026-11-26). Verification therefore uses GitHub's release-asset SHA-256 digest,
+the ADR 0007 fallback. Sources checked: `bitwarden.com/help/cli`,
+`bitwarden.com/help/security-faqs`, the GitHub release asset lists and Bitwarden's
+`build-cli.yml`. No self-authored hash pin and no exception entry are used.
+
+**Verification:** `./tests/test.sh` passed; `./tests/test.sh --vm --keep`
+installed `bitwarden-cli 2026.11.1` on a fresh VM and the versions report listed
+it; `./tests/test.sh --vm --reuse` skipped the install before any download and
+ended with all checks passed. Hermetic tests cover missing/mismatched material,
+transport failures, both architectures, rerun skip, PATH invocation and an
+existing snap install left untouched.
