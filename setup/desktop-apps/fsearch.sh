@@ -16,7 +16,7 @@ install_fsearch_repository() {
 	# Manual entry: add-apt-repository calls api.launchpad.net, which
 	# stalls ~2 min per run here. Key fingerprint per
 	# https://launchpad.net/~christian-boxdoerfer/+archive/ubuntu/fsearch-stable
-	curl -fsSL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x75555AFF5215AD9DBFD8CDB952B2FFB2DC496F40" | sudo gpg --dearmor -o /usr/share/keyrings/fsearch.gpg
+	curl -fsSL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x75555AFF5215AD9DBFD8CDB952B2FFB2DC496F40" | sudo gpg --dearmor --yes -o /usr/share/keyrings/fsearch.gpg || return 1
 	apt_source_write fsearch.sources <<EOF
 Types: deb
 URIs: https://ppa.launchpadcontent.net/christian-boxdoerfer/fsearch-stable/ubuntu
