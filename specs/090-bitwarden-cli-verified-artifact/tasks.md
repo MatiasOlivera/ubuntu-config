@@ -1,7 +1,5 @@
 # tasks.md - `090-bitwarden-cli-verified-artifact`
 
-> Atomic, dependency-ordered, each independently verifiable.
-
 | ID  | Done | Task | Depends on | Type      | Verification |
 | --- | ---- | ---- | ---------- | --------- | ------------ |
 | 1   | [x]  | Re-check live `cli-v*` release assets, asset names for amd64/arm64, archive entry `bw`, and the `digest` field in a GitHub release response; note sources checked for the ADR 0007 fallback in the PR draft. | - | Manual | Read the expanded release assets and one API response; output names and digest format match the parser contract in `plan.md`. |
