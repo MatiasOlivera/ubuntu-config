@@ -78,10 +78,10 @@ The root `opencode.json` adds command denials for setup scripts and selected hos
 - Explain the why in the body whenever a commit needs justification: bug fixes
   (symptom + root cause + why this fix), refactors, renames, sequencing changes.
   2–4 sentences. Omit the how - the diff shows it.
-- Use Git flow for branches off `develop`: `<type>/<[issue-]slug>` matching
-  the change's commit type (e.g. `fix/42-repo-key-missing`); release only as
-  `develop` → `main`. `slug` = kebab-case title: lowercase, non-alphanumerics
-  → `-`, capped at ~5 words / 60 chars.
+- Use Git flow for branches off `develop`: `<type>/<[issue-]slug>`; release
+  only as `develop` → `main`. `slug` = kebab-case title: lowercase,
+  non-alphanumerics → `-`, capped at ~5 words / 60 chars. Branch `<type>` and
+  pull request title `<type>` follow Conventional Branch, not the commit type.
 - Never commit without explicit approval
 
 ## Docs
