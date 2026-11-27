@@ -41,12 +41,13 @@ Use the highest rung that actually exists for the tool, in this order:
 
 Integrity is a constraint on every rung, not a rung of its own: never execute
 unverifiable remote code. `curl … | sh` is not an option; a tool that only has
-such an installer needs an entry in the integrity exception register
+such an installer needs an entry in the exception register
 (`docs/integrity-exceptions.md`) first.
 
 Install verified release artifacts, never execute a remote install script. If
-no usable integrity material exists, fail closed and record an exception
-decision first.
+no usable integrity material exists, fail closed and record an exception first.
+A tool kept below the preferred rung for a documented reason belongs in the
+same register.
 
 Break ties by, in order: idempotent and non-interactive installs; a verifiable
 source; updates through a path this repo actually runs; least privilege.
