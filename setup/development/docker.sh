@@ -23,8 +23,6 @@ install_docker() {
     # Manage Docker as a non-root user
     sudo groupadd -f docker
     sudo usermod -aG docker "$USER"
-
-    newgrp docker
 }
 
 install_docker_repository() {
