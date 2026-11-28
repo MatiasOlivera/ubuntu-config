@@ -10,4 +10,4 @@
 | 6   | [x]  | Publish the container image under the new package name and make that package public. | 5 | Manual | The `test-image` workflow run succeeds and an anonymous pull of the new image succeeds. |
 | 7   | [x]  | Update local clone/worktree remotes to the new repository URL. | 5 | Manual | `git remote -v` shows the new URL in this checkout. |
 | 8   | [x]  | Confirm an old repository URL still resolves to the renamed repository. | 5 | Manual | Opening the former URL lands on the renamed repository. |
-| 9   | [ ]  | Run the full test gate before the first local review. | 3, 6 | Automated | `./tests/test.sh` exits 0. |
+| 9   | [x]  | Run the full test gate before the first local review. | 3, 6 | Automated | `./tests/test.sh` exits 0. |
