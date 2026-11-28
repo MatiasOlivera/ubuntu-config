@@ -1,6 +1,6 @@
 # Repository identity naming
 
-- Status: proposed
+- Status: accepted
 - Deciders: MatiasOlivera
 - Date: 2026-11-27
 
