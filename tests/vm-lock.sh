@@ -6,7 +6,7 @@
 vm_lock_fd=
 
 vm_lock_path() {
-	printf '%s/ubuntu-config-e2e-%s.lock' "${TMPDIR:-/tmp}" "$1"
+	printf '%s/ubuntu-workstation-e2e-%s.lock' "${TMPDIR:-/tmp}" "$1"
 }
 
 vm_lock_release() {

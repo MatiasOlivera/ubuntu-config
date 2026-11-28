@@ -15,7 +15,7 @@ permissions:
   packages: write
 
 env:
-  IMAGE: ghcr.io/matiasolivera/ubuntu-config-test:latest
+  IMAGE: ghcr.io/matiasolivera/ubuntu-workstation-test:latest
 
 jobs:
   publish:

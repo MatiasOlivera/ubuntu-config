@@ -29,7 +29,7 @@ export UBUNTU_CONFIG_ROOT="$REPO" VM_NAME=stub-vm MULTIPASS="$T/multipass"
 export MULTIPASS_LOG="$LOG" XDG_STATE_HOME="$T/state"
 
 if bash "$HELPER" seed > "$T/seed.out" 2>&1; then
-	[[ -s $T/state/ubuntu-config/dev-iter-stub-vm.sha ]] &&
+	[[ -s $T/state/ubuntu-workstation/dev-iter-stub-vm.sha ]] &&
 		pass "seed: baseline recorded" || fail "seed: no baseline"
 else
 	printf 'seed output:\n' >&2

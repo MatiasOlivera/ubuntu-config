@@ -12,7 +12,7 @@ set -uo pipefail
 ROOT=${UBUNTU_CONFIG_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}
 VM_NAME=${VM_NAME:-$(bash "$ROOT/tests/vm-name.sh" "$ROOT")}
 MP=${MULTIPASS:-multipass}
-STATE_DIR=${XDG_STATE_HOME:-$HOME/.local/state}/ubuntu-config
+STATE_DIR=${XDG_STATE_HOME:-$HOME/.local/state}/ubuntu-workstation
 STATE_FILE=$STATE_DIR/dev-iter-$VM_NAME.sha
 
 setup_files() {
@@ -57,24 +57,24 @@ fi
 printf 'changed setup scripts:\n'
 printf '  %s\n' "${changed[@]}"
 
-tarball=$(mktemp "$HOME/ubuntu-config-dev.XXXXXX.tar.gz") || exit 1
+tarball=$(mktemp "$HOME/ubuntu-workstation-dev.XXXXXX.tar.gz") || exit 1
 tar -czf "$tarball" --exclude=.git -C "$ROOT" . || exit 1
-"$MP" transfer "$tarball" "$VM_NAME:/home/ubuntu/ubuntu-config.tar.gz" || exit 1
-"$MP" exec "$VM_NAME" -- mkdir -p /home/ubuntu/ubuntu-config || exit 1
-"$MP" exec "$VM_NAME" -- tar -xzf /home/ubuntu/ubuntu-config.tar.gz -C /home/ubuntu/ubuntu-config || exit 1
+"$MP" transfer "$tarball" "$VM_NAME:/home/ubuntu/ubuntu-workstation.tar.gz" || exit 1
+"$MP" exec "$VM_NAME" -- mkdir -p /home/ubuntu/ubuntu-workstation || exit 1
+"$MP" exec "$VM_NAME" -- tar -xzf /home/ubuntu/ubuntu-workstation.tar.gz -C /home/ubuntu/ubuntu-workstation || exit 1
 rm -f "$tarball"
 
 remote='set -e;'
 for rel in "${changed[@]}"; do
 	if grep -qE 'install_.*_repository\(\)' "$ROOT/$rel"; then
-		remote+=" bash /home/ubuntu/ubuntu-config/$rel repository;"
+		remote+=" bash /home/ubuntu/ubuntu-workstation/$rel repository;"
 	fi
 done
 remote+=' sudo apt update >/dev/null;'
 for rel in "${changed[@]}"; do
-	remote+=" bash /home/ubuntu/ubuntu-config/$rel install;"
+	remote+=" bash /home/ubuntu/ubuntu-workstation/$rel install;"
 	case $rel in
-	*config*.sh) remote+=" bash /home/ubuntu/ubuntu-config/$rel config;" ;;
+	*config*.sh) remote+=" bash /home/ubuntu/ubuntu-workstation/$rel config;" ;;
 	esac
 done
 remote+=' which git docker zsh curl >/dev/null'

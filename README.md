@@ -1,4 +1,4 @@
-# ubuntu-config
+# ubuntu-workstation
 
 ## Description
 
@@ -22,8 +22,8 @@ Restart the shell after `install.sh` so the new login shell and group membership
 take effect.
 
 ```sh
-git clone https://github.com/MatiasOlivera/ubuntu-config ubuntu-config
-cd ubuntu-config
+git clone https://github.com/MatiasOlivera/ubuntu-workstation ubuntu-workstation
+cd ubuntu-workstation
 ./setup/install.sh
 ./setup/post-install.sh
 ```
@@ -38,7 +38,7 @@ Re-run `./setup/install.sh` after pulling changes; it skips work already done.
 
 ## Support
 
-- Bugs and questions: [open an issue](https://github.com/MatiasOlivera/ubuntu-config/issues).
+- Bugs and questions: [open an issue](https://github.com/MatiasOlivera/ubuntu-workstation/issues).
 - [Dotfiles](docs/dotfiles.md) — secrets and chezmoi apply.
 - [Agent credentials runbook](docs/runbooks/agent-credentials-runbook.md) — vault → keyring bridge and troubleshooting.
 

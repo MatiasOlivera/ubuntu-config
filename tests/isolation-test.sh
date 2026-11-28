@@ -33,7 +33,7 @@ check 'compose forbids new privileges' tests/compose.yml 'no-new-privileges'
 check 'compose has no network' tests/compose.yml '^[[:space:]]*network_mode:[[:space:]]*none[[:space:]]*$'
 check 'compose mounts checkout read-only' tests/compose.yml '/work:ro'
 check 'compose declares a build cache source' tests/compose.yml '^[[:space:]]*cache_from:'
-check 'compose cache source is the published image' tests/compose.yml ghcr.io/matiasolivera/ubuntu-config-test:latest
+check 'compose cache source is the published image' tests/compose.yml ghcr.io/matiasolivera/ubuntu-workstation-test:latest
 
 workflow=.github/workflows/test-image.yml
 check "$workflow drops capabilities" "$workflow" --cap-drop=ALL

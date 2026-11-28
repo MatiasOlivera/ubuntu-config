@@ -11,7 +11,7 @@ description: Use when running or iterating on this repo's checks while changing 
 
 Every `./tests/test.sh --vm ...` phase already records its own transcript,
 per-app spans and logs under `E2E_OBSERVABILITY_DIR` (default
-`${XDG_DATA_HOME:-$HOME/.local/share}/ubuntu-config/observability/<run-id>/`).
+`${XDG_DATA_HOME:-$HOME/.local/share}/ubuntu-workstation/observability/<run-id>/`).
 The harness prints `records:` and `log:` paths; watch a live transcript with
 `tail -f <log path>`. To browse traces, correlated logs and metrics, start the
 local stack once (see `AGENTS.md`):
@@ -75,7 +75,7 @@ to a cold build, not a stale image. A nightly cache-free rebuild validates apt
 and upstream packages and refreshes that cache, so keep that workflow green
 when changing the toolchain ([ADR 0010](../../../docs/decisions/0010-ci-test-image-provisioning.md),
 [ADR 0017](../../../docs/decisions/0017-ci-test-image-freshness.md)). One-time
-setup: make the `ubuntu-config-test` GHCR package public so fork PRs can use the
+setup: make the `ubuntu-workstation-test` GHCR package public so fork PRs can use the
 cache without credentials.
 
 ## Full e2e (needs Multipass on host)
@@ -91,9 +91,9 @@ cache without credentials.
 MCP OAuth sign-in is interactive, so the headless e2e VM verifies that the
 Context7 entries are deployed but does not authenticate them.
 
-The VM name is `ubuntu-config-test-<checkout-dir>-<base62>` (checkout directory slug + base62 digest of its path), so each checkout has its own VM; each `--vm` run prints the name. Only one e2e run may use a given VM at a time: starting a second `--vm` run against the same checkout exits immediately with an error naming the VM. It does not queue, and runs against other worktrees are unaffected. Wait for the active run to finish before retrying.
+The VM name is `ubuntu-workstation-test-<checkout-dir>-<base62>` (checkout directory slug + base62 digest of its path), so each checkout has its own VM; each `--vm` run prints the name. Only one e2e run may use a given VM at a time: starting a second `--vm` run against the same checkout exits immediately with an error naming the VM. It does not queue, and runs against other worktrees are unaffected. Wait for the active run to finish before retrying.
 
-Deleting an Orca worktree with hooks enabled (`orca worktree rm --worktree <selector> --run-hooks`) runs the `scripts.archive` hook from `orca.yaml`, which purges only that checkout's VM. A failed purge never blocks deletion: it notifies on the desktop and appends the VM name to `${XDG_STATE_HOME:-$HOME/.local/state}/ubuntu-config/vm-cleanup-failures.log`.
+Deleting an Orca worktree with hooks enabled (`orca worktree rm --worktree <selector> --run-hooks`) runs the `scripts.archive` hook from `orca.yaml`, which purges only that checkout's VM. A failed purge never blocks deletion: it notifies on the desktop and appends the VM name to `${XDG_STATE_HOME:-$HOME/.local/state}/ubuntu-workstation/vm-cleanup-failures.log`.
 
 ## Iteration loop (fast re-runs)
 

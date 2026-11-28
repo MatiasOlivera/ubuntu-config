@@ -48,7 +48,7 @@ export PATH="$STUB_DIR:$PATH"
 
 VM="$(bash "$ROOT/tests/vm-name.sh" "$T/worktree")"
 OTHER="other-worktree"
-LOG="$XDG_STATE_HOME/ubuntu-config/vm-cleanup-failures.log"
+LOG="$XDG_STATE_HOME/ubuntu-workstation/vm-cleanup-failures.log"
 
 run_hook() {
 	local out=$1

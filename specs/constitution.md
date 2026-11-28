@@ -8,7 +8,7 @@
 
 ## Identity — what this project is
 
-`ubuntu-config` is one person's development environment expressed as code:
+`ubuntu-workstation` is one person's development environment expressed as code:
 bash scripts that turn a fresh Ubuntu machine into that person's working
 workstation (`setup/`), and chezmoi dotfiles that declaratively own its
 configuration (`dotfiles/`). The beneficiary is the machines the author owns;

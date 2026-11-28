@@ -22,7 +22,7 @@ body = """
 ### {{ entry.group }}
 
 {% for commit in entry.commits %}
-- {{ commit.message | split(pat="\n") | first | trim }} ([`{{ commit.id | truncate(length=7, end="") }}`](https://github.com/MatiasOlivera/ubuntu-config/commit/{{ commit.id }}))\
+- {{ commit.message | split(pat="\n") | first | trim }} ([`{{ commit.id | truncate(length=7, end="") }}`](https://github.com/MatiasOlivera/ubuntu-workstation/commit/{{ commit.id }}))\
 {% endfor %}
 {% endfor %}\n
 """
@@ -36,7 +36,7 @@ conventional_commits = true
 filter_unconventional = true
 tag_pattern = "v[0-9].*"
 commit_preprocessors = [
-  { pattern = '#([0-9]+)', replace = "[#${1}](https://github.com/MatiasOlivera/ubuntu-config/issues/${1})" },
+  { pattern = '#([0-9]+)', replace = "[#${1}](https://github.com/MatiasOlivera/ubuntu-workstation/issues/${1})" },
 ]
 commit_parsers = [
   { field = "breaking", pattern = "true", group = "Breaking changes" },

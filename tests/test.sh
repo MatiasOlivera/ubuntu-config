@@ -175,7 +175,7 @@ if [[ $RUN_VM -eq 1 && $FAILURES -eq 0 ]]; then
 		# Observability records are written inside the VM, then copied to the
 		# host by the phase wrapper before the cleanup trap can delete the VM.
 		OBSERVABILITY_VM_NAME=$VM_NAME
-		OBSERVABILITY_VM_RECORD_DIR=/home/ubuntu/.ubuntu-config-observability
+		OBSERVABILITY_VM_RECORD_DIR=/home/ubuntu/.ubuntu-workstation-observability
 		OBSERVABILITY_RUN_ID="$(date -u +%Y%m%dT%H%M%SZ)-$(git -C "$ROOT" rev-parse --short HEAD 2>/dev/null || echo unknown)"
 		OBSERVABILITY_GIT_SHA="$(git -C "$ROOT" rev-parse HEAD 2>/dev/null || true)"
 		OBSERVABILITY_GIT_BRANCH="$(git -C "$ROOT" rev-parse --abbrev-ref HEAD 2>/dev/null || true)"
@@ -221,11 +221,11 @@ if [[ $RUN_VM -eq 1 && $FAILURES -eq 0 ]]; then
 		export OBSERVABILITY_COLLECTOR
 
 		phase_begin
-		tarball="$(mktemp "$HOME/ubuntu-config-test.XXXXXX.tar.gz")"
+		tarball="$(mktemp "$HOME/ubuntu-workstation-test.XXXXXX.tar.gz")"
 		if tar -czf "$tarball" --exclude=.git -C "$ROOT" . &&
-			multipass transfer "$tarball" "$VM_NAME:/home/ubuntu/ubuntu-config.tar.gz" &&
-			multipass exec "$VM_NAME" -- mkdir -p /home/ubuntu/ubuntu-config &&
-			multipass exec "$VM_NAME" -- tar -xzf /home/ubuntu/ubuntu-config.tar.gz -C /home/ubuntu/ubuntu-config; then
+			multipass transfer "$tarball" "$VM_NAME:/home/ubuntu/ubuntu-workstation.tar.gz" &&
+			multipass exec "$VM_NAME" -- mkdir -p /home/ubuntu/ubuntu-workstation &&
+			multipass exec "$VM_NAME" -- tar -xzf /home/ubuntu/ubuntu-workstation.tar.gz -C /home/ubuntu/ubuntu-workstation; then
 			pass "transfer repo to VM"
 		else
 			fail "transfer repo to VM"
@@ -238,11 +238,11 @@ if [[ $RUN_VM -eq 1 && $FAILURES -eq 0 ]]; then
 			multipass exec "$VM_NAME" -- env \
 			CHEZMOI_NAME="Test" CHEZMOI_EMAIL="test@example.com" \
 			OBSERVABILITY_RECORD_DIR="$OBSERVABILITY_VM_RECORD_DIR/install" \
-			OBSERVABILITY_E2E_APP_PATHS=/home/ubuntu/ubuntu-config/tests/observability/app-paths.tsv \
+			OBSERVABILITY_E2E_APP_PATHS=/home/ubuntu/ubuntu-workstation/tests/observability/app-paths.tsv \
 			OBSERVABILITY_RUN_ID="$OBSERVABILITY_RUN_ID" OBSERVABILITY_PHASE=install \
 			OBSERVABILITY_COLLECTOR="$OBSERVABILITY_COLLECTOR" OBSERVABILITY_GIT_SHA="$OBSERVABILITY_GIT_SHA" \
 			OBSERVABILITY_GIT_BRANCH="$OBSERVABILITY_GIT_BRANCH" OBSERVABILITY_VM_NAME="$VM_NAME" OBSERVABILITY_IMAGE="$OBSERVABILITY_IMAGE" \
-			bash /home/ubuntu/ubuntu-config/setup/install.sh; then
+			bash /home/ubuntu/ubuntu-workstation/setup/install.sh; then
 			pass "install.sh in VM"
 		else
 			fail "install.sh in VM"
@@ -254,11 +254,11 @@ if [[ $RUN_VM -eq 1 && $FAILURES -eq 0 ]]; then
 			multipass exec "$VM_NAME" -- env \
 			SKIP_UPGRADE=1 \
 			OBSERVABILITY_RECORD_DIR="$OBSERVABILITY_VM_RECORD_DIR/post-install" \
-			OBSERVABILITY_E2E_APP_PATHS=/home/ubuntu/ubuntu-config/tests/observability/app-paths.tsv \
+			OBSERVABILITY_E2E_APP_PATHS=/home/ubuntu/ubuntu-workstation/tests/observability/app-paths.tsv \
 			OBSERVABILITY_RUN_ID="$OBSERVABILITY_RUN_ID" OBSERVABILITY_PHASE=post-install \
 			OBSERVABILITY_COLLECTOR="$OBSERVABILITY_COLLECTOR" OBSERVABILITY_GIT_SHA="$OBSERVABILITY_GIT_SHA" \
 			OBSERVABILITY_GIT_BRANCH="$OBSERVABILITY_GIT_BRANCH" OBSERVABILITY_VM_NAME="$VM_NAME" OBSERVABILITY_IMAGE="$OBSERVABILITY_IMAGE" \
-			bash /home/ubuntu/ubuntu-config/setup/post-install.sh; then
+			bash /home/ubuntu/ubuntu-workstation/setup/post-install.sh; then
 			pass "post-install.sh in VM"
 		else
 			fail "post-install.sh in VM"

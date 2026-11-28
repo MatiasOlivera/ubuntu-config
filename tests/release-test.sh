@@ -76,7 +76,7 @@ set -eu
 get() { grep "^$1=" "$GH_STATE" 2>/dev/null | cut -d= -f2- | head -n 1 || true; }
 setv() { grep -v "^$1=" "$GH_STATE" >"$GH_STATE.next" 2>/dev/null || true; printf '%s=%s\n' "$1" "$2" >>"$GH_STATE.next"; mv "$GH_STATE.next" "$GH_STATE"; }
 case "$*" in
-  *"repo view"*) printf 'MatiasOlivera/ubuntu-config\n' ;;
+  *"repo view"*) printf 'MatiasOlivera/ubuntu-workstation\n' ;;
   *"generate-notes"*) setv API_ARGS "$*"; printf '## What Changed\n- grouped note\n' ;;
   *"run list"*)
     # An unfiltered list sees the release workflow's own in-progress run.
@@ -102,7 +102,7 @@ case "$*" in
       prev=$arg
     done
     setv PR_NUMBER 10; setv PR_TITLE "$title"; setv PR_BODY "$body"; setv PR_LABELS "$labels"
-    printf 'https://github.com/MatiasOlivera/ubuntu-config/pull/10\n' ;;
+    printf 'https://github.com/MatiasOlivera/ubuntu-workstation/pull/10\n' ;;
   *"pr edit"*)
     prev=''
     for arg in "$@"; do
