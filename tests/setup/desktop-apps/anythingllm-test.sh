@@ -43,7 +43,7 @@ STUB_DIR="$T/stubs"
 mkdir -p "$STUB_DIR"
 export STUB_DIR
 APP="$HOME/Applications/$ASSET"
-MARKER="$HOME/.local/state/ubuntu-config/anythingllm.version"
+MARKER="$HOME/.local/state/anythingllm-desktop/version"
 DESKTOP="$HOME/.local/share/applications/anythingllmdesktop.desktop"
 PROFILE="/etc/apparmor.d/anythingllmdesktop"
 export APP MARKER DESKTOP PROFILE TAG ASSET ARM_ASSET

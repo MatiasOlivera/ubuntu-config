@@ -2,7 +2,7 @@
 
 | ID  | Done | Task | Depends on | Type      | Verification |
 | --- | ---- | ---- | ---------- | --------- | ------------ |
-| 1   | [ ]  | Move the AnythingLLM version marker to an application-owned path. | - | Automated | `bash tests/setup/desktop-apps/anythingllm-test.sh` exits 0. |
+| 1   | [x]  | Move the AnythingLLM version marker to an application-owned path. | - | Automated | `bash tests/setup/desktop-apps/anythingllm-test.sh` exits 0. |
 | 2   | [ ]  | Rename runtime identifiers — container image, e2e VM prefix, state/cache/log paths, compose project and observability service name — to `ubuntu-workstation` in scripts, workflows, tests, dashboards and agent docs. | 1 | Automated | The focused tests for the touched scripts exit 0: `bash tests/vm-name-test.sh`, `bash tests/vm-cleanup-test.sh`, `bash tests/observability/wrapper-test.sh`, `bash tests/isolation-test.sh`. |
 | 3   | [ ]  | Rename identity references in README, agent instructions, constitution, changelog generator config and issue-template links. | 2 | Manual | A grep for the former name in active files finds only historical records; `README.md` shows the new clone URL. |
 | 4   | [ ]  | Move ADR 0019 from `proposed` to `accepted` once the plan is approved. | 3 | Manual | `docs/decisions/0019-repository-identity-naming.md` shows `Status: accepted`. |
