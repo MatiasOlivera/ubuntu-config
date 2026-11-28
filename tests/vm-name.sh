@@ -30,5 +30,5 @@ if [[ ${BASH_SOURCE[0]} == "$0" ]]; then
 	hex="$(printf '%s\n' "$worktree" | sha256sum)"
 	suffix="$(base62 "$((16#${hex:0:12}))")"
 
-	printf 'ubuntu-config-test-%s-%s\n' "$slug" "$suffix"
+	printf 'ubuntu-workstation-test-%s-%s\n' "$slug" "$suffix"
 fi

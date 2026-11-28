@@ -33,7 +33,7 @@ releases by hand — see `docs/runbooks/release-runbook.md`.
 
 Each `./tests/test.sh --vm` phase records per-app spans, logs and a summary under
 `E2E_OBSERVABILITY_DIR` (default
-`${XDG_DATA_HOME:-$HOME/.local/share}/ubuntu-config/observability/<run-id>/`) and
+`${XDG_DATA_HOME:-$HOME/.local/share}/ubuntu-workstation/observability/<run-id>/`) and
 prints `records:` and `log:` paths. Start the local stack before or after a run
 to browse traces, correlated logs and metrics in Grafana:
 

@@ -1107,7 +1107,7 @@
   "schemaVersion": 40,
   "tags": [
     "e2e",
-    "ubuntu-config"
+    "ubuntu-workstation"
   ],
   "templating": {
     "list": [

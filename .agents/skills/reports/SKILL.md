@@ -12,7 +12,7 @@ description: Use when working with the report scripts reports/versions.sh and re
 ```sh
 ./reports/versions.sh
 ./reports/gaps.sh
-multipass exec <vm-name> -- bash ubuntu-config/reports/versions.sh  # same, inside the e2e VM
+multipass exec <vm-name> -- bash ubuntu-workstation/reports/versions.sh  # same, inside the e2e VM
 ```
 
 ## versions.sh

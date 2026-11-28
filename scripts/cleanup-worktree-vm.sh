@@ -7,14 +7,14 @@ set -uo pipefail
 
 report() {
 	local message="$1"
-	local log="${XDG_STATE_HOME:-${HOME:-/tmp}/.local/state}/ubuntu-config/vm-cleanup-failures.log"
+	local log="${XDG_STATE_HOME:-${HOME:-/tmp}/.local/state}/ubuntu-workstation/vm-cleanup-failures.log"
 
 	printf 'WARNING: %s\n' "$message" >&2
 	mkdir -p "${log%/*}" 2>/dev/null || true
 	printf '%s\n' "$message" >> "$log" 2>/dev/null || true
 	# Orca discards a successful hook's output, so make leftovers visible.
 	if command -v notify-send >/dev/null 2>&1; then
-		notify-send 'ubuntu-config: leftover e2e VM' "$message" >/dev/null 2>&1 || true
+		notify-send 'ubuntu-workstation: leftover e2e VM' "$message" >/dev/null 2>&1 || true
 	fi
 }
 
@@ -33,7 +33,7 @@ vm="$(bash "$worktree/tests/vm-name.sh" "$worktree")" || {
 	report "cannot compute the e2e VM name for '$worktree'"
 	exit 0
 }
-if [[ $vm != ubuntu-config-test-* ]]; then
+if [[ $vm != ubuntu-workstation-test-* ]]; then
 	report "unexpected e2e VM name '$vm' for '$worktree'; refusing to delete"
 	exit 0
 fi

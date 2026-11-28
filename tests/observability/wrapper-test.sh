@@ -19,7 +19,7 @@ T="$(mktemp -d)" || { printf 'error: mktemp failed\n' >&2; exit 1; }
 trap 'rm -rf "$T"' EXIT
 mkdir -p "$T/stubs" "$T/fixture" "$T/xdg" "$T/home"
 export STUB_DIR="$T/stubs" HOME="$T/home"
-records_root="$HOME/.local/share/ubuntu-config/observability"
+records_root="$HOME/.local/share/ubuntu-workstation/observability"
 
 cat > "$STUB_DIR/curl" <<'EOF'
 #!/usr/bin/env bash
@@ -78,7 +78,7 @@ if [[ -f $records/spans.jsonl ]]; then pass "success: VM records copied out"; el
 if grep -q '^label' "$records/summary.tsv" 2>/dev/null; then pass "success: summary written"; else fail "success: summary missing"; fi
 if grep -q 'install_uv' "$records/summary.tsv" 2>/dev/null; then pass "success: summary names the app"; else fail "success: summary has no app row"; fi
 if grep -q $'install_fnm\tinstall' "$records/summary.tsv" 2>/dev/null; then pass "success: nested phase records summarized"; else fail "success: nested phase rows missing"; fi
-if compgen -G "$HOME/ubuntu-config-observability-*.tgz" >/dev/null; then
+if compgen -G "$HOME/ubuntu-workstation-observability-*.tgz" >/dev/null; then
 	fail "success: staging archive left behind"
 else
 	pass "success: staging archive cleaned up"
@@ -100,7 +100,7 @@ E2E_OBSERVABILITY_DIR="$T/root2" XDG_DATA_HOME="$T/xdg" OBSERVABILITY_VM_NAME=fa
 	OBSERVABILITY_VM_RECORD_DIR=/tmp/vm-records OBSERVABILITY_COLLECTOR='' \
 	bash -c 'unset E2E_OBSERVABILITY_DIR; exec bash "$0" install true' "$WRAPPER" > "$T/xdg.out" 2>&1
 xdg_records=$(sed -n 's/^records: //p' "$T/xdg.out" | sed -n 1p)
-if [[ $xdg_records == "$T/xdg/ubuntu-config/observability/"* ]]; then
+if [[ $xdg_records == "$T/xdg/ubuntu-workstation/observability/"* ]]; then
 	pass "xdg: fallback root honored"
 else
 	fail "xdg: bad fallback path '$xdg_records'"

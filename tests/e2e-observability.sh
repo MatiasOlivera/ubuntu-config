@@ -15,7 +15,7 @@ usage() {
 phase=$1
 shift
 
-root=${E2E_OBSERVABILITY_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/ubuntu-config/observability}
+root=${E2E_OBSERVABILITY_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/ubuntu-workstation/observability}
 run_id="$(date -u +%Y%m%dT%H%M%SZ)-$$"
 run_dir="$root/$run_id"
 mkdir -p "$run_dir" || exit 1
@@ -35,8 +35,8 @@ export OBSERVABILITY_COLLECTOR
 rc=$?
 
 copy_records() {
-	local archive="/tmp/ubuntu-config-observability-$$.tgz"
-	local staging="$HOME/ubuntu-config-observability-$$-$phase.tgz"
+	local archive="/tmp/ubuntu-workstation-observability-$$.tgz"
+	local staging="$HOME/ubuntu-workstation-observability-$$-$phase.tgz"
 	[[ -n ${OBSERVABILITY_VM_NAME:-} && -n ${OBSERVABILITY_VM_RECORD_DIR:-} ]] || {
 		printf 'error: e2e record collection is not configured\n' >&2
 		return 1
