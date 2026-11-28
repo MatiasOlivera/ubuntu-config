@@ -1,28 +1,38 @@
-# Integrity exceptions
+# Install and integrity exceptions
 
-This register records setup tools that remain installable despite lacking
-publisher-provided integrity material, or where a verified install would drop
-setup the tool needs to work. It documents why the verified path is unavailable
-or unsuitable, why automatic installation remains useful, and the risk accepted
-for each exception. The general integrity standard remains in
-[`0003-remote-installer-integrity.md`](decisions/0003-remote-installer-integrity.md).
+This register records setup tools that stay on a lower install-method rung or
+without publisher-provided integrity material when every higher or verified
+path is unavailable or unsuitable. It documents why the preferred path is
+unavailable, why automatic installation remains useful, and the risk accepted
+for each exception. The install-method ladder is in
+[`0008-install-method-priority.md`](decisions/0008-install-method-priority.md);
+the integrity standards remain in
+[`0003-remote-installer-integrity.md`](decisions/0003-remote-installer-integrity.md)
+and
+[`0007-artifact-integrity-source-priority.md`](decisions/0007-artifact-integrity-source-priority.md).
 
 ## Entries
 
-| Application | Version reviewed | Checked on | Why a verified install is unavailable | Upstream request |
-| --- | --- | --- | --- | --- |
-| Cursor CLI | `2026.11.19-f005e9d` | 2026-11-19 | Cursor's official installer downloads and extracts a versioned archive without a publisher checksum or signature. | [Cursor forum request](https://forum.cursor.com/t/publish-integrity-metadata-for-cursor-cli-releases/178866) |
-| Ollama | unpinned — the installer fetches the current release; `OLLAMA_VERSION` is the upstream pin knob | 2026-11-20 | Upstream publishes `sha256sum.txt` for release assets, but `ollama.com/install.sh` does not consume it. A verified-artifact install would replace upstream GPU detection, ROCm/JetPack bundle selection, NVIDIA driver setup and systemd configuration with a partial reimplementation. Accepts unverified installer execution and downloads. | [Upstream request](https://github.com/ollama/ollama/issues/19787) |
+| Application | Version reviewed | Checked on | Exception | Why the preferred path is unavailable or unsuitable | Reference |
+| --- | --- | --- | --- | --- | --- |
+| Cursor CLI | `2026.11.19-f005e9d` | 2026-11-19 | Integrity | Cursor's official installer downloads and extracts a versioned archive without a publisher checksum or signature. | [Cursor forum request](https://forum.cursor.com/t/publish-integrity-metadata-for-cursor-cli-releases/178866) |
+| Ollama | unpinned — the installer fetches the current release; `OLLAMA_VERSION` is the upstream pin knob | 2026-11-20 | Integrity | Upstream publishes `sha256sum.txt` for release assets, but `ollama.com/install.sh` does not consume it. A verified-artifact install would replace upstream GPU detection, ROCm/JetPack bundle selection, NVIDIA driver setup and systemd configuration with a partial reimplementation. Accepts unverified installer execution and downloads. | [Upstream request](https://github.com/ollama/ollama/issues/19787) |
+| Homebrew | unpinned — installer fetched from `install/HEAD`; current release 7.0.16 (2026-11-26) | 2026-11-26 | Integrity | Ubuntu ships no `homebrew` apt package and Homebrew has no vendor apt repository. Releases carry only the macOS `Homebrew.pkg`; Linux installs clone an unsigned lightweight tag via a mutable remote script. A verified-artifact rewrite would need a self-authored hash pin, which ADR 0007 forbids. Accepts execution of mutable remote code and an unverified checkout during bootstrap. | [Upstream request](https://github.com/Homebrew/brew/issues/24815) |
+| Oh My Zsh | unpinned — the upstream installer fetches the current `master` at install time | 2026-11-26 | Integrity | Ubuntu ships no `oh-my-zsh` package; upstream publishes no releases or tags, so neither maintainer integrity material nor a GitHub release-asset digest exists to verify (ADR 0007). No Homebrew formula/cask or snap exists either; the install path executes a mutable remote installer that fetches code from a mutable branch. A verified rewrite would need a self-authored hash pin, which ADR 0007 forbids. Accepts unverifiable remote execution with the setup user's privileges. Re-evaluate when upstream releases ship ([upstream versioning work](https://github.com/ohmyzsh/ohmyzsh/issues/13563)). | [Upstream integrity request](https://github.com/ohmyzsh/ohmyzsh/issues/14301) |
+| OBS Studio | Flatpak `33.0.3` with seven Flathub plugin extensions (Scene Switcher `1.37.2`, Advanced Masks `1.6.1`, Move Transition `3.2.2`, PipeWire Audio Capture `1.2.2`, Source Clone `0.2.3`, Stroke Glow Shadow `1.6.1`, Source Copy `0.4.0`) | 2026-11-27 | Install method | The official Ubuntu PPA (rung 2) ships `33.0.0` but cannot keep three plugins: Advanced Masks' `.deb` depends on Qt6 `t64` package names absent on 26.04, and Move Transition/Source Copy depend on `libobs0t64`, which apt resolves by removing the PPA build and installing Ubuntu's `32.1.0`. Ubuntu apt (rung 1) keeps all seven plugins but ships OBS `32.1.0`. Flathub is publisher-verified and carries the newest core and plugin versions, so setup keeps the rung-5 install. Accepts a lower rung and vendor-native flatpak updates outside the repo's apt upgrade path. | [Upstream request](https://github.com/obsproject/obs-studio/issues/14244) |
 
 Automatic installation is retained when a tool is part of the configured
 workstation and installing it during setup keeps the fresh-machine environment
-complete. These exceptions mean setup may execute or install content without an
-independent integrity check; a compromise of the publisher or delivery path
-could result in malicious code running with the setup user's privileges.
+complete. An integrity exception means setup may execute or install content
+without an independent integrity check; an install-method exception means a
+tool stays below the preferred rung. Both accept risk: a compromise of the
+publisher or delivery path could result in malicious code running with the
+setup user's privileges, and updates may follow a path this repo does not run.
 
 ## Updating the register
 
-Add one row for each accepted exception. Record the application version and date
-examined, keep the reason and accepted risk specific to that application, and
-link the upstream request when it has been filed. Update the version and date
-when the publisher's delivery or integrity material is re-evaluated.
+Add one row for each accepted exception, name its kind (integrity or install
+method), record the application version and date examined, keep the reason and
+accepted risk specific to that application, and link the upstream request or
+tracking issue when one exists. Update the version and date when the publisher's
+delivery, integrity material or available install methods are re-evaluated.

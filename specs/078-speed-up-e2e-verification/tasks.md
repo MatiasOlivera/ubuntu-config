@@ -1,7 +1,5 @@
 # tasks.md - `078-speed-up-e2e-verification`
 
-> Atomic, dependency-ordered, each independently verifiable.
-
 | ID  | Done | Task | Depends on | Type | Verification |
 | --- | ---- | ---- | ---------- | ---- | ------------ |
 | 1   | [x]  | Write a hermetic test asserting one phase span per phase, correct name/kind/duration/status, no emission when observability is off, and no phase row in the summary (red) | - | Automated | `bash tests/observability/phase-span-test.sh` failed before the helper existed |

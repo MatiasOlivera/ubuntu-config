@@ -32,11 +32,17 @@ T="$(mktemp -d)" || {
 trap 'rm -rf "$T"' EXIT
 mkdir -p "$T/stubs" "$T/home"
 
-# The fake installer writes the arguments it received, one per line. The empty
-# $0 the real call must pass is part of what this test checks.
+# The fake curl writes a fake installer to the requested output file; the fake
+# installer records the arguments it received, one per line.
 cat > "$T/stubs/curl" <<'STUB'
 #!/usr/bin/env bash
-printf '%s\n' 'printf "%s\n" "$@" > "$OMZ_ARGS_FILE"'
+out= prev=
+for arg in "$@"; do
+	[[ $prev == -o ]] && out=$arg
+	prev=$arg
+done
+[[ -n $out ]] || exit 2
+printf '%s\n' 'printf "%s\n" "$@" > "$OMZ_ARGS_FILE"' > "$out"
 STUB
 chmod +x "$T/stubs/curl"
 

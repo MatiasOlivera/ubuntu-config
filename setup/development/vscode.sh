@@ -13,7 +13,7 @@ install_vscode() {
 }
 
 install_vscode_repository() {
-	curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | sudo gpg --dearmor -o /usr/share/keyrings/microsoft.gpg
+	curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | sudo gpg --dearmor --yes -o /usr/share/keyrings/microsoft.gpg || return 1
 	apt_source_write vscode.sources <<EOF
 Types: deb
 URIs: https://packages.microsoft.com/repos/code

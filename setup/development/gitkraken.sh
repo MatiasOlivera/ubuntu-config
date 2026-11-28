@@ -8,13 +8,11 @@ install_gitkraken() {
 		printf 'skip: gitkraken already installed (%s)\n' "$installed_ver"
 		return 0
 	fi
-	curl -fsSLO https://release.gitkraken.com/linux/gitkraken-amd64.deb
-	sudo apt install -y ./gitkraken-amd64.deb
-	rm -f gitkraken-amd64.deb
+	sudo snap install gitkraken --classic
 }
 
 gitkraken_version() {
-	dpkg -s gitkraken 2>/dev/null | grep "^Version:"
+	snap list gitkraken 2>/dev/null | tail -n 1 | grep .
 }
 
 if [[ ${BASH_SOURCE[0]} == "$0" ]]; then

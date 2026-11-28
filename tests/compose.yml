@@ -5,7 +5,7 @@ services:
       dockerfile: tests/Dockerfile
       # The published image is a cache source only, never the checked image.
       cache_from:
-        - ghcr.io/matiasolivera/ubuntu-config-test:latest
+        - ghcr.io/matiasolivera/ubuntu-workstation-test:latest
     # Rebuild every run so a Dockerfile change can't be tested against a stale
     # image; the layer cache makes it cheap.
     pull_policy: build
@@ -18,3 +18,5 @@ services:
     network_mode: none
     volumes:
       - ..:/work:ro
+    # The chezmoi check is container-only and is not auto-discovered by test.sh.
+    command: bash -c './tests/test.sh && bash tests/docker/chezmoi-ignore-check.sh'

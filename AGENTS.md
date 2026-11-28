@@ -1,6 +1,6 @@
-# ubuntu-config
+# ubuntu-workstation
 
-Infrastructure-as-code setup for a fresh Ubuntu workstation: versioned bash scripts in `setup/` install `apt` packages, Flatpak/Snap apps and dev tools; declarative chezmoi dotfiles in `dotfiles/` own the configuration. Scripts assume Ubuntu with `apt` + `sudo`. Humans: see `README.md` (commands, reports, project structure).
+Infrastructure-as-code setup for a fresh Ubuntu workstation: versioned bash scripts in `setup/` install `apt` packages, Flatpak/Snap apps and dev tools; declarative chezmoi dotfiles in `dotfiles/` own the configuration. Scripts assume Ubuntu with `apt` + `sudo`. Humans: see `README.md` (introduction) and `docs/` (reference and runbooks).
 
 ## Architecture
 
@@ -23,20 +23,7 @@ rules below are concrete operational detail that must honor its axioms.
 The shared workflow above governs cross-repo process; the constitution
 governs this repository.
 
-## Skills (load the one matching your task)
-
-Skills live in `.agents/skills/` (cross-agent: opencode, Cursor, VS Code, Codex, ...).
-
-- Adding or extending a setup script (`install_*`/`config_*`, apt repos, version guards, wiring) → `install-package`.
-- Adding or changing a chezmoi dotfile (`dotfiles/`, `dot_*` → `$HOME`, `.tmpl` data, deny-list sync) → `add-dotfile`.
-- Running or iterating on tests (scoped checks, full gate, Docker, Multipass) → `run-tests`.
-- Working with reports (`versions.sh`, `gaps.sh`, `chk`/`src` rows, baseline refresh) → `reports`.
-
 ## Commands
-
-Test commands — scoped checks, full gate, Docker and Multipass — live in the `run-tests` skill. Load it before running or iterating on tests.
-
-Anything beyond verify (adding apps, reports, baselines): `README.md` ("Testing", "Reports").
 
 Releases: `scripts/release.sh` owns prepare and preview; the promotion merge into
 `main` triggers `release.yml` to tag, publish and merge back. Do not cut tags or
@@ -46,7 +33,7 @@ releases by hand — see `docs/runbooks/release-runbook.md`.
 
 Each `./tests/test.sh --vm` phase records per-app spans, logs and a summary under
 `E2E_OBSERVABILITY_DIR` (default
-`${XDG_DATA_HOME:-$HOME/.local/share}/ubuntu-config/observability/<run-id>/`) and
+`${XDG_DATA_HOME:-$HOME/.local/share}/ubuntu-workstation/observability/<run-id>/`) and
 prints `records:` and `log:` paths. Start the local stack before or after a run
 to browse traces, correlated logs and metrics in Grafana:
 
@@ -77,7 +64,7 @@ The root `opencode.json` adds command denials for setup scripts and selected hos
 ## For changes
 
 - Run focused checks on the changed files while implementing.
-- Run the full gate (see `run-tests`) before the first local review, stopping at the first failure.
+- Run the full gate before the first local review, stopping at the first failure.
 - Rerun the full gate before the pull request only when review feedback changed code.
 - When a change invalidates agent-facing docs (`AGENTS.md`, `.agents/skills/`), update them in the same PR.
 
@@ -89,10 +76,10 @@ The root `opencode.json` adds command denials for setup scripts and selected hos
 - Explain the why in the body whenever a commit needs justification: bug fixes
   (symptom + root cause + why this fix), refactors, renames, sequencing changes.
   2–4 sentences. Omit the how - the diff shows it.
-- Use Git flow for branches off `develop`: `<type>/<[issue-]slug>` matching
-  the change's commit type (e.g. `fix/42-repo-key-missing`); release only as
-  `develop` → `main`. `slug` = kebab-case title: lowercase, non-alphanumerics
-  → `-`, capped at ~5 words / 60 chars.
+- Use Git flow for branches off `develop`: `<type>/<[issue-]slug>`; release
+  only as `develop` → `main`. `slug` = kebab-case title: lowercase,
+  non-alphanumerics → `-`, capped at ~5 words / 60 chars. Branch `<type>` and
+  pull request title `<type>` follow Conventional Branch, not the commit type.
 - Never commit without explicit approval
 
 ## Docs
@@ -103,7 +90,7 @@ README.md and docs are for humans; AGENTS.md and skills are for coding agents
 
 Non-trivial choices (stack, protocol, workflow) MUST be recorded as MADR records
 in `docs/decisions/` (`NNNN-slug.md`); overturns note "supersedes `NNNN-…`" in
-prose. Load the `adr` skill for the template and numbering when available.
+prose.
 Policy-type decisions that must stay current — notably language package-manager
 picks — live in `docs/language-package-managers.md` instead; that file is the
 authoritative source for those choices.

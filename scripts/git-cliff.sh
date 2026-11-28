@@ -38,7 +38,7 @@ for cmd in curl sha512sum tar; do
 	command -v "$cmd" >/dev/null 2>&1 || die "$cmd is required to install git-cliff $VERSION"
 done
 
-CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/ubuntu-config/git-cliff/$VERSION"
+CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/ubuntu-workstation/git-cliff/$VERSION"
 if [ -x "$CACHE/git-cliff" ]; then
 	exec "$CACHE/git-cliff" "$@"
 fi

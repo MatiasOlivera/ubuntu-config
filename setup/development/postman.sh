@@ -8,11 +8,11 @@ install_postman() {
         printf 'skip: postman already installed (%s)\n' "$installed_ver"
         return 0
     fi
-    sudo snap install postman
+    sudo flatpak install flathub -y com.getpostman.Postman
 }
 
 postman_version() {
-    snap list postman 2>/dev/null | tail -n 1 | grep .
+    flatpak info com.getpostman.Postman 2>/dev/null | grep -i "Version:" | head -n 1 | grep .
 }
 
 if [[ ${BASH_SOURCE[0]} == "$0" ]]; then

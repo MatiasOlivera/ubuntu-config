@@ -19,7 +19,7 @@ T="$(mktemp -d)" || { printf 'error: mktemp failed\n' >&2; exit 1; }
 trap 'rm -rf "$T"' EXIT
 mkdir -p "$T/stubs" "$T/fixture" "$T/xdg" "$T/home"
 export STUB_DIR="$T/stubs" HOME="$T/home"
-records_root="$HOME/.local/share/ubuntu-config/observability"
+records_root="$HOME/.local/share/ubuntu-workstation/observability"
 
 cat > "$STUB_DIR/curl" <<'EOF'
 #!/usr/bin/env bash
@@ -28,6 +28,10 @@ EOF
 cat > "$STUB_DIR/multipass" <<'EOF'
 #!/usr/bin/env bash
 printf '%s\n' "$*" >> "$STUB_DIR/multipass-calls"
+if [[ ${FAIL_COPY:-0} == 1 && $1 == exec ]]; then
+	printf 'simulated record copy failure\n' >&2
+	exit 2
+fi
 if [[ $1 == transfer ]]; then
 	case $3 in
 	*/.[!/.]*)
@@ -48,6 +52,10 @@ mkdir -p "$T/fixture/install"
 printf '{"kind":"step","name":"install_fnm","status":"ok","duration_ms":7}\n' > "$T/fixture/install/spans.jsonl"
 tar -czf "$T/fixture.tgz" -C "$T/fixture" spans.jsonl install/spans.jsonl
 export FIXTURE_ARCHIVE="$T/fixture.tgz"
+printf 'not a tarball\n' > "$T/corrupt.tgz"
+mkdir -p "$T/empty"
+printf '{"kind":"phase","name":"install","status":"ok","duration_ms":1}\n' > "$T/empty/spans.jsonl"
+tar -czf "$T/empty.tgz" -C "$T/empty" spans.jsonl
 
 run_wrapper() {
 	local out=$1
@@ -70,7 +78,7 @@ if [[ -f $records/spans.jsonl ]]; then pass "success: VM records copied out"; el
 if grep -q '^label' "$records/summary.tsv" 2>/dev/null; then pass "success: summary written"; else fail "success: summary missing"; fi
 if grep -q 'install_uv' "$records/summary.tsv" 2>/dev/null; then pass "success: summary names the app"; else fail "success: summary has no app row"; fi
 if grep -q $'install_fnm\tinstall' "$records/summary.tsv" 2>/dev/null; then pass "success: nested phase records summarized"; else fail "success: nested phase rows missing"; fi
-if compgen -G "$HOME/ubuntu-config-observability-*.tgz" >/dev/null; then
+if compgen -G "$HOME/ubuntu-workstation-observability-*.tgz" >/dev/null; then
 	fail "success: staging archive left behind"
 else
 	pass "success: staging archive cleaned up"
@@ -89,14 +97,38 @@ else
 fi
 
 E2E_OBSERVABILITY_DIR="$T/root2" XDG_DATA_HOME="$T/xdg" OBSERVABILITY_VM_NAME=fake-vm \
-	OBSERVABILITY_VM_RECORD_DIR=/tmp/vm-records OBSERVABILITY_COLLECTOR= \
+	OBSERVABILITY_VM_RECORD_DIR=/tmp/vm-records OBSERVABILITY_COLLECTOR='' \
 	bash -c 'unset E2E_OBSERVABILITY_DIR; exec bash "$0" install true' "$WRAPPER" > "$T/xdg.out" 2>&1
 xdg_records=$(sed -n 's/^records: //p' "$T/xdg.out" | sed -n 1p)
-if [[ $xdg_records == "$T/xdg/ubuntu-config/observability/"* ]]; then
+if [[ $xdg_records == "$T/xdg/ubuntu-workstation/observability/"* ]]; then
 	pass "xdg: fallback root honored"
 else
 	fail "xdg: bad fallback path '$xdg_records'"
 fi
+
+expect_case() {
+	local label=$1 expected=$2 out=$3 message=$4 status=$5
+	if [[ $status -eq $expected ]]; then pass "$label: status $expected"; else fail "$label: expected $expected, got $status"; fi
+	if grep -qF "$message" "$out.err"; then pass "$label: error reported"; else fail "$label: no '$message'"; fi
+}
+
+FAIL_COPY=1 run_wrapper "$T/copy.out" install true
+expect_case "copy failure" 1 "$T/copy.out" 'error: could not copy e2e records from the VM' "$?"
+
+FIXTURE_ARCHIVE="$T/corrupt.tgz" run_wrapper "$T/extract.out" install true
+expect_case "extract failure" 1 "$T/extract.out" 'error: could not extract e2e records' "$?"
+extract_records=$(sed -n 's/^records: //p' "$T/extract.out" | sed -n 1p)
+if [[ -f $extract_records/records.tgz ]]; then pass "extract failure: archive kept for inspection"; else fail "extract failure: archive deleted"; fi
+
+FIXTURE_ARCHIVE="$T/empty.tgz" run_wrapper "$T/empty.out" install true
+expect_case "empty records" 1 "$T/empty.out" 'error: no step spans in e2e records' "$?"
+
+E2E_OBSERVABILITY_DIR="$T/no-vm-root" OBSERVABILITY_VM_NAME='' OBSERVABILITY_VM_RECORD_DIR='' \
+	OBSERVABILITY_COLLECTOR='' bash "$WRAPPER" install true > "$T/no-vm.out" 2> "$T/no-vm.out.err"
+expect_case "missing VM record config" 1 "$T/no-vm.out" 'error: e2e record collection is not configured' "$?"
+
+FAIL_COPY=1 run_wrapper "$T/both.out" install bash -c 'exit 3'
+expect_case "command and copy failure" 3 "$T/both.out" 'error: could not copy e2e records from the VM' "$?"
 
 if [[ $FAILURES -gt 0 ]]; then
 	printf '%d check(s) failed\n' "$FAILURES" >&2

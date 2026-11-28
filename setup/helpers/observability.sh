@@ -180,7 +180,7 @@ observability_forward() {
 	# trace_id span_id name start_ns end_ns otlp_status attributes_json
 	[[ -n ${OBSERVABILITY_COLLECTOR:-} && -n $OBSERVABILITY_REAL_CURL ]] || return 0
 	local payload
-	printf -v payload '{"resourceSpans":[{"resource":{"attributes":[{"key":"service.name","value":{"stringValue":"ubuntu-config-e2e"}}]},"scopeSpans":[{"spans":[{"traceId":"%s","spanId":"%s","name":"%s","startTimeUnixNano":"%s","endTimeUnixNano":"%s","status":{"code":%s},"attributes":%s}]}]}]}' \
+	printf -v payload '{"resourceSpans":[{"resource":{"attributes":[{"key":"service.name","value":{"stringValue":"ubuntu-workstation-e2e"}}]},"scopeSpans":[{"spans":[{"traceId":"%s","spanId":"%s","name":"%s","startTimeUnixNano":"%s","endTimeUnixNano":"%s","status":{"code":%s},"attributes":%s}]}]}]}' \
 		"$1" "$2" "$(observability_json_escape "$3")" "$4" "$5" "$6" "$7"
 	"$OBSERVABILITY_REAL_CURL" -sS --max-time 2 -X POST \
 		-H 'Content-Type: application/json' \

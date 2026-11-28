@@ -20,7 +20,7 @@ processors:
   resource/e2e:
     attributes:
       - key: service.name
-        value: ubuntu-config-e2e
+        value: ubuntu-workstation-e2e
         action: insert
 
 exporters:

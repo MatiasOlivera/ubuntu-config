@@ -8,14 +8,11 @@ install_obsidian() {
 		printf 'skip: obsidian already installed (%s)\n' "$installed_ver"
 		return 0
 	fi
-	local ver="1.13.7"
-	curl -fsSLO "https://github.com/obsidianmd/obsidian-releases/releases/download/v${ver}/obsidian_${ver}_amd64.deb"
-	sudo apt install -y "./obsidian_${ver}_amd64.deb"
-	rm -f "obsidian_${ver}_amd64.deb"
+	sudo flatpak install flathub -y md.obsidian.Obsidian
 }
 
 obsidian_version() {
-	dpkg -s obsidian 2>/dev/null | grep "^Version:"
+	flatpak info md.obsidian.Obsidian 2>/dev/null | grep -i "Version:" | head -n 1 | grep .
 }
 
 if [[ ${BASH_SOURCE[0]} == "$0" ]]; then

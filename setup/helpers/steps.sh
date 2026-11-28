@@ -11,14 +11,16 @@ step() {
 	local t0=$SECONDS
 	[[ $# -gt 1 ]] && shift
 	declare -F observability_step_begin >/dev/null 2>&1 && observability_step_begin "$label"
-	local st
+	# tee via process substitution: a pipeline would run the step in a subshell.
+	local tee_pid=
 	if declare -F observability_step_begin >/dev/null 2>&1 && [[ ${OBSERVABILITY_INITIALIZED:-0} == 1 ]]; then
-		"$@" 2>&1 | tee "$OBSERVABILITY_CURRENT_LOG"
-		st=${PIPESTATUS[0]}
+		"$@" > >(tee "$OBSERVABILITY_CURRENT_LOG") 2>&1
+		tee_pid=$!
 	else
 		"$@"
-		st=$?
 	fi
+	local st=$?
+	[[ -z $tee_pid ]] || wait "$tee_pid" 2>/dev/null
 	printf '[+%ds] %s\n' "$((SECONDS - t0))" "$label"
 	if [[ $st -ne 0 ]]; then
 		printf 'FAILED: %s (status %d)\n' "$label" "$st" >&2
@@ -37,14 +39,16 @@ advisory_step() {
 	local t0=$SECONDS
 	[[ $# -gt 1 ]] && shift
 	declare -F observability_step_begin >/dev/null 2>&1 && observability_step_begin "$label"
-	local st
+	# tee via process substitution: a pipeline would run the step in a subshell.
+	local tee_pid=
 	if declare -F observability_step_begin >/dev/null 2>&1 && [[ ${OBSERVABILITY_INITIALIZED:-0} == 1 ]]; then
-		"$@" 2>&1 | tee "$OBSERVABILITY_CURRENT_LOG"
-		st=${PIPESTATUS[0]}
+		"$@" > >(tee "$OBSERVABILITY_CURRENT_LOG") 2>&1
+		tee_pid=$!
 	else
 		"$@"
-		st=$?
 	fi
+	local st=$?
+	[[ -z $tee_pid ]] || wait "$tee_pid" 2>/dev/null
 	printf '[+%ds] %s\n' "$((SECONDS - t0))" "$label"
 	declare -F observability_step_end >/dev/null 2>&1 && observability_step_end "$st"
 	return 0

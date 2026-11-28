@@ -5,7 +5,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/../helpers/dispatcher.sh"
 ANYTHINGLLM_REPO='Mintplex-Labs/anything-llm'
 ANYTHINGLLM_APP='AnythingLLMDesktop.AppImage'
 ANYTHINGLLM_INSTALL_DIR="${ANYTHING_LLM_INSTALL_DIR:-$HOME/Applications}"
-ANYTHINGLLM_VERSION_FILE="${XDG_STATE_HOME:-$HOME/.local/state}/ubuntu-config/anythingllm.version"
+ANYTHINGLLM_VERSION_FILE="${XDG_STATE_HOME:-$HOME/.local/state}/anythingllm-desktop/version"
 
 install_anythingllm() {
 	local installed_ver

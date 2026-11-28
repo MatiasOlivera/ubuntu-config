@@ -15,10 +15,10 @@ pass() {
 	printf 'ok: %s\n' "$1"
 }
 
-a="$(bash "$SRC" /tmp/agent-a/ubuntu-config)"
-b="$(bash "$SRC" /tmp/agent-b/ubuntu-config)"
-a_again="$(bash "$SRC" /tmp/agent-a/ubuntu-config)"
-name_re='^ubuntu-config-test-[a-z0-9]([a-z0-9-]*[a-z0-9])?-[0-9A-Za-z]+$'
+a="$(bash "$SRC" /tmp/agent-a/ubuntu-workstation)"
+b="$(bash "$SRC" /tmp/agent-b/ubuntu-workstation)"
+a_again="$(bash "$SRC" /tmp/agent-a/ubuntu-workstation)"
+name_re='^ubuntu-workstation-test-[a-z0-9]([a-z0-9-]*[a-z0-9])?-[0-9A-Za-z]+$'
 
 if [[ $a != "$b" ]]; then
 	pass "different worktrees get different VMs"
@@ -38,7 +38,7 @@ else
 	fail "name is recognizable and Multipass-safe ($a)"
 fi
 
-if [[ $a == ubuntu-config-test-ubuntu-config-* ]]; then
+if [[ $a == ubuntu-workstation-test-ubuntu-workstation-* ]]; then
 	pass "checkout directory appears as a readable slug"
 else
 	fail "checkout directory appears as a readable slug ($a)"
@@ -52,22 +52,22 @@ else
 fi
 
 # The original repository (not a worktree) gets its own stable name too.
-original="$(bash "$SRC" /home/user/ubuntu-config)"
-if [[ $original == ubuntu-config-test-ubuntu-config-* && $original != "$a" ]]; then
+original="$(bash "$SRC" /home/user/ubuntu-workstation)"
+if [[ $original == ubuntu-workstation-test-ubuntu-workstation-* && $original != "$a" ]]; then
 	pass "original repository gets its own VM"
 else
 	fail "original repository gets its own VM ($original)"
 fi
 
 weird="$(bash "$SRC" '/tmp/Agent A/work tree_v1')"
-if [[ $weird =~ $name_re && $weird == ubuntu-config-test-work-tree-v1-* ]]; then
+if [[ $weird =~ $name_re && $weird == ubuntu-workstation-test-work-tree-v1-* ]]; then
 	pass "odd path characters yield a safe, readable name"
 else
 	fail "odd path characters yield a safe, readable name ($weird)"
 fi
 
 long="$(bash "$SRC" '/tmp/this-is-a-very-long-worktree-directory-name')"
-if (( ${#long} <= 54 )); then
+if (( ${#long} <= 59 )); then
 	pass "slug length is bounded"
 else
 	fail "slug length is bounded (${#long} chars: $long)"

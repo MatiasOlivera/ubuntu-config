@@ -8,7 +8,7 @@
 
 ## Identity — what this project is
 
-`ubuntu-config` is one person's development environment expressed as code:
+`ubuntu-workstation` is one person's development environment expressed as code:
 bash scripts that turn a fresh Ubuntu machine into that person's working
 workstation (`setup/`), and chezmoi dotfiles that declaratively own its
 configuration (`dotfiles/`). The beneficiary is the machines the author owns;
@@ -35,4 +35,5 @@ repository is public, so it must never contain secrets.
 3. **No unverifiable execution.** The setup path never runs code it cannot
    hold to a publisher's integrity material.
 4. **Decisions are durable artifacts.** Non-trivial trade-offs become decision
-   records; issue work becomes a spec before it becomes code.
+   records; issue work becomes a spec before it becomes code when SDD triage
+   requires it.

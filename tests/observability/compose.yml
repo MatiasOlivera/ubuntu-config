@@ -1,4 +1,4 @@
-name: ubuntu-config-observability
+name: ubuntu-workstation-observability
 
 services:
   otel-collector:
@@ -6,7 +6,7 @@ services:
     command: ["--config=/etc/otelcol/config.yml"]
     volumes:
       - ./collector-config.yml:/etc/otelcol/config.yml:ro
-      - ${E2E_OBSERVABILITY_DIR:-${HOME}/.local/share/ubuntu-config/observability}:/records:ro
+      - ${E2E_OBSERVABILITY_DIR:-${HOME}/.local/share/ubuntu-workstation/observability}:/records:ro
     ports:
       - "4318:4318"
     depends_on:
