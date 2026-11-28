@@ -14,9 +14,8 @@ Three layers change in one coordinated pass:
 The project name is reused for every project-owned identifier; no second
 namespace is introduced. AnythingLLM's version marker moves out of the
 project-named state directory to an application-owned location, because it is
-app state rather than a project identifier. Its previous location is read once
-when the new marker is absent, so an existing install keeps its recorded
-version without a reinstall.
+app state rather than a project identifier. The target is a fresh install, so
+no pre-rename state is carried forward.
 
 Sequencing: land the in-repository changes first, apply the GitHub rename and
 metadata in one window immediately before merge, publish and make the new
@@ -26,9 +25,8 @@ is externally visible and needs explicit approval before it is executed.
 ## Data models
 
 No schema changes. One persisted file moves: the AnythingLLM version marker.
-Read the new location first; when it is absent and the legacy marker exists,
-use the legacy value and write it to the new location on the next install. No
-other persisted state is migrated — cache, logs and e2e records are disposable.
+The target is a fresh install, so no pre-rename state is migrated. Cache, logs
+and e2e records are disposable.
 
 ## API contracts
 
@@ -67,10 +65,8 @@ Topics: `ubuntu`, `linux`, `dotfiles`, `chezmoi`, `bash`, `workstation`,
   cannot edit.
 - Local clones keep working through redirects; update their remotes to avoid
   confusion.
-- The legacy AnythingLLM marker must stay readable while pre-rename installs
-  exist; the version check must not fail when only the new marker exists.
-- The grep-based check for stale names must exclude historical records and the
-  deliberate legacy-state read, or it will report false positives.
+- Machines set up before the rename are out of scope; on their next rerun the
+  AnythingLLM app is treated as newly installed.
 
 ## Assumptions
 

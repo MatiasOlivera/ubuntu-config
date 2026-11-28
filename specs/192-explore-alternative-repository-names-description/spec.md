@@ -17,9 +17,9 @@ setup behaves.
   it.
 - As someone following a link into the project, I want in-repository references
   to use the same name, so I never land on a stale self-reference.
-- As a person who already ran the setup, I want a rerun after the rename to
-  behave exactly as before, so my installed apps and recorded versions are not
-  reinstalled or lost.
+- As a person setting up a fresh Ubuntu machine, I want the renamed setup to
+  install the same apps and tools, so the rename changes names only, not
+  behavior.
 - As a coding agent, I want one consistent identity across active code and
   docs, so I do not act on outdated names.
 - As a maintainer, I want the naming decision recorded, so a future rename does
@@ -32,7 +32,7 @@ Scenario: Listing conveys the full scope
   Given a reader on the GitHub repository listing
   When they see the repository name, description and topics
   Then the name names the whole workstation, not only its configuration
-  And the description mentions rerun-safe setup scripts and chezmoi dotfiles
+  And the description names bash setup scripts and chezmoi dotfiles
   And the topics include ubuntu, linux, dotfiles and chezmoi
 
 Scenario: Old links still reach the renamed repository
@@ -52,18 +52,6 @@ Scenario: Consistent runtime identity
   Then active scripts, tests and dashboards use the same project name
   And the only differently named state is owned by the app it belongs to
 
-Scenario: Existing install state survives the rename
-  Given a machine with apps installed by an earlier version of the setup
-  When the setup is rerun after the change
-  Then already-installed apps are skipped as before
-  And the version reported for each managed app is unchanged
-
-Scenario: Previous version marker is understood
-  Given a machine whose AnythingLLM version marker was written by the old setup
-  When the version is queried after the change
-  Then the reported version matches the one recorded before the rename
-  And no reinstall is triggered
-
 Scenario: CI image is available under the new name
   Given the published test image has moved to the new package name
   When the full gate runs in CI and locally
@@ -77,7 +65,8 @@ Scenario: CI image is available under the new name
 - [ ] Integration points: GitHub repository metadata, the container package,
       CI, local state and cache, e2e VMs and observability.
 - [ ] Out of scope: what the scripts install, the repository restructure in
-      #190, and renaming existing branches or pull requests.
+      #190, renaming existing branches or pull requests, and migrating machines
+      set up before the rename — the target is a fresh Ubuntu install.
 
 ## Assumptions
 
